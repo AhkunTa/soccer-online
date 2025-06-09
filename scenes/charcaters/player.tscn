@@ -1,0 +1,89 @@
+[gd_scene load_steps=8 format=3 uid="uid://dv6q00nlf84ql"]
+
+[ext_resource type="Script" path="res://scenes/charcaters/player.gd" id="1_ct8e2"]
+[ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/assets/art/characters/soccer-player.png" id="1_mrolr"]
+
+[sub_resource type="Animation" id="Animation_ksry5"]
+resource_name = "idle"
+length = 0.6
+loop_mode = 1
+step = 0.15
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3]
+}
+
+[sub_resource type="Animation" id="Animation_qjq5t"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_wuwi6"]
+resource_name = "run"
+length = 0.6
+loop_mode = 1
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [7, 8, 9, 10, 11, 12]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ro83n"]
+_data = {
+"RESET": SubResource("Animation_qjq5t"),
+"idle": SubResource("Animation_ksry5"),
+"run": SubResource("Animation_wuwi6")
+}
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ydrrd"]
+radius = 4.0
+height = 20.0
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_ct8e2")
+
+[node name="PlayerSprite" type="Sprite2D" parent="."]
+y_sort_enabled = true
+texture = ExtResource("1_mrolr")
+centered = false
+offset = Vector2(-16, -32)
+hframes = 6
+vframes = 13
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_ro83n")
+}
+autoplay = "run"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -3)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_ydrrd")
