@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dv6q00nlf84ql"]
+[gd_scene load_steps=10 format=3 uid="uid://dv6q00nlf84ql"]
 
 [ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/charcaters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/assets/art/characters/soccer-player.png" id="1_mrolr"]
@@ -72,19 +72,38 @@ tracks/0/keys = {
 "values": [30]
 }
 
+[sub_resource type="Animation" id="Animation_bdifb"]
+resource_name = "recover"
+loop_mode = 1
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [18]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ro83n"]
 _data = {
 &"RESET": SubResource("Animation_qjq5t"),
 &"idle": SubResource("Animation_ksry5"),
+&"recover": SubResource("Animation_bdifb"),
 &"run": SubResource("Animation_wuwi6"),
 &"tackle": SubResource("Animation_pvhfr")
 }
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ydrrd"]
-radius = 4.0
-height = 20.0
+radius = 3.0
+height = 16.0
 
 [node name="Player" type="CharacterBody2D"]
+physics_interpolation_mode = 2
 script = ExtResource("1_ct8e2")
 
 [node name="PlayerSprite" type="Sprite2D" parent="."]
@@ -106,3 +125,4 @@ libraries = {
 position = Vector2(0, -3)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydrrd")
+disabled = true

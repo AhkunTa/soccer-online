@@ -8,48 +8,34 @@ extends CharacterBody2D
 @export var JUMP_IMPULES = 20
 @export var control_scheme: ControlScheme
 
-
-
 @onready var animation_player: AnimationPlayer =  %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
 
-
-const DURATION_TACKLE :=200
 enum ControlScheme {CPU,P1,P2}
-enum State {MOVING, TACKLING, JUMPING,SHOOTING}
+enum State {MOVING, TACKLING, JUMPING,SHOOTING, RECOVERING}
 
 var heading:= Vector2.RIGHT
-var state:=State.MOVING
-var time_start_tackle := Time.get_ticks_msec()
 
-func _physics_process(delta: float) -> void:
-	if control_scheme == ControlScheme.CPU:
-		pass
-	else:
-		if state == State.MOVING:
-			set_movement_animation()
-			handle_human_movement()
-			if velocity.x != 0 and KeyUtils.is_action_just_pressed(control_scheme,KeyUtils.Action.SHOOT):
-				state = State.TACKLING
-				time_start_tackle = Time.get_ticks_msec()
-		elif state == State.TACKLING:
-			set_tackling_animation()
-			if Time.get_ticks_msec() - time_start_tackle >= DURATION_TACKLE && state == State.TACKLING:
-				state = State.MOVING
-		elif state == State.SHOOTING:
-			pass
-		elif state == State.JUMPING:
-			pass
-	if is_on_floor() and Input.is_action_just_pressed("p1_jump"):
-		prints('jump')
-		#animation_player.y = JUMP_IMPULES		
-	set_heading()
+var current_state: PlayerState = null
+var state_factory := PlayerStateFactory.new()
+
+func _ready() -> void:
+	switch_state(State.MOVING)
+
+func _process(_delta: float) -> void:
+
 	flip_sprites()
 	move_and_slide()
+	zIndex_set()
 
-func handle_human_movement() -> void:
-	var direction := KeyUtils.get_input_vector(control_scheme)
-	velocity = direction * SPEED
+func switch_state(state: State) -> void:
+	if current_state != null:
+		current_state.queue_free()
+	current_state = state_factory.get_fresh_state(state)
+	current_state.setup(self, animation_player)
+	current_state.state_transition_requested.connect(switch_state.bind())
+	current_state.name = "PlayerStateMachine: " + str(state)
+	call_deferred("add_child", current_state)
 
 func set_tackling_animation() ->void:
 	animation_player.play("tackle")
@@ -72,3 +58,6 @@ func flip_sprites() -> void:
 	elif heading == Vector2.LEFT:
 		player_sprite.flip_h = true
 	#player_sprite.flip_h == true if heading == Vector2.LEFT else false
+
+func zIndex_set() ->void:
+	z_index = int(position.y)
