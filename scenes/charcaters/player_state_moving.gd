@@ -17,15 +17,3 @@ func handle_human_movement() -> void:
 		state_transition_requested.emit(Player.State.TACKLING)
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		

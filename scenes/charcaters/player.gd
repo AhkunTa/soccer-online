@@ -18,7 +18,6 @@ var heading:= Vector2.RIGHT
 
 var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
-
 func _ready() -> void:
 	switch_state(State.MOVING)
 
@@ -26,7 +25,7 @@ func _process(_delta: float) -> void:
 
 	flip_sprites()
 	move_and_slide()
-	zIndex_set()
+	#zIndex_set()
 
 func switch_state(state: State) -> void:
 	if current_state != null:

@@ -7,9 +7,8 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_g2d2v"]
 radius = 5.0
 
-[sub_resource type="Animation" id="Animation_nlnnd"]
-resource_name = "idle"
-loop_mode = 1
+[sub_resource type="Animation" id="Animation_s88pd"]
+length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -23,8 +22,9 @@ tracks/0/keys = {
 "values": [0]
 }
 
-[sub_resource type="Animation" id="Animation_s88pd"]
-length = 0.001
+[sub_resource type="Animation" id="Animation_nlnnd"]
+resource_name = "idle"
+loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -67,6 +67,7 @@ _data = {
 radius = 4.0
 
 [node name="Ball" type="AnimatableBody2D"]
+position = Vector2(0, -3)
 collision_layer = 4
 script = ExtResource("1_nlnnd")
 
@@ -83,7 +84,6 @@ shape = SubResource("CircleShape2D_g2d2v")
 libraries = {
 &"": SubResource("AnimationLibrary_ye0rm")
 }
-autoplay = "roll"
 
 [node name="ShadowSprite" type="Sprite2D" parent="."]
 texture = ExtResource("2_tpnuj")
