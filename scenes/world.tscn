@@ -47,5 +47,6 @@ control_scheme = 2
 position = Vector2(191, 121)
 
 [node name="Camera" type="Camera2D" parent="."]
+position = Vector2(140, 90)
 script = ExtResource("6_qfnet")
 shake_noise = SubResource("FastNoiseLite_i7141")
