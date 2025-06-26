@@ -3,16 +3,18 @@ extends CharacterBody2D
 
 
 @export var SPEED: float = 80.0
+@export var POWER: float = 1.0
 @export var JUMP_VELOCITY: float = -400.0
 @export var STRENGTH: int = 5
 @export var JUMP_IMPULES = 20
 @export var control_scheme: ControlScheme
+@export var ball : Ball
 
 @onready var animation_player: AnimationPlayer =  %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
 
 enum ControlScheme {CPU,P1,P2}
-enum State {MOVING, TACKLING, JUMPING,SHOOTING, RECOVERING}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING,}
 
 var heading:= Vector2.RIGHT
 
@@ -58,5 +60,9 @@ func flip_sprites() -> void:
 		player_sprite.flip_h = true
 	#player_sprite.flip_h == true if heading == Vector2.LEFT else false
 
-func zIndex_set() ->void:
-	z_index = int(position.y)
+func has_ball() -> bool:
+	return ball.carrier == self
+
+
+#func zIndex_set() ->void:
+	#z_index = int(position.y)

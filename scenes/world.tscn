@@ -31,17 +31,20 @@ texture = ExtResource("3_lqsyo")
 [node name="ActorsContainer" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="Player" parent="ActorsContainer" instance=ExtResource("4_x5gyw")]
+[node name="Player" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
 position = Vector2(109, 127)
 scale = Vector2(1.0009, 1)
 control_scheme = 1
+ball = NodePath("../Ball")
 
-[node name="Player2" parent="ActorsContainer" instance=ExtResource("4_x5gyw")]
+[node name="Player2" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
 position = Vector2(153, 117)
+ball = NodePath("../Ball")
 
-[node name="Player3" parent="ActorsContainer" instance=ExtResource("4_x5gyw")]
+[node name="Player3" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
 position = Vector2(215, 95)
 control_scheme = 2
+ball = NodePath("../Ball")
 
 [node name="Ball" parent="ActorsContainer" instance=ExtResource("5_71j4m")]
 position = Vector2(191, 121)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dv6q00nlf84ql"]
+[gd_scene load_steps=12 format=3 uid="uid://dv6q00nlf84ql"]
 
 [ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/charcaters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/art/characters/soccer-player.png" id="1_mrolr"]
@@ -34,6 +34,41 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 1,
 "values": [0, 1, 2, 3]
+}
+
+[sub_resource type="Animation" id="Animation_ydfq7"]
+resource_name = "kick"
+length = 0.15
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.0495583, 0.1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [49, 50, 51]
+}
+
+[sub_resource type="Animation" id="Animation_6aipo"]
+resource_name = "prep_kick"
+length = 0.1
+loop_mode = 1
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.073368),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [48]
 }
 
 [sub_resource type="Animation" id="Animation_bdifb"]
@@ -93,6 +128,8 @@ tracks/0/keys = {
 _data = {
 &"RESET": SubResource("Animation_qjq5t"),
 &"idle": SubResource("Animation_ksry5"),
+&"kick": SubResource("Animation_ydfq7"),
+&"prep_kick": SubResource("Animation_6aipo"),
 &"recover": SubResource("Animation_bdifb"),
 &"run": SubResource("Animation_wuwi6"),
 &"tackle": SubResource("Animation_pvhfr")
@@ -121,6 +158,7 @@ unique_name_in_owner = true
 libraries = {
 &"": SubResource("AnimationLibrary_ro83n")
 }
+autoplay = "kick"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -3)
