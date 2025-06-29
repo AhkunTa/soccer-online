@@ -21,7 +21,7 @@ var heading:= Vector2.RIGHT
 var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
 func _ready() -> void:
-	switch_state(State.MOVING)
+	switch_state(State.MOVING, PlayerStateData.new())
 
 func _process(_delta: float) -> void:
 
@@ -29,11 +29,11 @@ func _process(_delta: float) -> void:
 	move_and_slide()
 	#zIndex_set()
 
-func switch_state(state: State) -> void:
+func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, animation_player)
+	current_state.setup(self, state_data, animation_player)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)
@@ -63,6 +63,10 @@ func flip_sprites() -> void:
 func has_ball() -> bool:
 	return ball.carrier == self
 
-
+func on_animation_complete() ->void:
+	if current_state != null:
+		current_state.on_animation_complete()
+	pass
+	
 #func zIndex_set() ->void:
 	#z_index = int(position.y)
