@@ -3,7 +3,7 @@ extends CharacterBody2D
 
 
 @export var SPEED: float = 80.0
-@export var POWER: float = 1.0
+@export var POWER: float = 100.0
 @export var JUMP_VELOCITY: float = -400.0
 @export var STRENGTH: int = 5
 @export var JUMP_IMPULES = 20
@@ -33,7 +33,7 @@ func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player)
+	current_state.setup(self, state_data, animation_player, ball)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)

@@ -69,9 +69,11 @@ radius = 4.0
 [node name="Ball" type="AnimatableBody2D"]
 position = Vector2(0, -3)
 collision_layer = 4
+sync_to_physics = false
 script = ExtResource("1_nlnnd")
 
 [node name="BallSprite" type="Sprite2D" parent="."]
+unique_name_in_owner = true
 texture = ExtResource("1_g2d2v")
 offset = Vector2(0, -5)
 hframes = 4

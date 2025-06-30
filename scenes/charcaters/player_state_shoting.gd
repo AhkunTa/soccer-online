@@ -13,7 +13,5 @@ func on_animation_complete()-> void:
 	shoot_ball()
 	
 func shoot_ball():
-	print("Shooting the ball ")
-	print(state_data)
-	pass
+	ball.shoot(state_data.shot_direction * state_data.shot_power)
 	

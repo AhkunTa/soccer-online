@@ -1,7 +1,7 @@
 class_name PlayerStateData
 
-var shot_direction: Vector2 = Vector2.ZERO
-var shot_power: float = 0.0
+var shot_direction: Vector2
+var shot_power: float
 
 
 static func build() -> PlayerStateData:
