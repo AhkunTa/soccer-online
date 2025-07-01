@@ -7,15 +7,11 @@ var velocity:= Vector2.ZERO
 var current_state :BallState = null
 var carrier :Player = null
 var height := 0.0
-
+var height_velocity = 0.0
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_detection_area :Area2D = $PlayerDetection
-
 @onready var ball_sprite :Sprite2D = %BallSprite
-
-
-
 
 func _ready() -> void:
 	switch_state(State.FREEFORM)
