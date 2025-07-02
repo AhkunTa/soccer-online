@@ -157,6 +157,12 @@ height = 16.0
 physics_interpolation_mode = 2
 collision_layer = 2
 script = ExtResource("1_ct8e2")
+SPEED = null
+POWER = null
+JUMP_VELOCITY = null
+STRENGTH = null
+JUMP_IMPULES = null
+control_scheme = null
 
 [node name="PlayerSprite" type="Sprite2D" parent="."]
 unique_name_in_owner = true
@@ -177,3 +183,9 @@ libraries = {
 position = Vector2(0, -3)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydrrd")
+
+[node name="TeammateDetectionArea" type="Area2D" parent="."]
+unique_name_in_owner = true
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="TeammateDetectionArea"]
+polygon = PackedVector2Array(0, -40, 280, -150, 330, -100, 330, 100, 280, 150, 0, 40)
