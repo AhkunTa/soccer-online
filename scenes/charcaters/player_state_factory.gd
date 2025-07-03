@@ -15,6 +15,8 @@ func _init() -> void:
 		Player.State.TACKLING: PlayerStateTackling,
 		Player.State.SHOOTING: PlayerStateShooting,
 		Player.State.PREPINGSHOT: PlayerStatePrepingShot,
+		Player.State.PASSING: PlayerStatePassing,
+		#TODO 跳跃 跳跃射击
 		Player.State.JUMPING: PlayerStateJumping,
 		Player.State.JUMPINGSHOTING: PlayerStateJumpingShot,
 	}

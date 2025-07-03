@@ -34,31 +34,15 @@ y_sort_enabled = true
 [node name="Player" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
 position = Vector2(109, 127)
 scale = Vector2(1.0009, 1)
-SPEED = null
-POWER = null
-JUMP_VELOCITY = null
-STRENGTH = null
-JUMP_IMPULES = null
 control_scheme = 1
 ball = NodePath("../Ball")
 
 [node name="Player2" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
 position = Vector2(153, 117)
-SPEED = null
-POWER = null
-JUMP_VELOCITY = null
-STRENGTH = null
-JUMP_IMPULES = null
-control_scheme = null
 ball = NodePath("../Ball")
 
 [node name="Player3" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
 position = Vector2(215, 95)
-SPEED = null
-POWER = null
-JUMP_VELOCITY = null
-STRENGTH = null
-JUMP_IMPULES = null
 control_scheme = 2
 ball = NodePath("../Ball")
 

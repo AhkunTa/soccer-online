@@ -15,7 +15,7 @@ extends CharacterBody2D
 @onready var team_detection_area: Area2D = %TeammateDetectionArea
 
 enum ControlScheme {CPU,P1,P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING,}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING,PASSING}
 
 var heading:= Vector2.RIGHT
 

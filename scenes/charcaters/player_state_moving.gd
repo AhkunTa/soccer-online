@@ -17,6 +17,9 @@ func handle_human_movement() -> void:
 	if player.velocity !=Vector2.ZERO:
 		teammate_detection_area.rotation = player.velocity.angle()
 	
+	if player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme, KeyUtils.Action.PASS):
+		transition_state(Player.State.PASSING)
+	
 	if player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme, KeyUtils.Action.SHOOT):
 		transition_state(Player.State.PREPINGSHOT)
 	#if player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme, KeyUtils.Action.SHOOT):

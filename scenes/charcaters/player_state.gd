@@ -8,7 +8,7 @@ var player: Player = null
 var animation_player: AnimationPlayer = null
 var state_data: PlayerStateData = null
 var ball :Ball = null
-var teammate_detection_area = null
+var teammate_detection_area :Area2D= null
 
 func setup(context_player: Player, context_data: PlayerStateData,context_animation_player: AnimationPlayer, context_ball: Ball, context_teammate_detection_area: Area2D) -> void:
 	player = context_player
