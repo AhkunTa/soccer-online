@@ -9,6 +9,12 @@ var carrier :Player = null
 var height := 0.0
 var height_velocity = 0.0
 
+#摩擦力 空中
+@export var friction_air :=25.0
+#摩擦力 地面
+@export var friction_ground :=250.0
+#TODO 不同地面 
+
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_detection_area :Area2D = $PlayerDetection
 @onready var ball_sprite :Sprite2D = %BallSprite
@@ -33,4 +39,14 @@ func shoot(shot_velocity: Vector2) -> void:
 	print(shot_velocity)
 	carrier = null
 	switch_state(Ball.State.SHOT)
+
+func pass_to(destination: Vector2) -> void:
+	var direction := position.direction_to(destination)
+	var distance := position.distance_to(destination)
+	#	TODO 微积分方程  https://youtu.be/-4pGf5bW4-M?t=457
+	var intensity := sqrt(2 * distance * friction_ground)
+
+	velocity = intensity * direction
+	carrier = null
+	switch_state(Ball.State.FREEFORM)
 	

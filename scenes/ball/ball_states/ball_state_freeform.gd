@@ -2,11 +2,6 @@ class_name BallStateFreeForm
 
 extends BallState
 
-#摩擦力 空中
-const FRICTION_AIR :=25.0
-#摩擦力 地面
-const FRICTION_GROUND :=250.0
-#TODO 不同地面 
 #基础反弹弹力 
 const BOUNCINESS :=0.8
 
@@ -20,7 +15,7 @@ func on_player_enter(body: Player) -> void:
 func _process(delta: float) -> void:
 	
 	set_ball_animation_from_velocity()
-	var friction := FRICTION_AIR if ball.height > 0 else FRICTION_GROUND
+	var friction := ball.friction_air if ball.height > 0 else ball.friction_ground
 	ball.velocity = ball.velocity.move_toward(Vector2.ZERO, friction * delta)
 	
 	process_gravity(delta, BOUNCINESS)
