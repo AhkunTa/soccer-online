@@ -25,7 +25,7 @@ func _process(delta: float) -> void:
 		var duration_pass := clampf(prep_time, 0.0, DURATION_MAX_BONUS)
 		var ease_time := duration_pass / DURATION_MAX_BONUS
 		var bonus := ease(ease_time, EASE_REWARD_FACTOR) # 用pow代替ease
-		var shot_power := player.POWER * (1 + bonus)
+		var shot_power := player.power * (1 + bonus)
 		shot_direction = shot_direction.normalized()
 		var state_data = PlayerStateData.build().set_shot_direction(shot_direction).set_shot_power(shot_power)
 		print("data ==> ", shot_direction, shot_power)
