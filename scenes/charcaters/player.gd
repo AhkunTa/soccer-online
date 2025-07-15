@@ -8,7 +8,7 @@ const CONTROL_SCHENE_MAP: Dictionary = {
 }
 
 @export var speed: float = 80.0
-@export var power: float = 50.0
+@export var power: float = 150.0
 @export var JUMP_VELOCITY: float = -400.0
 @export var strength: int = 5
 @export var JUMP_IMPULES = 20

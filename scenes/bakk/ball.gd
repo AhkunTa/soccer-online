@@ -49,4 +49,6 @@ func pass_to(destination: Vector2) -> void:
 	velocity = intensity * direction
 	carrier = null
 	switch_state(Ball.State.FREEFORM)
-	
+
+func stop() -> void:
+	velocity = Vector2.ZERO

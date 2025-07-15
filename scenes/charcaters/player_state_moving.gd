@@ -25,4 +25,3 @@ func handle_human_movement() -> void:
 	# 没球状态 铲球 撞人
 	if not player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme,KeyUtils.Action.PASS):
 		transition_state(Player.State.TACKLING)
-
