@@ -11,6 +11,17 @@
 
 [node name="World" type="Node2D"]
 
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("ball")]
+position = Vector2(140, 90)
+limit_left = 0
+limit_top = 0
+limit_right = 850
+limit_bottom = 360
+position_smoothing_enabled = true
+script = ExtResource("6_qfnet")
+ball = NodePath("../ActorsContainer/Ball")
+shake_noise = SubResource("FastNoiseLite_i7141")
+
 [node name="Backgrounds" type="Node2D" parent="."]
 
 [node name="Grass" type="Sprite2D" parent="Backgrounds"]
@@ -48,8 +59,3 @@ ball = NodePath("../Ball")
 
 [node name="Ball" parent="ActorsContainer" instance=ExtResource("5_71j4m")]
 position = Vector2(191, 121)
-
-[node name="Camera" type="Camera2D" parent="."]
-position = Vector2(140, 90)
-script = ExtResource("6_qfnet")
-shake_noise = SubResource("FastNoiseLite_i7141")

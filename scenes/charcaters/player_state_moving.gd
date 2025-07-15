@@ -22,10 +22,7 @@ func handle_human_movement() -> void:
 	
 	if player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme, KeyUtils.Action.SHOOT):
 		transition_state(Player.State.PREPINGSHOT)
-	#if player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme, KeyUtils.Action.SHOOT):
-		#transition_state.emit(Player.State.PREPINGSHOT)
-	
-	#if player.velocity != Vector2.ZERO  and KeyUtils.is_action_just_pressed(player.control_scheme,KeyUtils.Action.SHOOT):
-		#transition_state.emit(Player.State.TACKLING)
-		
-		
+	# 没球状态 铲球 撞人
+	if not player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme,KeyUtils.Action.PASS):
+		transition_state(Player.State.TACKLING)
+
