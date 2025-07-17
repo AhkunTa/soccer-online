@@ -2,8 +2,6 @@ class_name BallStateFreeForm
 
 extends BallState
 
-#基础反弹弹力 
-const BOUNCINESS :=0.8
 
 func _enter_tree() -> void:
 	player_detection_area.body_entered.connect(on_player_enter.bind())
@@ -19,6 +17,6 @@ func _process(delta: float) -> void:
 	ball.velocity = ball.velocity.move_toward(Vector2.ZERO, friction * delta)
 	
 	process_gravity(delta, BOUNCINESS)
-	ball.move_and_collide(ball.velocity * delta)
+	move_and_bounce(delta)
 
 	

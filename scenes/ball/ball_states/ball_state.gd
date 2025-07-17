@@ -2,7 +2,8 @@ class_name BallState
 extends Node
 
 signal state_transition_requested(new_state: Ball.State)
-
+#基础反弹弹力 
+const BOUNCINESS :=0.8
 const GRAVITY := 10.0
 
 var ball: Ball = null
@@ -37,3 +38,10 @@ func process_gravity(delta: float, bounciness: float =0.0)-> void:
 			if bounciness > 0 and ball.height_velocity < 0:
 				ball.height_velocity = -ball.height_velocity * bounciness
 				ball.velocity *= bounciness
+
+func move_and_bounce(delta: float)-> void:
+	var collision := ball.move_and_collide(ball.velocity * delta)
+	if collision !=null:
+		ball.velocity = ball.velocity.bounce(collision.get_normal()) * BOUNCINESS
+		ball.switch_state(Ball.State.FREEFORM)
+	
