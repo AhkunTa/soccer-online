@@ -44,4 +44,14 @@ func move_and_bounce(delta: float)-> void:
 	if collision !=null:
 		ball.velocity = ball.velocity.bounce(collision.get_normal()) * BOUNCINESS
 		ball.switch_state(Ball.State.FREEFORM)
-	
+
+func can_air_interact() -> bool:
+	return false
+
+# func get_state() -> Ball.State:
+# 	if ball.carrier != null:
+# 		return Ball.State.CARRIED
+# 	elif ball.velocity == Vector2.ZERO and ball.height == 0:
+# 		return Ball.State.FREEFORM
+# 	else:
+# 		return Ball.State.SHOT
