@@ -2,6 +2,9 @@ class_name  Ball
 extends AnimatableBody2D
 enum State {CARRIED, FREEFORM, SHOT}
 
+const DISTANCE_HIGH_PASS := 150
+
+
 var state_factory :=BallStateFactory.new()
 var velocity:= Vector2.ZERO
 var current_state :BallState = null
@@ -45,7 +48,9 @@ func pass_to(destination: Vector2) -> void:
 	var distance := position.distance_to(destination)
 	#	TODO 微积分方程  https://youtu.be/-4pGf5bW4-M?t=457
 	var intensity := sqrt(2 * distance * friction_ground)
-
+	#	TODO 高度加速度方程 https://youtu.be/FHnebIUSXHk?t=345
+	if distance > DISTANCE_HIGH_PASS:
+		height_velocity = BallState.GRAVITY * distance / (2 * intensity)
 	velocity = intensity * direction
 	carrier = null
 	switch_state(Ball.State.FREEFORM)

@@ -19,9 +19,10 @@ const CONTROL_SCHENE_MAP: Dictionary = {
 @onready var player_sprite: Sprite2D = %PlayerSprite
 @onready var team_detection_area: Area2D = %TeammateDetectionArea
 @onready var control_sprite: Sprite2D = %ControlSprite
+@onready var ball_detection_area: Area2D = %BallDetectionArea
 
 enum ControlScheme {CPU,P1,P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING,PASSING}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING,PASSING,HEADER,VOLLEY_KICK,BICYCLE_KICK}
 
 var heading:= Vector2.RIGHT
 
@@ -42,7 +43,7 @@ func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player, ball, team_detection_area)
+	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)
