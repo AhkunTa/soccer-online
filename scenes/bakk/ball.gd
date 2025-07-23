@@ -12,6 +12,9 @@ var carrier: Player = null
 var height := 0.0
 var height_velocity = 0.0
 
+@export var air_connect_min_height : float
+@export var air_connect_max_height : float
+
 #摩擦力 空中
 @export var friction_air := 25.0
 #摩擦力 地面
@@ -60,6 +63,9 @@ func stop() -> void:
 
 func can_air_interact() -> bool:
 	return current_state != null and current_state.can_air_interact()
+
+func can_air_connect() -> bool:
+	return height >= air_connect_min_height and height <= air_connect_max_height
 
 func is_freeform() -> bool:
 	return current_state != null and current_state is BallStateFreeForm
