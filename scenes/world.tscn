@@ -106,11 +106,13 @@ offset = Vector2(0, -13)
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/RightWall/StaticBody2D"]
 polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 
-[node name="Player" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
+[node name="Player" parent="ActorsContainer" node_paths=PackedStringArray("ball", "own_goal", "target_goal") instance=ExtResource("4_x5gyw")]
 position = Vector2(109, 127)
 scale = Vector2(1.0009, 1)
 control_scheme = 1
 ball = NodePath("../Ball")
+own_goal = NodePath("../PitchObjects/GoalLeft")
+target_goal = NodePath("../PitchObjects/GoalRight")
 
 [node name="Player2" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("4_x5gyw")]
 position = Vector2(153, 117)

@@ -16,6 +16,8 @@ const GRAVITY := 8.0
 @export var JUMP_IMPULES = 20
 @export var control_scheme: ControlScheme
 @export var ball: Ball
+@export var own_goal: Goal
+@export var target_goal: Goal
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
