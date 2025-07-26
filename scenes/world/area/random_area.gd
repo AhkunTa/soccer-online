@@ -72,8 +72,8 @@ func setup_detection() -> void:
 	body_exited.connect(_on_body_exited)
 	
 	# 设置检测层
-	collision_layer = 0  # 不与任何东西碰撞
-	collision_mask = 1   # 检测玩家层
+	collision_layer = 0  # 区域本身不参与物理碰撞
+	collision_mask = 2   # 检测层2的玩家
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is Player and body not in players_inside:

@@ -47,8 +47,6 @@ func _ready() -> void:
 	# 应用配置到玩家属性
 	apply_player_config()
 	
-	# 设置碰撞层用于区域检测
-	collision_layer = 1  # 玩家层
 	
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
