@@ -34,6 +34,11 @@ var height_velocity := 0.0
 var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
 
+# 临时效果系统
+var active_boosts: Dictionary = {}
+var healing_active: bool = false
+var healing_rate: float = 0.0
+
 func _ready() -> void:
 	# 如果没有配置，使用默认配置
 	if player_config == null:
@@ -41,6 +46,7 @@ func _ready() -> void:
 	
 	# 应用配置到玩家属性
 	apply_player_config()
+	
 	
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
@@ -67,6 +73,7 @@ func _process(delta: float) -> void:
 	flip_sprites()
 	set_sprite_visiable()
 	process_gravity(delta)
+	# update_temporary_effects(delta)
 	move_and_slide()
 	#zIndex_set()
 
@@ -140,6 +147,74 @@ func get_player_info() -> String:
 func reset_to_default() -> void:
 	set_player_config(PlayerConfig.create_default_config())
 
+# 应用临时增益效果
+func apply_temporary_boost(stat_name: String, multiplier: float, duration: float) -> void:
+	# 移除现有的同类型增益
+	if stat_name in active_boosts:
+		remove_boost(stat_name)
+	
+	# 应用新增益
+	var original_value = get(stat_name)
+	var boosted_value = original_value * multiplier
+	set(stat_name, boosted_value)
+	
+	# 保存增益信息
+	active_boosts[stat_name] = {
+		"original_value": original_value,
+		"multiplier": multiplier,
+		"timer": duration
+	}
+	
+	print("Applied %s boost: %.1fx for %.1fs" % [stat_name, multiplier, duration])
+
+# 移除增益效果
+func remove_boost(stat_name: String) -> void:
+	if stat_name in active_boosts:
+		var boost_data = active_boosts[stat_name]
+		set(stat_name, boost_data["original_value"])
+		active_boosts.erase(stat_name)
+		print("Removed %s boost" % stat_name)
+
+# 开始治疗
+func start_healing(rate: float) -> void:
+	healing_active = true
+	healing_rate = rate
+	print("Started healing at %.1f per second" % rate)
+
+# 停止治疗
+func stop_healing() -> void:
+	healing_active = false
+	healing_rate = 0.0
+	print("Stopped healing")
+
+# 应用伤害
+func apply_damage(amount: float) -> void:
+	# 这里可以实现伤害系统
+	print("Player took %.1f damage" % amount)
+
+# 更新临时效果
+func update_temporary_effects(delta: float) -> void:
+	# 更新临时增益效果
+	var boosts_to_remove: Array[String] = []
+	for stat_name in active_boosts:
+		active_boosts[stat_name]["timer"] -= delta
+		if active_boosts[stat_name]["timer"] <= 0:
+			boosts_to_remove.append(stat_name)
+	
+	# 移除过期的增益
+	for stat_name in boosts_to_remove:
+		remove_boost(stat_name)
+	
+	# 处理治疗效果
+	if healing_active:
+		# 这里可以实现实际的治疗逻辑
+		pass
+
+# 检查是否与其他玩家在同一队伍
+func is_teammate(other_player: Player) -> bool:
+	if player_config != null and other_player.player_config != null:
+		return player_config.team_id == other_player.player_config.team_id
+	return false
 	
 #func zIndex_set() ->void:
 	#z_index = int(position.y)
