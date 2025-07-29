@@ -16,8 +16,7 @@ const GRAVITY := 8.0
 @export var JUMP_IMPULES = 20
 @export var control_scheme: ControlScheme
 @export var ball: Ball
-@export var own_goal: Goal
-@export var target_goal: Goal
+@export var player_config: PlayerConfig  # 玩家配置
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
@@ -34,9 +33,35 @@ var height_velocity := 0.0
 
 var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
+
 func _ready() -> void:
+	# 如果没有配置，使用默认配置
+	if player_config == null:
+		player_config = PlayerConfig.create_default_config()
+	
+	# 应用配置到玩家属性
+	apply_player_config()
+	
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
+
+# 应用玩家配置到属性
+func apply_player_config() -> void:
+	if player_config != null:
+		speed = player_config.speed
+		power = player_config.power
+		JUMP_VELOCITY = player_config.jump_velocity
+		strength = player_config.strength
+		JUMP_IMPULES = player_config.jump_impulse
+
+# 设置玩家配置
+func set_player_config(config: PlayerConfig) -> void:
+	player_config = config
+	apply_player_config()
+
+# 获取玩家配置
+func get_player_config() -> PlayerConfig:
+	return player_config
 
 func _process(delta: float) -> void:
 	flip_sprites()
@@ -99,6 +124,22 @@ func on_animation_complete() -> void:
 	if current_state != null:
 		current_state.on_animation_complete()
 	pass
+
+func get_player_info() -> String:
+	if player_config != null:
+		return "Player: %s | Speed: %.1f | Power: %.1f | Strength: %d | Team: %d" % [
+			player_config.player_name,
+			speed,
+			power, 
+			strength,
+		]
+	else:
+		return "Player: Unknown | Speed: %.1f | Power: %.1f | Strength: %d" % [speed, power, strength]
+
+# 重置玩家为默认配置
+func reset_to_default() -> void:
+	set_player_config(PlayerConfig.create_default_config())
+
 	
 #func zIndex_set() ->void:
 	#z_index = int(position.y)
