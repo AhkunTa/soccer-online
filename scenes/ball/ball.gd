@@ -2,7 +2,7 @@ class_name Ball
 extends AnimatableBody2D
 enum State {CARRIED, FREEFORM, SHOT}
 
-const DISTANCE_HIGH_PASS := 150
+const DISTANCE_HIGH_PASS := 100
 
 
 var state_factory := BallStateFactory.new()
@@ -10,10 +10,7 @@ var velocity := Vector2.ZERO
 var current_state: BallState = null
 var carrier: Player = null
 var height := 0.0
-var height_velocity = 0.0
-
-@export var air_connect_min_height : float
-@export var air_connect_max_height : float
+var height_velocity := 0.0
 
 #摩擦力 空中
 @export var friction_air := 25.0
@@ -52,9 +49,9 @@ func pass_to(destination: Vector2) -> void:
 	#	TODO 微积分方程  https://youtu.be/-4pGf5bW4-M?t=457
 	var intensity := sqrt(2 * distance * friction_ground)
 	#	TODO 高度加速度方程 https://youtu.be/FHnebIUSXHk?t=345
-	if distance > DISTANCE_HIGH_PASS:
-		height_velocity = BallState.GRAVITY * distance / (2 * intensity)
 	velocity = intensity * direction
+	if distance > DISTANCE_HIGH_PASS:
+		height_velocity = BallState.GRAVITY * distance / (1.8 * intensity)
 	carrier = null
 	switch_state(Ball.State.FREEFORM)
 
@@ -64,7 +61,7 @@ func stop() -> void:
 func can_air_interact() -> bool:
 	return current_state != null and current_state.can_air_interact()
 
-func can_air_connect() -> bool:
+func can_air_connect(air_connect_min_height: float, air_connect_max_height: float) -> bool:
 	return height >= air_connect_min_height and height <= air_connect_max_height
 
 func is_freeform() -> bool:

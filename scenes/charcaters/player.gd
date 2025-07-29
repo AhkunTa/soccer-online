@@ -17,6 +17,8 @@ const GRAVITY := 8.0
 @export var control_scheme: ControlScheme
 @export var ball: Ball
 @export var player_config: PlayerConfig  # 玩家配置
+@export var own_goal: Goal
+@export var target_goal: Goal
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
@@ -81,7 +83,7 @@ func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area)
+	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)

@@ -40,7 +40,7 @@ texture = ExtResource("2_5qq27")
 
 [node name="Pattern" type="Sprite2D" parent="Backgrounds"]
 modulate = Color(0.282353, 0.607843, 0, 1)
-position = Vector2(439, 175)
+position = Vector2(424, 175)
 texture = ExtResource("3_dlabj")
 
 [node name="Lines" type="Sprite2D" parent="Backgrounds"]
@@ -108,7 +108,7 @@ offset = Vector2(0, -13)
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/RightWall/StaticBody2D"]
 polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 
-[node name="Player" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("9_bt7bg")]
+[node name="Player" parent="ActorsContainer" node_paths=PackedStringArray("ball", "own_goal", "target_goal") instance=ExtResource("9_bt7bg")]
 position = Vector2(109, 127)
 scale = Vector2(1.0009, 1)
 control_scheme = 1
@@ -116,14 +116,18 @@ ball = NodePath("../Ball")
 own_goal = NodePath("../PitchObjects/GoalLeft")
 target_goal = NodePath("../PitchObjects/GoalRight")
 
-[node name="Player2" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("9_bt7bg")]
+[node name="Player2" parent="ActorsContainer" node_paths=PackedStringArray("ball", "own_goal", "target_goal") instance=ExtResource("9_bt7bg")]
 position = Vector2(153, 117)
 ball = NodePath("../Ball")
+own_goal = NodePath("../PitchObjects/GoalRight")
+target_goal = NodePath("../PitchObjects/GoalLeft")
 
-[node name="Player3" parent="ActorsContainer" node_paths=PackedStringArray("ball") instance=ExtResource("9_bt7bg")]
+[node name="Player3" parent="ActorsContainer" node_paths=PackedStringArray("ball", "own_goal", "target_goal") instance=ExtResource("9_bt7bg")]
 position = Vector2(215, 95)
 control_scheme = 2
 ball = NodePath("../Ball")
+own_goal = NodePath("../PitchObjects/GoalLeft")
+target_goal = NodePath("../PitchObjects/GoalRight")
 
 [node name="Ball" parent="ActorsContainer" instance=ExtResource("10_wbwoo")]
 position = Vector2(191, 121)

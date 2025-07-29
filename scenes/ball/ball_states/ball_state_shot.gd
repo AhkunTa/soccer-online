@@ -4,7 +4,7 @@ extends BallState
 
 const DURATION_SHOT := 1000
 const SHOT_SPRITE_SCALE := 0.9
-const SHOT_HEIGHT := 50
+const SHOT_HEIGHT := 10
 var time_since_shot := Time.get_ticks_msec()
 
 func _enter_tree() -> void:
