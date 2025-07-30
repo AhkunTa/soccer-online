@@ -1,4 +1,4 @@
-class_name PlayStateRevocering
+class_name PlayerStateRecovering
 
 extends  PlayerState
 const DURATION_REVOCER :=500

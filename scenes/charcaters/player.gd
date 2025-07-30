@@ -6,6 +6,7 @@ const CONTROL_SCHENE_MAP: Dictionary = {
 	ControlScheme.P1: preload("res://assets/art/props/1p.png"),
 	ControlScheme.P2: preload("res://assets/art/props/2p.png")
 }
+const BALL_CONTROL_HEIGHT_MAX := 10.0
 
 const GRAVITY := 8.0
 
@@ -16,7 +17,7 @@ const GRAVITY := 8.0
 @export var JUMP_IMPULES = 20
 @export var control_scheme: ControlScheme
 @export var ball: Ball
-@export var player_config: PlayerConfig  # 玩家配置
+@export var player_config: PlayerConfig # 玩家配置
 @export var own_goal: Goal
 @export var target_goal: Goal
 
@@ -27,7 +28,7 @@ const GRAVITY := 8.0
 @onready var ball_detection_area: Area2D = %BallDetectionArea
 
 enum ControlScheme {CPU, P1, P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL}
 
 var heading := Vector2.RIGHT
 var height := 0.0
@@ -139,7 +140,7 @@ func get_player_info() -> String:
 		return "Player: %s | Speed: %.1f | Power: %.1f | Strength: %d | Team: %d" % [
 			player_config.player_name,
 			speed,
-			power, 
+			power,
 			strength,
 		]
 	else:
@@ -217,6 +218,10 @@ func is_teammate(other_player: Player) -> bool:
 	if player_config != null and other_player.player_config != null:
 		return player_config.team_id == other_player.player_config.team_id
 	return false
-	
+
+func control_ball() -> void:
+	if ball.height >= BALL_CONTROL_HEIGHT_MAX:
+		switch_state(Player.State.CHEST_CONTROL, PlayerStateData.new())
+
 #func zIndex_set() ->void:
 	#z_index = int(position.y)
