@@ -22,9 +22,7 @@ func spawn_players(country: String, own_goal: Goal) -> void:
 	for i in players.size():
 		var player_position := spawns.get_child(i).global_position as Vector2
 		var player_data := players[i] as PlayerResource
-		# TODO  移除 BALL_PREFAB 实例化
-		var player_ball := BALL_PREFAB.instantiate()
-		var player := spawn_player(player_position, player_ball, own_goal, target_goal, player_data)
+		var player := spawn_player(player_position, ball, own_goal, target_goal, player_data)
 		add_child(player)
 
 func spawn_player(player_position: Vector2, player_ball: Ball, own_goal: Goal, target_goal: Goal, player_data: PlayerResource) -> Player:

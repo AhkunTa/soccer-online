@@ -49,9 +49,10 @@ modulate = Color(0.941176, 0.941176, 0.941176, 1)
 position = Vector2(426, 181)
 texture = ExtResource("4_srmg5")
 
-[node name="ActorsContainer" type="Node2D" parent="." node_paths=PackedStringArray("goal_home", "goal_away")]
+[node name="ActorsContainer" type="Node2D" parent="." node_paths=PackedStringArray("ball", "goal_home", "goal_away")]
 y_sort_enabled = true
 script = ExtResource("6_dlabj")
+ball = NodePath("Ball")
 goal_home = NodePath("PitchObjects/GoalLeft")
 goal_away = NodePath("PitchObjects/GoalRight")
 team_home = "ARGENTINA"
