@@ -30,6 +30,15 @@ const GRAVITY := 8.0
 enum ControlScheme {CPU, P1, P2}
 enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL}
 
+
+enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD}
+enum SkinColor {LIGHT, MEDIUM, DARK}
+
+# 基础属性
+var fullname := ""
+var role :=Player.Role.MIDFIELDER
+var skin_color := Player.SkinColor.MEDIUM
+
 var heading := Vector2.RIGHT
 var height := 0.0
 var height_velocity := 0.0
@@ -79,6 +88,17 @@ func _process(delta: float) -> void:
 	# update_temporary_effects(delta)
 	move_and_slide()
 	#zIndex_set()
+
+func initialize(context_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource) -> void:
+	position = context_position
+	ball = context_ball
+	own_goal = context_own_goal
+	target_goal = context_target_goal
+	speed = context_player_data.speed
+	power = context_player_data.power
+	role = context_player_data.role
+	skin_color = context_player_data.skin_color
+	fullname = context_player_data.full_name
 
 func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
