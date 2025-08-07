@@ -18,6 +18,10 @@ func _ready() -> void:
 	spawns.scale.x = -1
 	spawn_players(team_away, goal_away)
 
+	var player: Player = get_children().filter(func(c): return c is Player)[3]
+	player.control_scheme = Player.ControlScheme.P1
+	player.set_control_texture()
+
 func spawn_players(country: String, own_goal: Goal) -> void:
 	var players := DataLoader.get_squad(country)
 	var target_goal := goal_home if own_goal == goal_away else goal_away
