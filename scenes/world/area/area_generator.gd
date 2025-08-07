@@ -2,7 +2,7 @@ class_name RandomAreaGenerator
 extends Node2D
 
 # Ensure RandomArea is available
-const RandomArea = preload("res://scenes/world/area/random_area.gd")
+#const RandomArea = preload("res://scenes/world/area/random_area.gd")
 
 # 区域类型枚举（与 RandomArea 同步）
 enum AreaType {
@@ -114,11 +114,11 @@ func remove_area(area: RandomArea) -> void:
 		area.queue_free()
 		area_removed.emit(area)
 
-func _on_player_entered_area(area: RandomArea, player: Player) -> void:
+func _on_player_entered_area(player: Player, area: RandomArea) -> void:
 	player_entered_area.emit(player, area)
 	apply_area_effect(player, area, true)
 
-func _on_player_exited_area(area: RandomArea, player: Player) -> void:
+func _on_player_exited_area(player: Player, area: RandomArea) -> void:
 	player_exited_area.emit(player, area)
 	apply_area_effect(player, area, false)
 

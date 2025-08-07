@@ -16,6 +16,6 @@ func on_ball_entered(contact_ball: Ball) -> void:
 	if contact_ball.can_air_connect(BALL_HEIGHT_MIN, BALL_HEIGHT_MAX):
 		contact_ball.shoot(player.velocity.normalized() * player.power * BONUS_POWER)
 		
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if player.height == 0:
 		transition_state(Player.State.RECOVERING)

@@ -5,7 +5,7 @@ func _enter_tree() -> void:
 	animation_player.play("kick")
 	player.velocity = Vector2.ZERO
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
 	
 func on_animation_complete() -> void:

@@ -27,8 +27,8 @@ func _process(delta: float) -> void:
 		var bonus := ease(ease_time, EASE_REWARD_FACTOR) # 用pow代替ease
 		var shot_power := player.power * (1 + bonus)
 		shot_direction = shot_direction.normalized()
-		var state_data = PlayerStateData.build().set_shot_direction(shot_direction).set_shot_power(shot_power)
-		transition_state(Player.State.SHOOTING, state_data)
+		var shooting_data = PlayerStateData.build().set_shot_direction(shot_direction).set_shot_power(shot_power)
+		transition_state(Player.State.SHOOTING, shooting_data)
 
 		#  超时惩罚
 		if prep_time >= DURATION_MIN_MALUS:

@@ -21,7 +21,7 @@ var noise_sample: Vector2
 var current_amplitude: float = 0
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	#shake(delta)
 	if ball.carrier !=null:
 		position = ball.carrier.position + ball.carrier.heading * DISTANCE_TARGET

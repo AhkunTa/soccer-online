@@ -99,6 +99,7 @@ func initialize(context_position: Vector2, context_ball: Ball, context_own_goal:
 	role = context_player_data.role
 	skin_color = context_player_data.skin_color
 	fullname = context_player_data.full_name
+	heading = Vector2.LEFT if target_goal.position.x < position.x else Vector2.RIGHT
 
 func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:

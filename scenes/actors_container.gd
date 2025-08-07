@@ -15,6 +15,8 @@ const BALL_PREFAB := preload('res://scenes/ball/ball.tscn')
 
 func _ready() -> void:
 	spawn_players(team_home, goal_home)
+	spawns.scale.x = -1
+	spawn_players(team_away, goal_away)
 
 func spawn_players(country: String, own_goal: Goal) -> void:
 	var players := DataLoader.get_squad(country)

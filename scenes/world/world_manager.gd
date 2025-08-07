@@ -11,9 +11,9 @@ extends Node2D
 var area_generator: Node2D
 
 func _ready() -> void:
-	# TODO 
-	# setup_layers()
-	# setup_area_generator()
+	# TODO 地图管理器
+	#setup_layers()
+	#setup_area_generator()
 	pass
 
 func setup_layers() -> void:
