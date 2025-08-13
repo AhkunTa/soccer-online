@@ -1,13 +1,19 @@
-[gd_scene load_steps=21 format=3 uid="uid://dv6q00nlf84ql"]
+[gd_scene load_steps=23 format=3 uid="uid://dv6q00nlf84ql"]
 
 [ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/charcaters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/art/characters/soccer-player.png" id="1_mrolr"]
 [ext_resource type="Shader" uid="uid://d0121fgat8g35" path="res://shaders/replace_color.gdshader" id="2_3g0k1"]
 [ext_resource type="Texture2D" uid="uid://cwj17hijrniey" path="res://assets/art/characters/player-shadow.png" id="3_6aipo"]
+[ext_resource type="Texture2D" uid="uid://bd8li7jywv683" path="res://assets/art/palettes/teams-color-palette.png" id="3_sisoe"]
 [ext_resource type="Texture2D" uid="uid://l5nflo672p66" path="res://assets/art/props/1p.png" id="3_ydfq7"]
+[ext_resource type="Texture2D" uid="uid://whgqm11qw0x1" path="res://assets/art/palettes/skin-colors-palette.png" id="4_ug4v2"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sisoe"]
 shader = ExtResource("2_3g0k1")
+shader_parameter/team_palette = ExtResource("3_sisoe")
+shader_parameter/team_skin_palette = ExtResource("4_ug4v2")
+shader_parameter/team_color = 8
+shader_parameter/skin_color = 0
 
 [sub_resource type="Animation" id="Animation_qjq5t"]
 length = 0.001
@@ -314,12 +320,14 @@ collision_layer = 0
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea"]
+visible = false
 position = Vector2(0, -6)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydfq7")
 
 [node name="BallDetectionArea" type="Area2D" parent="BallDetectionArea"]
 unique_name_in_owner = true
+visible = false
 collision_layer = 0
 collision_mask = 4
 
