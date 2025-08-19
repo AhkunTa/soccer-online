@@ -9,11 +9,12 @@
 [ext_resource type="Texture2D" uid="uid://whgqm11qw0x1" path="res://assets/art/palettes/skin-colors-palette.png" id="4_ug4v2"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sisoe"]
+resource_local_to_scene = true
 shader = ExtResource("2_3g0k1")
 shader_parameter/team_palette = ExtResource("3_sisoe")
-shader_parameter/team_skin_palette = ExtResource("4_ug4v2")
-shader_parameter/team_color = 8
-shader_parameter/skin_color = 0
+shader_parameter/skin_palette = ExtResource("4_ug4v2")
+shader_parameter/team_color = 6
+shader_parameter/skin_color = 2
 
 [sub_resource type="Animation" id="Animation_qjq5t"]
 length = 0.001

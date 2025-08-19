@@ -7,6 +7,7 @@ const CONTROL_SCHENE_MAP: Dictionary = {
 	ControlScheme.P2: preload("res://assets/art/props/2p.png")
 }
 const BALL_CONTROL_HEIGHT_MAX := 10.0
+const COUNTRIES = ["FRANCE", "ARGENTINA", "BRAZIL", "ENGLAND", "GERMANY", "ITALY", "SPAIN", "USA","CANADA"]
 
 const GRAVITY := 8.0
 
@@ -34,9 +35,10 @@ enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPIN
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD}
 enum SkinColor {LIGHT, MEDIUM, DARK}
 
+var country := ""
 # 基础属性
 var fullname := ""
-var role :=Player.Role.MIDFIELDER
+var role := Player.Role.MIDFIELDER
 var skin_color := Player.SkinColor.MEDIUM
 
 var heading := Vector2.RIGHT
@@ -62,6 +64,7 @@ func _ready() -> void:
 	
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
+	set_shader_properties()
 
 # 应用玩家配置到属性
 func apply_player_config() -> void:
@@ -81,6 +84,16 @@ func set_player_config(config: PlayerConfig) -> void:
 func get_player_config() -> PlayerConfig:
 	return player_config
 
+# 着色器
+func set_shader_properties() -> void:
+	player_sprite.material.set_shader_parameter('skin_color', skin_color)
+	
+	var country_color_index := COUNTRIES.find(country)
+	var team_color_index = clampi(country_color_index, 0, COUNTRIES.size() - 1)
+
+	print("team_color_index: ", team_color_index)
+	player_sprite.material.set_shader_parameter('team_color', team_color_index)
+
 func _process(delta: float) -> void:
 	flip_sprites()
 	set_sprite_visiable()
@@ -89,7 +102,7 @@ func _process(delta: float) -> void:
 	move_and_slide()
 	#zIndex_set()
 
-func initialize(context_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource) -> void:
+func initialize(context_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:
 	position = context_position
 	ball = context_ball
 	own_goal = context_own_goal
@@ -100,6 +113,7 @@ func initialize(context_position: Vector2, context_ball: Ball, context_own_goal:
 	skin_color = context_player_data.skin_color
 	fullname = context_player_data.full_name
 	heading = Vector2.LEFT if target_goal.position.x < position.x else Vector2.RIGHT
+	country = context_country
 
 func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:

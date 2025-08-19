@@ -1,10 +1,11 @@
 shader_type canvas_item;
-
+group_uniforms Palettes;
 uniform sampler2D team_palette;
-uniform sampler2D team_skin_palette;
+uniform sampler2D skin_palette;
+group_uniforms;
 
 uniform int team_color;
-uniform int skin_color;
+uniform int skin_color: hint_enum("Light", "Medium", "Dark");
 
 vec2 px_to_uv(ivec2 pos, ivec2 tex_size) {
 	return vec2(
@@ -30,4 +31,7 @@ vec4 get_pelette_color(vec4 color, sampler2D palette, int selection) {
 
 void fragment() {
 	COLOR = get_pelette_color(COLOR, team_palette, team_color);
+	if (skin_color > 0) {
+		COLOR = get_pelette_color(COLOR, skin_palette, skin_color);
+	}
 }
