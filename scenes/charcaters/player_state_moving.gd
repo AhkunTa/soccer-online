@@ -3,11 +3,11 @@ extends PlayerState
 
 func _process(_delta: float) -> void:
 	if player.control_scheme == Player.ControlScheme.CPU:
-		pass
+		ai_bahavior.process_ai()
 	else:
 		handle_human_movement()
-		player.set_movement_animation()
-		player.set_heading()
+	player.set_movement_animation()
+	player.set_heading()
 	
 
 func handle_human_movement() -> void:

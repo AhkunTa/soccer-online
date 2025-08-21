@@ -14,8 +14,8 @@ const GRAVITY := 8.0
 @export var speed: float = 80.0
 @export var power: float = 150.0
 @export var JUMP_VELOCITY: float = -400.0
-@export var strength: int = 5
-@export var JUMP_IMPULES = 20
+@export var strength:= 5
+@export var JUMP_IMPULES:= 20
 @export var control_scheme: ControlScheme
 @export var ball: Ball
 @export var player_config: PlayerConfig # 玩家配置
@@ -35,18 +35,20 @@ enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPIN
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD}
 enum SkinColor {LIGHT, MEDIUM, DARK}
 
+var ai_behavior: AIBehavior = AIBehavior.new()
 var country := ""
 # 基础属性
 var fullname := ""
 var role := Player.Role.MIDFIELDER
 var skin_color := Player.SkinColor.MEDIUM
-
 var heading := Vector2.RIGHT
 var height := 0.0
 var height_velocity := 0.0
 
 var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
+var spawn_position := Vector2.ZERO
+var weight_on_duty_steering := 0.0
 
 # 临时效果系统
 var active_boosts: Dictionary = {}
@@ -65,7 +67,8 @@ func _ready() -> void:
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
 	set_shader_properties()
-
+	set_ai_behavior()
+	
 # 应用玩家配置到属性
 func apply_player_config() -> void:
 	if player_config != null:
@@ -94,6 +97,11 @@ func set_shader_properties() -> void:
 	print("team_color_index: ", team_color_index)
 	player_sprite.material.set_shader_parameter('team_color', team_color_index)
 
+func set_ai_behavior()-> void:
+	ai_behavior.setup(self, ball);
+	ai_behavior.name = "AI Behavior"
+	add_child(ai_behavior)
+
 func _process(delta: float) -> void:
 	flip_sprites()
 	set_sprite_visiable()
@@ -119,7 +127,7 @@ func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal)
+	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal, ai_behavior)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)
@@ -132,7 +140,6 @@ func set_movement_animation() -> void:
 		animation_player.play("run")
 	else:
 		animation_player.play("idle")
-
 
 func process_gravity(delta) -> void:
 	if height > 0:
