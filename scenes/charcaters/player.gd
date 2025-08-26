@@ -55,6 +55,7 @@ var active_boosts: Dictionary = {}
 var healing_active: bool = false
 var healing_rate: float = 0.0
 
+
 func _ready() -> void:
 	# 如果没有配置，使用默认配置
 	if player_config == null:
@@ -62,13 +63,12 @@ func _ready() -> void:
 	
 	# 应用配置到玩家属性
 	apply_player_config()
-	
-	
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
 	set_shader_properties()
 	set_ai_behavior()
-	
+	spawn_position = position
+
 # 应用玩家配置到属性
 func apply_player_config() -> void:
 	if player_config != null:

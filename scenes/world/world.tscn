@@ -137,7 +137,7 @@ offset = Vector2(0, -13)
 polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 
 [node name="Ball" parent="ActorsContainer" instance=ExtResource("10_wbwoo")]
-position = Vector2(426, 185)
+position = Vector2(324, 185)
 
 [node name="EffectsContainer" type="Node2D" parent="."]
 y_sort_enabled = true

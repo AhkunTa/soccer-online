@@ -8,7 +8,7 @@ var ball:Ball = null
 var player :Player = null
 var time_since_last_ai_tick :=Time.get_ticks_msec()
 
-
+# https://www.youtube.com/watch?v=4_J_rYPteXg&t=1301s
 func _ready() -> void:
 	time_since_last_ai_tick = Time.get_ticks_msec() + randi_range(0, DURATION_AI_TICK_FREQUENCY)
 
@@ -25,9 +25,14 @@ func process_ai() -> void:
 		perform_ai_decisions()
 
 func perform_ai_movement() -> void:
+	var total_steering_force := Vector2.ZERO
+	total_steering_force += get_onduty_steering_force()
+	total_steering_force = total_steering_force.limit_length(1.0)
+	player.velocity = total_steering_force * player.speed
 	
-	
-	
-	pass
 func perform_ai_decisions() -> void:
 	pass
+
+func get_onduty_steering_force() -> Vector2:
+	return player.weight_on_duty_steering * player.position.direction_to(ball.position)
+	
