@@ -10,6 +10,7 @@ const BALL_CONTROL_HEIGHT_MAX := 10.0
 const COUNTRIES = ["FRANCE", "ARGENTINA", "BRAZIL", "ENGLAND", "GERMANY", "ITALY", "SPAIN", "USA","CANADA"]
 
 const GRAVITY := 8.0
+const WALK_ANIM_THRESHOLD :=0.6
 
 @export var speed: float = 80.0
 @export var power: float = 150.0
@@ -136,11 +137,14 @@ func set_tackling_animation() -> void:
 	animation_player.play("tackle")
 
 func set_movement_animation() -> void:
-	if velocity.length() > 0:
-		animation_player.play("run")
+	var vel_length :=velocity.length()
+	if vel_length < 1:
+		animation_player.play('idle')
+	elif vel_length < speed * WALK_ANIM_THRESHOLD:
+		animation_player.play('walk')
 	else:
-		animation_player.play("idle")
-
+		animation_player.play("run")
+		
 func process_gravity(delta) -> void:
 	if height > 0:
 		height_velocity -= GRAVITY * delta
@@ -148,7 +152,6 @@ func process_gravity(delta) -> void:
 		if height < 0:
 			height = 0
 	player_sprite.position = Vector2.UP * height
-
 
 func set_heading() -> void:
 	if velocity.x > 0:
