@@ -7,16 +7,16 @@ const CONTROL_SCHENE_MAP: Dictionary = {
 	ControlScheme.P2: preload("res://assets/art/props/2p.png")
 }
 const BALL_CONTROL_HEIGHT_MAX := 10.0
-const COUNTRIES = ["FRANCE", "ARGENTINA", "BRAZIL", "ENGLAND", "GERMANY", "ITALY", "SPAIN", "USA","CANADA"]
+const COUNTRIES = ["FRANCE", "ARGENTINA", "BRAZIL", "ENGLAND", "GERMANY", "ITALY", "SPAIN", "USA", "CANADA"]
 
 const GRAVITY := 8.0
-const WALK_ANIM_THRESHOLD :=0.6
+const WALK_ANIM_THRESHOLD := 0.6
 
 @export var speed: float = 80.0
 @export var power: float = 150.0
 @export var JUMP_VELOCITY: float = -400.0
-@export var strength:= 5
-@export var JUMP_IMPULES:= 20
+@export var strength := 5
+@export var JUMP_IMPULES := 20
 @export var control_scheme: ControlScheme
 @export var ball: Ball
 @export var player_config: PlayerConfig # 玩家配置
@@ -98,7 +98,7 @@ func set_shader_properties() -> void:
 	print("team_color_index: ", team_color_index)
 	player_sprite.material.set_shader_parameter('team_color', team_color_index)
 
-func set_ai_behavior()-> void:
+func set_ai_behavior() -> void:
 	ai_behavior.setup(self, ball);
 	ai_behavior.name = "AI Behavior"
 	add_child(ai_behavior)
@@ -137,7 +137,7 @@ func set_tackling_animation() -> void:
 	animation_player.play("tackle")
 
 func set_movement_animation() -> void:
-	var vel_length :=velocity.length()
+	var vel_length := velocity.length()
 	if vel_length < 1:
 		animation_player.play('idle')
 	elif vel_length < speed * WALK_ANIM_THRESHOLD:
