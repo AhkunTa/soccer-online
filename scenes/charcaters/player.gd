@@ -109,7 +109,6 @@ func _process(delta: float) -> void:
 	process_gravity(delta)
 	# update_temporary_effects(delta)
 	move_and_slide()
-	#zIndex_set()
 
 func initialize(context_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:
 	position = context_position
@@ -267,6 +266,10 @@ func is_teammate(other_player: Player) -> bool:
 func control_ball() -> void:
 	if ball.height >= BALL_CONTROL_HEIGHT_MAX:
 		switch_state(Player.State.CHEST_CONTROL, PlayerStateData.new())
+
+func is_facing_target_goal() -> bool:
+	var direction_to_target_goal := position.direction_to(target_goal.position)
+	return heading.dot(direction_to_target_goal) > 0
 
 #func zIndex_set() ->void:
 	#z_index = int(position.y)
