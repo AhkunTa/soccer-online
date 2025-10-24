@@ -30,13 +30,14 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var ball_detection_area: Area2D = %BallDetectionArea
 
 enum ControlScheme {CPU, P1, P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPINGSHOT, SHOOTING, JUMPINGSHOTING, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL}
 
 
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD}
 enum SkinColor {LIGHT, MEDIUM, DARK}
 
-var ai_behavior: AIBehavior = AIBehavior.new()
+var ai_behavior_factory :=  AIBehaviorFactory.new()
+var current_ai_behavior : AIBehavior = null
 var country := ""
 # 基础属性
 var fullname := ""
@@ -58,26 +59,23 @@ var healing_rate: float = 0.0
 
 
 func _ready() -> void:
-	# 如果没有配置，使用默认配置
-	if player_config == null:
-		player_config = PlayerConfig.create_default_config()
-	
+	set_ai_behavior()
 	# 应用配置到玩家属性
 	apply_player_config()
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
 	set_shader_properties()
-	set_ai_behavior()
 	spawn_position = position
 
 # 应用玩家配置到属性
 func apply_player_config() -> void:
-	if player_config != null:
-		speed = player_config.speed
-		power = player_config.power
-		JUMP_VELOCITY = player_config.jump_velocity
-		strength = player_config.strength
-		JUMP_IMPULES = player_config.jump_impulse
+	if player_config == null:
+		player_config = PlayerConfig.create_default_config()
+	speed = player_config.speed
+	power = player_config.power
+	JUMP_VELOCITY = player_config.jump_velocity
+	strength = player_config.strength
+	JUMP_IMPULES = player_config.jump_impulse
 
 # 设置玩家配置
 func set_player_config(config: PlayerConfig) -> void:
@@ -99,9 +97,10 @@ func set_shader_properties() -> void:
 	player_sprite.material.set_shader_parameter('team_color', team_color_index)
 
 func set_ai_behavior() -> void:
-	ai_behavior.setup(self, ball);
-	ai_behavior.name = "AI Behavior"
-	add_child(ai_behavior)
+	current_ai_behavior = ai_behavior_factory.get_ai_behavior(role)
+	current_ai_behavior.setup(self, ball);
+	current_ai_behavior.name = "AI Behavior"
+	add_child(current_ai_behavior)
 
 func _process(delta: float) -> void:
 	flip_sprites()
@@ -127,7 +126,7 @@ func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal, ai_behavior)
+	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal, current_ai_behavior)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)

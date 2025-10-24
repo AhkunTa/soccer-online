@@ -15,7 +15,7 @@ func _init() -> void:
 		Player.State.CHEST_CONTROL: PlayerStateChestControl,
 		Player.State.TACKLING: PlayerStateTackling,
 		Player.State.SHOOTING: PlayerStateShooting,
-		Player.State.PREPINGSHOT: PlayerStatePrepingShot,
+		Player.State.PREPPING_SHOT: PlayerStatePrepingShot,
 		Player.State.PASSING: PlayerStatePassing,
 		Player.State.VOLLEY_KICK: PlayerStateVolleyKick,
 		Player.State.HEADER: PlayerStateHeader,
@@ -23,7 +23,7 @@ func _init() -> void:
 
 		#TODO 跳跃 跳跃射击
 		Player.State.JUMPING: PlayerStateJumping,
-		Player.State.JUMPINGSHOTING: PlayerStateJumpingShot,
+		Player.State.JUMPING_SHOT: PlayerStateJumpingShot,
 	}
 	
 func get_fresh_state(state: Player.State) -> PlayerState:
