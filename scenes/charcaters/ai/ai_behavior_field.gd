@@ -35,7 +35,7 @@ func perform_ai_decisions() -> void:
 				face_towards_goal()
 				var shot_direction := player.position.direction_to(player.target_goal.get_random_target_position())
 				var data := PlayerStateData.build().set_shot_power(player.power).set_shot_direction(shot_direction)
-				player.switch_state(Player.State.SHOOTING, data)
+				# player.switch_state(Player.State.SHOOTING, data)
 
 func face_towards_goal() -> void:
 	if not player.is_facing_target_goal():

@@ -3,7 +3,7 @@ extends PlayerState
 
 func _process(_delta: float) -> void:
 	if player.control_scheme == Player.ControlScheme.CPU:
-		ai_bahavior.process_ai()
+		ai_behavior.process_ai()
 	else:
 		handle_human_movement()
 	player.set_movement_animation()
@@ -42,4 +42,3 @@ func handle_human_movement() -> void:
 	# 没球状态 铲球 撞人
 	if not player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme,KeyUtils.Action.PASS):
 		transition_state(Player.State.TACKLING)
-

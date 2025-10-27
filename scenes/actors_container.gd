@@ -50,7 +50,6 @@ func spawn_players(country: String, own_goal: Goal) -> Array[Player]:
 
 func spawn_player(player_position: Vector2, player_ball: Ball, own_goal: Goal, target_goal: Goal, player_data: PlayerResource, country: String) -> Player:
 	var player := PLAYER_PREFAB.instantiate()
-	print("Spawning player: ", player_data.full_name, ", skin: ", player_data.skin_color, ", country: ", country)
 	player.initialize(player_position, player_ball, own_goal, target_goal, player_data, country)
 	return player
 

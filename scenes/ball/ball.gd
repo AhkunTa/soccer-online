@@ -39,7 +39,6 @@ func switch_state(state: Ball.State) -> void:
 	
 func shoot(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity
-	print(shot_velocity)
 	carrier = null
 	switch_state(Ball.State.SHOT)
 

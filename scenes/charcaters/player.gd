@@ -1,7 +1,7 @@
 class_name Player
 extends CharacterBody2D
 
-const CONTROL_SCHENE_MAP: Dictionary = {
+const CONTROL_SCENE_MAP: Dictionary = {
 	ControlScheme.CPU: preload("res://assets/art/props/cpu.png"),
 	ControlScheme.P1: preload("res://assets/art/props/1p.png"),
 	ControlScheme.P2: preload("res://assets/art/props/2p.png")
@@ -28,16 +28,17 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var team_detection_area: Area2D = %TeammateDetectionArea
 @onready var control_sprite: Sprite2D = %ControlSprite
 @onready var ball_detection_area: Area2D = %BallDetectionArea
+@onready var tackle_damage_emitter_area: Area2D = %TackleDamageEmitterArea
 
 enum ControlScheme {CPU, P1, P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT}
 
 
-enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD}
+enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD, FIELD}
 enum SkinColor {LIGHT, MEDIUM, DARK}
 
-var ai_behavior_factory :=  AIBehaviorFactory.new()
-var current_ai_behavior : AIBehavior = null
+var ai_behavior_factory := AIBehaviorFactory.new()
+var current_ai_behavior: AIBehavior = null
 var country := ""
 # 基础属性
 var fullname := ""
@@ -65,6 +66,7 @@ func _ready() -> void:
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
 	set_shader_properties()
+	tackle_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	spawn_position = position
 
 # 应用玩家配置到属性
@@ -93,7 +95,7 @@ func set_shader_properties() -> void:
 	var country_color_index := COUNTRIES.find(country)
 	var team_color_index = clampi(country_color_index, 0, COUNTRIES.size() - 1)
 
-	print("team_color_index: ", team_color_index)
+	# print("team_color_index: ", team_color_index)
 	player_sprite.material.set_shader_parameter('team_color', team_color_index)
 
 func set_ai_behavior() -> void:
@@ -126,7 +128,7 @@ func switch_state(state: State, state_data: PlayerStateData) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal, current_ai_behavior)
+	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal, tackle_damage_emitter_area, current_ai_behavior)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)
@@ -160,9 +162,10 @@ func set_heading() -> void:
 func flip_sprites() -> void:
 	if heading == Vector2.RIGHT:
 		player_sprite.flip_h = false
+		tackle_damage_emitter_area.scale.x = 1
 	elif heading == Vector2.LEFT:
 		player_sprite.flip_h = true
-	#player_sprite.flip_h == true if heading == Vector2.LEFT else false
+		tackle_damage_emitter_area.scale.x = -1
 
 func set_sprite_visiable() -> void:
 	control_sprite.visible = has_ball() or not control_scheme == ControlScheme.CPU
@@ -170,13 +173,22 @@ func set_sprite_visiable() -> void:
 func has_ball() -> bool:
 	return ball.carrier == self
 
+func get_hurt(hurt_origin: Vector2) -> void:
+	switch_state(Player.State.HURT, PlayerStateData.new())
+
 func set_control_texture() -> void:
-	control_sprite.texture = CONTROL_SCHENE_MAP[control_scheme]
+	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]
 
 func on_animation_complete() -> void:
 	if current_state != null:
 		current_state.on_animation_complete()
 	pass
+
+func on_tackle_player(player: Player) -> void:
+	if player != self and player.country != country and player == ball.carrier:
+		# 防止在 HURT 状态期间重复触发
+		#if player.current_state is not PlayerStateHurt:
+		player.get_hurt(position.direction_to(player.position))
 
 func get_player_info() -> String:
 	if player_config != null:
