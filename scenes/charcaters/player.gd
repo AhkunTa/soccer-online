@@ -174,7 +174,7 @@ func has_ball() -> bool:
 	return ball.carrier == self
 
 func get_hurt(hurt_origin: Vector2) -> void:
-	switch_state(Player.State.HURT, PlayerStateData.new())
+	switch_state(Player.State.HURT, PlayerStateData.new().set_hurt_direction(hurt_origin))
 
 func set_control_texture() -> void:
 	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]
@@ -185,9 +185,9 @@ func on_animation_complete() -> void:
 	pass
 
 func on_tackle_player(player: Player) -> void:
+	print("Tackle detected between ", player.country, " and ", country)
 	if player != self and player.country != country and player == ball.carrier:
-		# 防止在 HURT 状态期间重复触发
-		#if player.current_state is not PlayerStateHurt:
+		print("Tackled player get hurt: ", player.fullname )
 		player.get_hurt(position.direction_to(player.position))
 
 func get_player_info() -> String:

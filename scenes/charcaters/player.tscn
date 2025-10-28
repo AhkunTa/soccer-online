@@ -381,6 +381,8 @@ shape = SubResource("CapsuleShape2D_ydfq7")
 unique_name_in_owner = true
 collision_layer = 0
 collision_mask = 2
+monitoring = false
+monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TackleDamageEmitterArea"]
 position = Vector2(15, -3)
