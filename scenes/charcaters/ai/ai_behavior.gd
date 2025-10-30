@@ -58,6 +58,9 @@ func get_bicircular_weight(position: Vector2, center_target: Vector2, inner_circ
 		var t := distance_to_inner_radius / distance_between_circles
 		return lerp(inner_circle_weight, outer_circle_weight, t)
 
+func is_ball_possessed_by_opponent() -> bool:
+	return ball.carrier != null and ball.carrier.country != player.country
+
 ## 判断球是否被队友持有
 func is_ball_carried_by_teammate() -> bool:
 	return ball.carrier != null and ball.carrier != player and ball.carrier.country == player.country

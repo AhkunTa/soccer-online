@@ -7,6 +7,7 @@ const SPREAD_ASSIST_FACTOR := 0.8
 const SHOT_DISTANCE := 150
 # 每次 30% 射击
 const SHOT_PROBABILITY := 0.3
+# 抢断距离
 const TACKLE_DISTANCE := 15
 const TACKLE_PROBABILITY := 0.3
 
@@ -29,13 +30,20 @@ func perform_ai_movement() -> void:
 
 ## 执行AI决策逻辑
 func perform_ai_decisions() -> void:
+	if is_ball_possessed_by_opponent():
+		# 对手持球时，有一定概率尝试抢断
+		if player.position.distance_to(ball.carrier.position) < TACKLE_DISTANCE and randf() < TACKLE_PROBABILITY:
+			face_towards_goal()
+			var tackle_direction := player.position.direction_to(ball.carrier.position)
+			var data := PlayerStateData.build().set_shot_direction(tackle_direction)
+			player.switch_state(Player.State.TACKLING, data)
 	if ball.carrier == player:
 			var target := player.target_goal.get_center_target_position()
 			if player.position.distance_to(target) < SHOT_DISTANCE and randf() < SHOT_PROBABILITY:
 				face_towards_goal()
 				var shot_direction := player.position.direction_to(player.target_goal.get_random_target_position())
 				var data := PlayerStateData.build().set_shot_power(player.power).set_shot_direction(shot_direction)
-				# player.switch_state(Player.State.SHOOTING, data)
+				player.switch_state(Player.State.SHOOTING, data)
 
 func face_towards_goal() -> void:
 	if not player.is_facing_target_goal():

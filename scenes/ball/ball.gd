@@ -3,7 +3,7 @@ extends AnimatableBody2D
 enum State {CARRIED, FREEFORM, SHOT}
 
 const DISTANCE_HIGH_PASS := 100
-
+const TUMBLE_HEIGHT_VELOCITY := 3.0
 
 var state_factory := BallStateFactory.new()
 var velocity := Vector2.ZERO
@@ -41,6 +41,12 @@ func shoot(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity
 	carrier = null
 	switch_state(Ball.State.SHOT)
+
+func tumble(shot_velocity: Vector2) -> void:
+	velocity = shot_velocity
+	height_velocity = TUMBLE_HEIGHT_VELOCITY
+	carrier = null
+	switch_state(Ball.State.FREEFORM)
 
 func pass_to(destination: Vector2) -> void:
 	var direction := position.direction_to(destination)

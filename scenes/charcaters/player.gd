@@ -174,7 +174,7 @@ func has_ball() -> bool:
 	return ball.carrier == self
 
 func get_hurt(hurt_origin: Vector2) -> void:
-	switch_state(Player.State.HURT, PlayerStateData.new().set_hurt_direction(hurt_origin))
+	switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(hurt_origin))
 
 func set_control_texture() -> void:
 	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]
