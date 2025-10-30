@@ -3,13 +3,14 @@ extends AIBehavior
 
 ## 助攻站位分散系数，用于计算队友助攻时的站位距离
 const SPREAD_ASSIST_FACTOR := 0.8
-# AI射击距离
+# 射门
 const SHOT_DISTANCE := 150
-# 每次 30% 射击
 const SHOT_PROBABILITY := 0.3
-# 抢断距离
+# 抢断
 const TACKLE_DISTANCE := 15
 const TACKLE_PROBABILITY := 0.3
+# 传球
+const PASS_PROBABILITY := 0.5
 
 ## 执行AI移动逻辑
 ## 根据球员状态计算转向力并更新速度
@@ -44,6 +45,8 @@ func perform_ai_decisions() -> void:
 				var shot_direction := player.position.direction_to(player.target_goal.get_random_target_position())
 				var data := PlayerStateData.build().set_shot_power(player.power).set_shot_direction(shot_direction)
 				player.switch_state(Player.State.SHOOTING, data)
+			elif has_opponent_in_nearby() and randf() < PASS_PROBABILITY:
+				player.switch_state(Player.State.PASSING)
 
 func face_towards_goal() -> void:
 	if not player.is_facing_target_goal():

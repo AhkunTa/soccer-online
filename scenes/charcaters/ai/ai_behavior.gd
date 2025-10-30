@@ -7,7 +7,7 @@ const DURATION_AI_TICK_FREQUENCY := 200
 var ball: Ball = null
 var player: Player = null
 var time_since_last_ai_tick := Time.get_ticks_msec()
-
+var opponent_detection_area: Area2D = null
 ## 初始化AI行为
 ## 参考: https://www.youtube.com/watch?v=4_J_rYPteXg&t=1301s
 func _ready() -> void:
@@ -18,9 +18,10 @@ func _ready() -> void:
 ## 设置AI上下文
 ## @param context_player: 要控制的球员
 ## @param context_ball: 球的引用
-func setup(context_player: Player, context_ball: Ball) -> void:
+func setup(context_player: Player, context_ball: Ball, context_opponent_detection_area: Area2D) -> void:
 	player = context_player
 	ball = context_ball
+	opponent_detection_area = context_opponent_detection_area
 
 
 ## 处理AI逻辑（每帧调用）
@@ -64,3 +65,10 @@ func is_ball_possessed_by_opponent() -> bool:
 ## 判断球是否被队友持有
 func is_ball_carried_by_teammate() -> bool:
 	return ball.carrier != null and ball.carrier != player and ball.carrier.country == player.country
+
+func has_opponent_in_nearby() -> bool:
+	var bodies := opponent_detection_area.get_overlapping_bodies()
+	for body in bodies:
+		if body is Player and body.country != player.country:
+			return true
+	return false

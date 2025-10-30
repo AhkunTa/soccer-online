@@ -3,7 +3,7 @@ extends PlayerState
 
 const DURATION_HURT := 1000
 const AIR_FRICTION := 35.0
-const HURT_HEIGHT_VELOCITY := 3.0
+const HURT_HEIGHT_VELOCITY := 2.0
 # 掉球速度
 const BALL_TUMBLE_SPEED := 100.0
 var time_start_hurt := Time.get_ticks_msec()
@@ -12,6 +12,7 @@ func _enter_tree() -> void:
 	animation_player.play("hurt")
 	time_start_hurt = Time.get_ticks_msec()
 	player.height_velocity = HURT_HEIGHT_VELOCITY
+	player.height = 0.1
 	if ball.carrier == player:
 		ball.tumble(state_data.hurt_direction * BALL_TUMBLE_SPEED)
 

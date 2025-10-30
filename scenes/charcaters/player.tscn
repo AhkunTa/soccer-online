@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://dv6q00nlf84ql"]
+[gd_scene load_steps=27 format=3 uid="uid://dv6q00nlf84ql"]
 
 [ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/charcaters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/art/characters/soccer-player.png" id="1_mrolr"]
@@ -308,11 +308,21 @@ height = 20.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ug4v2"]
 size = Vector2(10, 10)
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ug4v2"]
+radius = 40.0
+height = 120.0
+
 [node name="Player" type="CharacterBody2D"]
 physics_interpolation_mode = 2
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_ct8e2")
+speed = null
+power = null
+JUMP_VELOCITY = null
+strength = null
+JUMP_IMPULES = null
+control_scheme = null
 
 [node name="PlayerSprite" type="Sprite2D" parent="."]
 unique_name_in_owner = true
@@ -387,3 +397,13 @@ monitorable = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TackleDamageEmitterArea"]
 position = Vector2(15, -3)
 shape = SubResource("RectangleShape2D_ug4v2")
+
+[node name="OpponentDetectionArea" type="Area2D" parent="."]
+unique_name_in_owner = true
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OpponentDetectionArea"]
+position = Vector2(20, 0)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_ug4v2")

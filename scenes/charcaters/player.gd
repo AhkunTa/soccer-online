@@ -29,6 +29,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var control_sprite: Sprite2D = %ControlSprite
 @onready var ball_detection_area: Area2D = %BallDetectionArea
 @onready var tackle_damage_emitter_area: Area2D = %TackleDamageEmitterArea
+@onready var opponent_detection_area: Area2D = %OpponentDetectionArea
 
 enum ControlScheme {CPU, P1, P2}
 enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT}
@@ -100,7 +101,7 @@ func set_shader_properties() -> void:
 
 func set_ai_behavior() -> void:
 	current_ai_behavior = ai_behavior_factory.get_ai_behavior(role)
-	current_ai_behavior.setup(self, ball);
+	current_ai_behavior.setup(self, ball, opponent_detection_area);
 	current_ai_behavior.name = "AI Behavior"
 	add_child(current_ai_behavior)
 
@@ -124,7 +125,7 @@ func initialize(context_position: Vector2, context_ball: Ball, context_own_goal:
 	heading = Vector2.LEFT if target_goal.position.x < position.x else Vector2.RIGHT
 	country = context_country
 
-func switch_state(state: State, state_data: PlayerStateData) -> void:
+func switch_state(state: State, state_data: PlayerStateData = PlayerStateData.new()) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
@@ -163,9 +164,11 @@ func flip_sprites() -> void:
 	if heading == Vector2.RIGHT:
 		player_sprite.flip_h = false
 		tackle_damage_emitter_area.scale.x = 1
+		opponent_detection_area.scale.x = 1
 	elif heading == Vector2.LEFT:
 		player_sprite.flip_h = true
 		tackle_damage_emitter_area.scale.x = -1
+		opponent_detection_area.scale.x = -1
 
 func set_sprite_visiable() -> void:
 	control_sprite.visible = has_ball() or not control_scheme == ControlScheme.CPU
