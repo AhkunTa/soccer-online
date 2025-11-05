@@ -67,14 +67,14 @@ team_away = "FRANCE"
 unique_name_in_owner = true
 position = Vector2(426, 180)
 
+[node name="GoalliePosition" type="Node2D" parent="ActorsContainer/Spawns"]
+position = Vector2(-330, 5)
+
 [node name="DefensePosition" type="Node2D" parent="ActorsContainer/Spawns"]
 position = Vector2(-235, -40)
 
 [node name="DefensePosition2" type="Node2D" parent="ActorsContainer/Spawns"]
 position = Vector2(-235, 40)
-
-[node name="GoalliePosition" type="Node2D" parent="ActorsContainer/Spawns"]
-position = Vector2(-330, 5)
 
 [node name="MidfieldPosition" type="Node2D" parent="ActorsContainer/Spawns"]
 position = Vector2(-135, 0)

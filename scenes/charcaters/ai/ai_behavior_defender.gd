@@ -1,6 +1,6 @@
-class_name  AIBehaviorMidfielder
-extends AIBehaviorField
-# 中场
+class_name  AIBehaviorDefender
+extends AIBehavior
+# 后卫
 func perform_ai_movement() -> void:
 	pass
 	
