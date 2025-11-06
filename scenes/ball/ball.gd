@@ -21,12 +21,15 @@ var height_velocity := 0.0
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_detection_area: Area2D = $PlayerDetection
 @onready var ball_sprite: Sprite2D = %BallSprite
+@onready var scoring_ratcast: RayCast2D= %ScoringRayCast
+
 
 func _ready() -> void:
 	switch_state(State.FREEFORM)
 
 func _process(_delta: float) -> void:
 	ball_sprite.position = Vector2.UP * height
+	scoring_ratcast.rotation = velocity.angle()
 
 func switch_state(state: Ball.State) -> void:
 	if current_state != null:
@@ -71,3 +74,8 @@ func can_air_connect(air_connect_min_height: float, air_connect_max_height: floa
 
 func is_freeform() -> bool:
 	return current_state != null and current_state is BallStateFreeForm
+
+func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
+	if not scoring_ratcast.is_colliding():
+		return false
+	return scoring_ratcast.get_collider() == scoring_area

@@ -14,7 +14,7 @@ func handle_human_movement() -> void:
 	var direction := KeyUtils.get_input_vector(player.control_scheme)
 	player.velocity = direction * player.speed
 	
-	if player.velocity !=Vector2.ZERO:
+	if player.velocity != Vector2.ZERO:
 		teammate_detection_area.rotation = player.velocity.angle()
 	
 	if player.has_ball():
@@ -40,5 +40,8 @@ func handle_human_movement() -> void:
 
 	
 	# 没球状态 铲球 撞人
-	if not player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme,KeyUtils.Action.PASS):
+	if not player.has_ball() and KeyUtils.is_action_just_pressed(player.control_scheme, KeyUtils.Action.PASS):
 		transition_state(Player.State.TACKLING)
+
+func can_carry_ball() -> bool:
+	return player.role != Player.Role.GOALIE

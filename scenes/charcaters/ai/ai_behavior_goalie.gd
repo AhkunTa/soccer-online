@@ -1,4 +1,4 @@
-class_name  AIBehaviorGoalie
+class_name AIBehaviorGoalie
 extends AIBehavior
 # 守门
 const PROXIMITY_CONCERN := 10.0
@@ -9,17 +9,18 @@ func perform_ai_movement() -> void:
 	player.velocity = total_steering_force * player.speed
 	
 func perform_ai_decisions() -> void:
-	pass
+	if ball.is_header_for_scoring_area(player.own_goal.get_scoring_area()):
+		player.switch_state(Player.State.DIVING)
 
 func get_goalie_steering_force() -> Vector2:
 	var top := player.own_goal.get_top_target_position()
 	var center := player.spawn_position
 	var bottom := player.own_goal.get_bottom_target_position()
-	var target_y := clampf(ball.position.y , top.y, bottom.y)
+	var target_y := clampf(ball.position.y, top.y, bottom.y)
 	
 	var destination := Vector2(center.x, target_y)
 	var direction := player.position.direction_to(destination)
 
 	var distance_to_destination := player.position.distance_to(destination)
-	var weight := clampf(distance_to_destination / PROXIMITY_CONCERN, 0 ,1)
+	var weight := clampf(distance_to_destination / PROXIMITY_CONCERN, 0, 1)
 	return weight * direction

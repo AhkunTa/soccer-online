@@ -2,7 +2,7 @@ class_name Goal
 extends Node2D
 
 @onready var back_net_area := %BackNetArea
-
+@onready var scoring_area := %ScoringArea
 @onready var targets := %Targets
 func _ready() -> void:
 	back_net_area.body_entered.connect(on_ball_enter_back_net.bind())
@@ -23,3 +23,6 @@ func get_top_target_position() -> Vector2:
 	
 func get_bottom_target_position() -> Vector2:
 	return targets.get_child(targets.get_child_count() -1).global_position
+
+func get_scoring_area() -> Area2D:
+	return scoring_area

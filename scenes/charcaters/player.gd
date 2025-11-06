@@ -30,9 +30,11 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var ball_detection_area: Area2D = %BallDetectionArea
 @onready var tackle_damage_emitter_area: Area2D = %TackleDamageEmitterArea
 @onready var opponent_detection_area: Area2D = %OpponentDetectionArea
+@onready var permanent_damage_emitter_area: Area2D = %PermanentDamageEmitterArea
+@onready var goalie_hands_collider :CollisionShape2D = %GoalieHandsCollider
 
 enum ControlScheme {CPU, P1, P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING}
 
 
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD, FIELD}
@@ -67,7 +69,10 @@ func _ready() -> void:
 	set_control_texture()
 	switch_state(State.MOVING, PlayerStateData.new())
 	set_shader_properties()
+	permanent_damage_emitter_area.monitoring = role == Role.GOALIE
+	goalie_hands_collider.disabled = role !=Role.GOALIE
 	tackle_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
+	permanent_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	spawn_position = position
 
 # 应用玩家配置到属性
@@ -187,6 +192,9 @@ func on_animation_complete() -> void:
 		current_state.on_animation_complete()
 	pass
 
+func can_carry_ball() -> bool:
+	return current_state != null and current_state.can_carry_ball()
+
 func on_tackle_player(player: Player) -> void:
 	print("Tackle detected between ", player.country, " and ", country)
 	if player != self and player.country != country and player == ball.carrier:
@@ -284,6 +292,4 @@ func control_ball() -> void:
 func is_facing_target_goal() -> bool:
 	var direction_to_target_goal := position.direction_to(target_goal.position)
 	return heading.dot(direction_to_target_goal) > 0
-
-#func zIndex_set() ->void:
-	#z_index = int(position.y)
+	
