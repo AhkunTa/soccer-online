@@ -25,7 +25,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
-@onready var team_detection_area: Area2D = %TeammateDetectionArea
+@onready var teammate_detection_area: Area2D = %TeammateDetectionArea
 @onready var control_sprite: Sprite2D = %ControlSprite
 @onready var ball_detection_area: Area2D = %BallDetectionArea
 @onready var tackle_damage_emitter_area: Area2D = %TackleDamageEmitterArea
@@ -106,7 +106,8 @@ func set_shader_properties() -> void:
 
 func set_ai_behavior() -> void:
 	current_ai_behavior = ai_behavior_factory.get_ai_behavior(role)
-	current_ai_behavior.setup(self, ball, opponent_detection_area);
+	current_ai_behavior.setup(self, ball, opponent_detection_area, teammate_detection_area);
+
 	current_ai_behavior.name = "AI Behavior"
 	add_child(current_ai_behavior)
 
@@ -134,7 +135,7 @@ func switch_state(state: State, state_data: PlayerStateData = PlayerStateData.ne
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player, ball, team_detection_area, ball_detection_area, own_goal, target_goal, tackle_damage_emitter_area, current_ai_behavior)
+	current_state.setup(self, state_data, animation_player, ball, teammate_detection_area, ball_detection_area, own_goal, target_goal, tackle_damage_emitter_area, current_ai_behavior)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)
