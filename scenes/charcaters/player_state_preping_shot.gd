@@ -34,3 +34,6 @@ func _process(delta: float) -> void:
 		if prep_time >= DURATION_MIN_MALUS:
 			# transition_state(Player.State.RECOVERING)
 			pass
+
+func can_pass() -> bool:
+	return true

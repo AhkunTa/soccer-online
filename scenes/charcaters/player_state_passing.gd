@@ -9,11 +9,10 @@ func _process(_delta: float) -> void:
 	pass
 	
 func on_animation_complete() -> void:
-	var pass_target := find_teammate_in_view()
+	var pass_target := state_data.pass_target
 	if  pass_target == null:
-		ball.pass_to(ball.position + player.heading * player.speed)
-	else :
-		ball.pass_to(pass_target.position + pass_target.velocity)
+		pass_target = find_teammate_in_view()
+	ball.pass_to(pass_target.position + pass_target.velocity)
 	transition_state(Player.State.MOVING)
 
 # 获取视野范围内最短距离队友

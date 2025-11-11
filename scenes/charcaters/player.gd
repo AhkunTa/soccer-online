@@ -31,7 +31,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var tackle_damage_emitter_area: Area2D = %TackleDamageEmitterArea
 @onready var opponent_detection_area: Area2D = %OpponentDetectionArea
 @onready var permanent_damage_emitter_area: Area2D = %PermanentDamageEmitterArea
-@onready var goalie_hands_collider :CollisionShape2D = %GoalieHandsCollider
+@onready var goalie_hands_collider: CollisionShape2D = %GoalieHandsCollider
 
 enum ControlScheme {CPU, P1, P2}
 enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING}
@@ -70,7 +70,7 @@ func _ready() -> void:
 	switch_state(State.MOVING, PlayerStateData.new())
 	set_shader_properties()
 	permanent_damage_emitter_area.monitoring = role == Role.GOALIE
-	goalie_hands_collider.disabled = role !=Role.GOALIE
+	goalie_hands_collider.disabled = role != Role.GOALIE
 	tackle_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	permanent_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	spawn_position = position
@@ -188,6 +188,10 @@ func get_hurt(hurt_origin: Vector2) -> void:
 func set_control_texture() -> void:
 	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]
 
+func get_pass_request(player: Player) -> void:
+	if ball.carrier == self and current_state != null and current_state.can_pass():
+		switch_state(Player.State.PASSING, PlayerStateData.build().set_pass_target(player))
+
 func on_animation_complete() -> void:
 	if current_state != null:
 		current_state.on_animation_complete()
@@ -199,7 +203,7 @@ func can_carry_ball() -> bool:
 func on_tackle_player(player: Player) -> void:
 	print("Tackle detected between ", player.country, " and ", country)
 	if player != self and player.country != country and player == ball.carrier:
-		print("Tackled player get hurt: ", player.fullname )
+		print("Tackled player get hurt: ", player.fullname)
 		player.get_hurt(position.direction_to(player.position))
 
 func get_player_info() -> String:
@@ -293,4 +297,3 @@ func control_ball() -> void:
 func is_facing_target_goal() -> bool:
 	var direction_to_target_goal := position.direction_to(target_goal.position)
 	return heading.dot(direction_to_target_goal) > 0
-	

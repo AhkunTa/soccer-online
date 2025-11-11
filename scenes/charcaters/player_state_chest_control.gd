@@ -15,3 +15,6 @@ func _process(_delta: float) -> void:
 	var time_pass :=  Time.get_ticks_msec() - time_start_control
 	if time_pass > DURATION_CONTROL:
 		transition_state(Player.State.MOVING)
+
+func can_pass() -> bool:
+	return true
