@@ -5,12 +5,16 @@ enum State {CARRIED, FREEFORM, SHOT}
 const DISTANCE_HIGH_PASS := 100
 const TUMBLE_HEIGHT_VELOCITY := 3.0
 
+const DURATION_TUMBLE_LOCK := 200
+const DURATION_PASS_LOCK := 500
+
 var state_factory := BallStateFactory.new()
 var velocity := Vector2.ZERO
 var current_state: BallState = null
 var carrier: Player = null
 var height := 0.0
 var height_velocity := 0.0
+
 
 #摩擦力 空中
 @export var friction_air := 25.0
@@ -21,7 +25,7 @@ var height_velocity := 0.0
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_detection_area: Area2D = $PlayerDetection
 @onready var ball_sprite: Sprite2D = %BallSprite
-@onready var scoring_ratcast: RayCast2D= %ScoringRayCast
+@onready var scoring_ratcast: RayCast2D = %ScoringRayCast
 
 
 func _ready() -> void:
@@ -31,11 +35,11 @@ func _process(_delta: float) -> void:
 	ball_sprite.position = Vector2.UP * height
 	scoring_ratcast.rotation = velocity.angle()
 
-func switch_state(state: Ball.State) -> void:
+func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, player_detection_area, carrier, animation_player, ball_sprite)
+	current_state.setup(self, data, player_detection_area, carrier, animation_player, ball_sprite)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "BallStateMachine"
 	call_deferred('add_child', current_state)
@@ -49,7 +53,7 @@ func tumble(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity
 	height_velocity = TUMBLE_HEIGHT_VELOCITY
 	carrier = null
-	switch_state(Ball.State.FREEFORM)
+	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(DURATION_TUMBLE_LOCK))
 
 func pass_to(destination: Vector2) -> void:
 	var direction := position.direction_to(destination)
@@ -61,7 +65,7 @@ func pass_to(destination: Vector2) -> void:
 	if distance > DISTANCE_HIGH_PASS:
 		height_velocity = BallState.GRAVITY * distance / (1.8 * intensity)
 	carrier = null
-	switch_state(Ball.State.FREEFORM)
+	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(DURATION_PASS_LOCK))
 
 func stop() -> void:
 	velocity = Vector2.ZERO
