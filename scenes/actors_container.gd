@@ -52,19 +52,41 @@ func spawn_players(country: String, own_goal: Goal) -> Array[Player]:
 	return player_nodes
 
 func spawn_player(player_position: Vector2, player_ball: Ball, own_goal: Goal, target_goal: Goal, player_data: PlayerResource, country: String) -> Player:
-	var player := PLAYER_PREFAB.instantiate()
+	var player: Player = PLAYER_PREFAB.instantiate()
 	player.initialize(player_position, player_ball, own_goal, target_goal, player_data, country)
+	player.swap_requested.connect(on_player_swap_request.bind())
 	return player
 
 func set_on_duty_weights() -> void:
 	for squad in [squad_away, squad_home]:
 		var cpu_players: Array[Player] = squad.filter(
-			func(p:Player): return p.control_scheme == Player.ControlScheme.CPU and p.role != Player.Role.GOALIE
+			func(p: Player): return p.control_scheme == Player.ControlScheme.CPU and p.role != Player.Role.GOALIE
 		)
 		cpu_players.sort_custom(
 			func(p1: Player, p2: Player): return p1.spawn_position.distance_squared_to(ball.position) < p2.spawn_position.distance_squared_to(ball.position)
 		)
 		# TODO 
 		for i in range(cpu_players.size()):
-			cpu_players[i].weight_on_duty_steering = 1 - ease(float(i)/ 10.0, 0.1)
+			cpu_players[i].weight_on_duty_steering = 1 - ease(float(i) / 10.0, 0.1)
 	
+
+func on_player_swap_request(requester: Player) -> void:
+	var squad := squad_home if requester.country == squad_home[0].country else squad_away
+	var cpu_players: Array[Player] = squad.filter(
+		func(p: Player): return p.control_scheme == Player.ControlScheme.CPU and p.role != Player.Role.GOALIE
+	)
+	cpu_players.sort_custom(
+		func(p1: Player, p2: Player): return p1.position.distance_squared_to(ball.position) < p2.position.distance_squared_to(ball.position)
+	)
+	# 获取最近的角色切换
+	var closest_cpu_to_ball: Player = cpu_players[0]
+	if closest_cpu_to_ball.position.distance_squared_to(ball.position) < requester.position.distance_squared_to(ball.position):
+		switch_control_scheme(closest_cpu_to_ball, requester)
+
+func switch_control_scheme(player1: Player, player2: Player) -> void:
+	var p1_control_scheme = player1.control_scheme
+	var p2_control_scheme = player2.control_scheme
+	player1.control_scheme = p2_control_scheme
+	player1.set_control_texture()
+	player2.control_scheme = p1_control_scheme
+	player2.set_control_texture()
