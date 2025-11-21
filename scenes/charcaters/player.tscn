@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://dv6q00nlf84ql"]
+[gd_scene load_steps=33 format=3 uid="uid://dv6q00nlf84ql"]
 
 [ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/charcaters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/art/characters/soccer-player.png" id="1_mrolr"]
@@ -314,10 +314,45 @@ tracks/0/keys = {
 "values": [12, 13, 14, 15, 16, 17]
 }
 
+[sub_resource type="Animation" id="Animation_a1yi3"]
+resource_name = "celebrate"
+length = 0.3
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 18, 24]
+}
+
+[sub_resource type="Animation" id="Animation_ffrgf"]
+resource_name = "mourn"
+length = 0.1
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [18]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ro83n"]
 _data = {
 &"RESET": SubResource("Animation_qjq5t"),
 &"bicycle_kick": SubResource("Animation_3g0k1"),
+&"celebrate": SubResource("Animation_a1yi3"),
 &"chest_control": SubResource("Animation_jmkan"),
 &"dive_down": SubResource("Animation_aes66"),
 &"dive_up": SubResource("Animation_r2fe5"),
@@ -325,6 +360,7 @@ _data = {
 &"hurt": SubResource("Animation_kdtft"),
 &"idle": SubResource("Animation_ksry5"),
 &"kick": SubResource("Animation_ydfq7"),
+&"mourn": SubResource("Animation_ffrgf"),
 &"prep_kick": SubResource("Animation_6aipo"),
 &"recover": SubResource("Animation_bdifb"),
 &"run": SubResource("Animation_wuwi6"),

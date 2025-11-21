@@ -36,7 +36,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var goalie_hands_collider: CollisionShape2D = %GoalieHandsCollider
 
 enum ControlScheme {CPU, P1, P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING}
 
 
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD, FIELD}
@@ -76,6 +76,7 @@ func _ready() -> void:
 	tackle_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	permanent_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	spawn_position = position
+	GameEvents.team_scored.connect(on_team_scored.bind())
 
 # 应用玩家配置到属性
 func apply_player_config() -> void:
@@ -197,7 +198,12 @@ func get_pass_request(player: Player) -> void:
 func on_animation_complete() -> void:
 	if current_state != null:
 		current_state.on_animation_complete()
-	pass
+
+func on_team_scored(team_scored_on: String) -> void:
+	if country == team_scored_on:
+		switch_state(Player.State.MOURNING)
+	else:
+		switch_state(Player.State.CELEBRATING)
 
 func can_carry_ball() -> bool:
 	return current_state != null and current_state.can_carry_ball()

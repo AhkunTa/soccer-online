@@ -22,8 +22,11 @@ var time_since_last_cache_refresh := Time.get_ticks_msec()
 
 func _ready() -> void:
 	squad_home = spawn_players(team_home, goal_home)
+	goal_home.initialize(team_home)
 	spawns.scale.x = -1
 	squad_away = spawn_players(team_away, goal_away)
+	goal_away.initialize(team_away)
+	
 	var player_p1: Player = get_children().filter(func(c): return c is Player)[3]
 	var player_p2: Player = squad_away[3]
 	player_p2.control_scheme = Player.ControlScheme.P2

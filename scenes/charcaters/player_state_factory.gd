@@ -22,6 +22,9 @@ func _init() -> void:
 		Player.State.BICYCLE_KICK: PlayerStateBicycleKick,
 		Player.State.HURT: PlayerStateHurt,
 		Player.State.DIVING: PlayerStateDiving,
+		Player.State.CELEBRATING: PlayerStateCelebrating,
+		Player.State.MOURNING: PlayerStateMourning,
+
 		#TODO 跳跃 跳跃射击
 		Player.State.JUMPING: PlayerStateJumping,
 		Player.State.JUMPING_SHOT: PlayerStateJumpingShot,
