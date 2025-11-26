@@ -10,8 +10,6 @@ const DURATION_WEIGHT_CACHE := 200
 @export var goal_home: Goal
 @export var goal_away: Goal
 
-@export var team_home: String
-@export var team_away: String
 
 @onready var spawns: Node2D = %Spawns
 
@@ -21,11 +19,11 @@ var squad_away: Array[Player] = []
 var time_since_last_cache_refresh := Time.get_ticks_msec()
 
 func _ready() -> void:
-	squad_home = spawn_players(team_home, goal_home)
-	goal_home.initialize(team_home)
+	squad_home = spawn_players(GameManager.countries[0], goal_home)
+	goal_home.initialize(GameManager.countries[0])
 	spawns.scale.x = -1
-	squad_away = spawn_players(team_away, goal_away)
-	goal_away.initialize(team_away)
+	squad_away = spawn_players(GameManager.countries[1], goal_away)
+	goal_away.initialize(GameManager.countries[1])
 	
 	var player_p1: Player = get_children().filter(func(c): return c is Player)[3]
 	var player_p2: Player = squad_away[3]
