@@ -2,4 +2,4 @@ class_name GameStateReset
 extends  GameState
 
 func _enter_tree() -> void:
-	print('reset')
+	GameEvents.team_reset.emit()

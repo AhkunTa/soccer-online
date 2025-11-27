@@ -10,7 +10,7 @@ const DURATION_WEIGHT_CACHE := 200
 @export var goal_home: Goal
 @export var goal_away: Goal
 
-
+@onready var kickoffs: Node2D = %KickOffs
 @onready var spawns: Node2D = %Spawns
 
 # AI
@@ -22,6 +22,7 @@ func _ready() -> void:
 	squad_home = spawn_players(GameManager.countries[0], goal_home)
 	goal_home.initialize(GameManager.countries[0])
 	spawns.scale.x = -1
+	kickoffs.scale.x = -1
 	squad_away = spawn_players(GameManager.countries[1], goal_away)
 	goal_away.initialize(GameManager.countries[1])
 	
@@ -47,14 +48,17 @@ func spawn_players(country: String, own_goal: Goal) -> Array[Player]:
 	for i in players.size():
 		var player_position := spawns.get_child(i).global_position as Vector2
 		var player_data := players[i] as PlayerResource
-		var player := spawn_player(player_position, ball, own_goal, target_goal, player_data, country)
+		var kickoff_position := player_position
+		if i> 3:
+			kickoff_position = kickoffs.get_child(i-4).global_position as Vector2
+		var player := spawn_player(player_position, kickoff_position, ball, own_goal, target_goal, player_data, country)
 		player_nodes.append(player)
 		add_child(player)
 	return player_nodes
 
-func spawn_player(player_position: Vector2, player_ball: Ball, own_goal: Goal, target_goal: Goal, player_data: PlayerResource, country: String) -> Player:
+func spawn_player(player_position: Vector2, kickoff_position: Vector2, player_ball: Ball, own_goal: Goal, target_goal: Goal, player_data: PlayerResource, country: String) -> Player:
 	var player: Player = PLAYER_PREFAB.instantiate()
-	player.initialize(player_position, player_ball, own_goal, target_goal, player_data, country)
+	player.initialize(player_position, kickoff_position, player_ball, own_goal, target_goal, player_data, country)
 	player.swap_requested.connect(on_player_swap_request.bind())
 	return player
 

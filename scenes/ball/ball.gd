@@ -14,7 +14,7 @@ var current_state: BallState = null
 var carrier: Player = null
 var height := 0.0
 var height_velocity := 0.0
-
+var spawn_position := Vector2.ZERO
 
 #摩擦力 空中
 @export var friction_air := 25.0
@@ -30,6 +30,8 @@ var height_velocity := 0.0
 
 func _ready() -> void:
 	switch_state(State.FREEFORM)
+	spawn_position = position
+	GameEvents.team_reset.connect(on_team_reset.bind())
 
 func _process(_delta: float) -> void:
 	ball_sprite.position = Vector2.UP * height
@@ -83,3 +85,11 @@ func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
 	if not scoring_ratcast.is_colliding():
 		return false
 	return scoring_ratcast.get_collider() == scoring_area
+
+func on_team_reset() -> void:
+	position = spawn_position
+	velocity = Vector2.ZERO
+	height = 0
+	switch_state(State.FREEFORM)
+	
+	

@@ -36,7 +36,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var goalie_hands_collider: CollisionShape2D = %GoalieHandsCollider
 
 enum ControlScheme {CPU, P1, P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING, RESETING}
 
 
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD, FIELD}
@@ -52,7 +52,7 @@ var skin_color := Player.SkinColor.MEDIUM
 var heading := Vector2.RIGHT
 var height := 0.0
 var height_velocity := 0.0
-
+var kickoff_position := Vector2.ZERO
 var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
 var spawn_position := Vector2.ZERO
@@ -121,8 +121,9 @@ func _process(delta: float) -> void:
 	# update_temporary_effects(delta)
 	move_and_slide()
 
-func initialize(context_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:
+func initialize(context_position: Vector2, context_kickoff_position: Vector2,context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:
 	position = context_position
+	kickoff_position = context_kickoff_position
 	ball = context_ball
 	own_goal = context_own_goal
 	target_goal = context_target_goal

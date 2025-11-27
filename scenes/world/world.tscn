@@ -83,6 +83,19 @@ position = Vector2(-35, -40)
 [node name="offensePosition2" type="Node2D" parent="ActorsContainer/Spawns"]
 position = Vector2(-35, 40)
 
+[node name="KickOffs" type="Node2D" parent="ActorsContainer"]
+unique_name_in_owner = true
+position = Vector2(425, 180)
+
+[node name="KickOffPosition" type="Node2D" parent="ActorsContainer/KickOffs"]
+position = Vector2(-10, 0)
+
+[node name="KickOffPosition2" type="Node2D" parent="ActorsContainer/KickOffs"]
+position = Vector2(-5, 30)
+
+[node name="KickOffPosition3" type="Node2D" parent="ActorsContainer/KickOffs"]
+position = Vector2(-5, -30)
+
 [node name="PitchObjects" type="Node2D" parent="ActorsContainer"]
 y_sort_enabled = true
 
@@ -141,7 +154,7 @@ offset = Vector2(0, -13)
 polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 
 [node name="Ball" parent="ActorsContainer" instance=ExtResource("10_wbwoo")]
-position = Vector2(324, 185)
+position = Vector2(425, 180)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ActorsContainer"]
 position = Vector2(61, 184)

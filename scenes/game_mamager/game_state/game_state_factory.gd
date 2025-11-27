@@ -15,4 +15,3 @@ func _init() -> void:
 func get_fresh_state(state: GameManager.State) -> GameState:
 	assert(states.has(state), 'State does not exist')
 	return states.get(state).new()
-
