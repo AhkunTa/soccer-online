@@ -121,7 +121,7 @@ func _process(delta: float) -> void:
 	# update_temporary_effects(delta)
 	move_and_slide()
 
-func initialize(context_position: Vector2, context_kickoff_position: Vector2,context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:
+func initialize(context_position: Vector2, context_kickoff_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:
 	position = context_position
 	kickoff_position = context_kickoff_position
 	ball = context_ball
@@ -169,6 +169,10 @@ func set_heading() -> void:
 		heading = Vector2.RIGHT
 	elif velocity.x < 0:
 		heading = Vector2.LEFT
+
+func face_towards_goal() -> void:
+	if not is_facing_target_goal():
+		heading = heading * -1
 
 func flip_sprites() -> void:
 	if heading == Vector2.RIGHT:

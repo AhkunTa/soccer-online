@@ -42,23 +42,19 @@ func perform_ai_decisions() -> void:
 	if is_ball_possessed_by_opponent():
 		# 对手持球时，有一定概率尝试抢断
 		if player.position.distance_to(ball.carrier.position) < TACKLE_DISTANCE and randf() < TACKLE_PROBABILITY:
-			face_towards_goal()
+			player.face_towards_goal()
 			var tackle_direction := player.position.direction_to(ball.carrier.position)
 			var data := PlayerStateData.build().set_shot_direction(tackle_direction)
 			player.switch_state(Player.State.TACKLING, data)
 	if ball.carrier == player:
 			var target := player.target_goal.get_center_target_position()
 			if player.position.distance_to(target) < SHOT_DISTANCE and randf() < SHOT_PROBABILITY:
-				face_towards_goal()
+				player.face_towards_goal()
 				var shot_direction := player.position.direction_to(player.target_goal.get_random_target_position())
 				var data := PlayerStateData.build().set_shot_power(player.power).set_shot_direction(shot_direction)
 				player.switch_state(Player.State.SHOOTING, data)
 			elif randf() < PASS_PROBABILITY and has_opponent_in_nearby() and has_teammate_in_view():
 				player.switch_state(Player.State.PASSING)
-
-func face_towards_goal() -> void:
-	if not player.is_facing_target_goal():
-		player.heading = player.heading * -1
 
 
 ## 获取值班状态下的转向力（追球）

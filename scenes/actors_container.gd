@@ -49,8 +49,8 @@ func spawn_players(country: String, own_goal: Goal) -> Array[Player]:
 		var player_position := spawns.get_child(i).global_position as Vector2
 		var player_data := players[i] as PlayerResource
 		var kickoff_position := player_position
-		if i> 3:
-			kickoff_position = kickoffs.get_child(i-4).global_position as Vector2
+		if i > 3:
+			kickoff_position = kickoffs.get_child(i - 4).global_position as Vector2
 		var player := spawn_player(player_position, kickoff_position, ball, own_goal, target_goal, player_data, country)
 		player_nodes.append(player)
 		add_child(player)
