@@ -134,7 +134,7 @@ func initialize(context_position: Vector2, context_kickoff_position: Vector2, co
 	fullname = context_player_data.full_name
 	heading = Vector2.LEFT if target_goal.position.x < position.x else Vector2.RIGHT
 	country = context_country
-
+	
 func switch_state(state: State, state_data: PlayerStateData = PlayerStateData.new()) -> void:
 	if current_state != null:
 		current_state.queue_free()
@@ -189,6 +189,9 @@ func set_sprite_visiable() -> void:
 
 func has_ball() -> bool:
 	return ball.carrier == self
+
+func is_ready_for_kickoff() -> bool:
+	return current_state != null and current_state.is_ready_for_kickoff()
 
 func get_hurt(hurt_origin: Vector2) -> void:
 	switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(hurt_origin))

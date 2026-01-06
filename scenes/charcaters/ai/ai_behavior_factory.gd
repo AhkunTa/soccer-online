@@ -16,5 +16,5 @@ func get_ai_behavior(role: Player.Role) -> AIBehavior:
 	print(role)
 	assert(roles.has(role), "AI behavior for role doesn't exist! ")
 	if role != Player.Role.GOALIE:
-			role = Player.Role.FIELD
+		role = Player.Role.FIELD
 	return roles.get(role).new()

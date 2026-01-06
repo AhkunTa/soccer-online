@@ -18,6 +18,8 @@ var squad_home: Array[Player] = []
 var squad_away: Array[Player] = []
 var time_since_last_cache_refresh := Time.get_ticks_msec()
 
+var is_checking_for_kickoff_readiness := false
+
 func _ready() -> void:
 	squad_home = spawn_players(GameManager.countries[0], goal_home)
 	goal_home.initialize(GameManager.countries[0])
@@ -32,12 +34,15 @@ func _ready() -> void:
 	player_p2.set_control_texture()
 	player_p1.control_scheme = Player.ControlScheme.P1
 	player_p1.set_control_texture()
+	GameEvents.team_reset.connect(on_team_reset.bind())
 
 func _process(_delta: float) -> void:
 	# 每 200 ms 触发AI 逻辑
 	if Time.get_ticks_msec() - time_since_last_cache_refresh > DURATION_WEIGHT_CACHE:
 		time_since_last_cache_refresh = Time.get_ticks_msec()
 		set_on_duty_weights()
+	if is_checking_for_kickoff_readiness:
+		checking_for_kickoff_readiness()
 	
 
 func spawn_players(country: String, own_goal: Goal) -> Array[Player]:
@@ -95,3 +100,17 @@ func switch_control_scheme(player1: Player, player2: Player) -> void:
 	player1.set_control_texture()
 	player2.control_scheme = p1_control_scheme
 	player2.set_control_texture()
+
+func checking_for_kickoff_readiness() -> void:
+	var all_ready := true
+	for squad in [squad_home, squad_away]:
+		for player in squad:
+			if not player.is_ready_for_kickoff():
+				all_ready = false
+				break
+	if all_ready:
+		is_checking_for_kickoff_readiness = false
+		GameEvents.kickoff_ready.emit()
+
+func on_team_reset() -> void:
+	is_checking_for_kickoff_readiness = true
