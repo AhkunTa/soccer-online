@@ -69,7 +69,6 @@ func _ready() -> void:
 	# 应用配置到玩家属性
 	apply_player_config()
 	set_control_texture()
-	switch_state(State.MOVING, PlayerStateData.new())
 	set_shader_properties()
 	permanent_damage_emitter_area.monitoring = role == Role.GOALIE
 	goalie_hands_collider.disabled = role != Role.GOALIE
@@ -77,6 +76,8 @@ func _ready() -> void:
 	permanent_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	spawn_position = position
 	GameEvents.team_scored.connect(on_team_scored.bind())
+	var initial_position := kickoff_position if country == GameManager.countries[0] else spawn_position
+	switch_state(Player.State.RESETING, PlayerStateData.build().set_reset_position(initial_position))
 
 # 应用玩家配置到属性
 func apply_player_config() -> void:
@@ -104,7 +105,6 @@ func set_shader_properties() -> void:
 	var country_color_index := COUNTRIES.find(country)
 	var team_color_index = clampi(country_color_index, 0, COUNTRIES.size() - 1)
 
-	# print("team_color_index: ", team_color_index)
 	player_sprite.material.set_shader_parameter('team_color', team_color_index)
 
 func set_ai_behavior() -> void:
@@ -155,7 +155,13 @@ func set_movement_animation() -> void:
 		animation_player.play('walk')
 	else:
 		animation_player.play("run")
-		
+	
+
+func set_countrol_scheme(scheme: ControlScheme) -> void:
+	control_scheme = scheme
+	set_control_texture()
+
+
 func process_gravity(delta) -> void:
 	if height > 0:
 		height_velocity -= GRAVITY * delta

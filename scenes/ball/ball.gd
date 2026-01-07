@@ -8,6 +8,8 @@ const TUMBLE_HEIGHT_VELOCITY := 3.0
 const DURATION_TUMBLE_LOCK := 200
 const DURATION_PASS_LOCK := 500
 
+const KICKOFF_PASS_DISTANCE := 50.0
+
 var state_factory := BallStateFactory.new()
 var velocity := Vector2.ZERO
 var current_state: BallState = null
@@ -32,6 +34,7 @@ func _ready() -> void:
 	switch_state(State.FREEFORM)
 	spawn_position = position
 	GameEvents.team_reset.connect(on_team_reset.bind())
+	GameEvents.kickoff_started.connect(on_kickoff_started.bind())
 
 func _process(_delta: float) -> void:
 	ball_sprite.position = Vector2.UP * height
@@ -57,7 +60,7 @@ func tumble(shot_velocity: Vector2) -> void:
 	carrier = null
 	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(DURATION_TUMBLE_LOCK))
 
-func pass_to(destination: Vector2) -> void:
+func pass_to(destination: Vector2, lock_duration: int = DURATION_PASS_LOCK) -> void:
 	var direction := position.direction_to(destination)
 	var distance := position.distance_to(destination)
 	#	TODO 微积分方程  https://youtu.be/-4pGf5bW4-M?t=457
@@ -67,7 +70,7 @@ func pass_to(destination: Vector2) -> void:
 	if distance > DISTANCE_HIGH_PASS:
 		height_velocity = BallState.GRAVITY * distance / (1.8 * intensity)
 	carrier = null
-	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(DURATION_PASS_LOCK))
+	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(lock_duration))
 
 func stop() -> void:
 	velocity = Vector2.ZERO
@@ -92,4 +95,5 @@ func on_team_reset() -> void:
 	height = 0
 	switch_state(State.FREEFORM)
 	
-	
+func on_kickoff_started() -> void:
+	pass_to(spawn_position + Vector2.DOWN * KICKOFF_PASS_DISTANCE, 0)

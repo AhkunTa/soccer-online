@@ -11,11 +11,12 @@ var score := [0, 0]
 var state_factory := GameStateFactory.new()
 var time_left: float
 var current_state: GameState = null
+var player_setup: Array[String] = ['FRANCE','USA']
 
 
 func _ready() -> void:
 	time_left = DURATION_GAME_SEC
-	switch_state(State.IN_PLAY)
+	switch_state(State.RESET)
 
 func switch_state(state: State, data: GameStateData = GameStateData.build()) -> void:
 	if current_state != null:
@@ -25,3 +26,9 @@ func switch_state(state: State, data: GameStateData = GameStateData.build()) -> 
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "GameStateMacheine: " + str(state)
 	call_deferred('add_child', current_state)
+
+func is_coop() -> bool:
+	return player_setup[0] == player_setup[1]
+
+func is_single_player() -> bool:
+	return player_setup[1].is_empty()

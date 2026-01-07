@@ -4,7 +4,7 @@ extends PlayerState
 var has_arrived: bool = false
 
 func _enter_tree() -> void:
-	pass
+	GameEvents.kickoff_started.connect(on_kickoff_started.bind())
 
 func _process(_delta: float) -> void:
 	if not has_arrived:
@@ -20,3 +20,6 @@ func _process(_delta: float) -> void:
 
 func is_ready_for_kickoff() -> bool:
 	return has_arrived
+
+func on_kickoff_started() -> void:
+	transition_state(Player.State.MOVING)

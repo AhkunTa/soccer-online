@@ -20,6 +20,10 @@ var time_since_last_cache_refresh := Time.get_ticks_msec()
 
 var is_checking_for_kickoff_readiness := false
 
+
+func _init() -> void:
+	GameEvents.team_reset.connect(on_team_reset.bind())
+
 func _ready() -> void:
 	squad_home = spawn_players(GameManager.countries[0], goal_home)
 	goal_home.initialize(GameManager.countries[0])
@@ -27,13 +31,7 @@ func _ready() -> void:
 	kickoffs.scale.x = -1
 	squad_away = spawn_players(GameManager.countries[1], goal_away)
 	goal_away.initialize(GameManager.countries[1])
-	
-	var player_p1: Player = get_children().filter(func(c): return c is Player)[3]
-	var player_p2: Player = squad_away[3]
-	player_p2.control_scheme = Player.ControlScheme.P2
-	player_p2.set_control_texture()
-	player_p1.control_scheme = Player.ControlScheme.P1
-	player_p1.set_control_texture()
+	setup_control_schemes()
 	GameEvents.team_reset.connect(on_team_reset.bind())
 
 func _process(_delta: float) -> void:
@@ -93,14 +91,13 @@ func on_player_swap_request(requester: Player) -> void:
 	if closest_cpu_to_ball.position.distance_squared_to(ball.position) < requester.position.distance_squared_to(ball.position):
 		switch_control_scheme(closest_cpu_to_ball, requester)
 
+# 切换 cpu 控制
 func switch_control_scheme(player1: Player, player2: Player) -> void:
 	var p1_control_scheme = player1.control_scheme
 	var p2_control_scheme = player2.control_scheme
-	player1.control_scheme = p2_control_scheme
-	player1.set_control_texture()
-	player2.control_scheme = p1_control_scheme
-	player2.set_control_texture()
-
+	player1.set_countrol_scheme(p2_control_scheme)
+	player2.set_countrol_scheme(p1_control_scheme)
+	
 func checking_for_kickoff_readiness() -> void:
 	var all_ready := true
 	for squad in [squad_home, squad_away]:
@@ -109,8 +106,25 @@ func checking_for_kickoff_readiness() -> void:
 				all_ready = false
 				break
 	if all_ready:
+		setup_control_schemes()
 		is_checking_for_kickoff_readiness = false
 		GameEvents.kickoff_ready.emit()
 
+func setup_control_schemes() -> void:
+	var p1_country := GameManager.player_setup[0]
+	if GameManager.is_coop():
+		var player_squad := squad_home if squad_home[0].country == p1_country else squad_away
+		player_squad[4].set_countrol_scheme(Player.ControlScheme.P1)
+		player_squad[5].set_countrol_scheme(Player.ControlScheme.P2)
+	elif GameManager.is_single_player():
+		var player_squad := squad_home if squad_home[0].country == p1_country else squad_away
+		player_squad[5].set_countrol_scheme(Player.ControlScheme.P1)
+	else:
+		var p1_squad := squad_home if squad_home[0].country == p1_country else squad_away
+		var p2_squad := squad_home if p1_squad == squad_away else squad_away
+		p1_squad[5].set_countrol_scheme(Player.ControlScheme.P1)
+		p2_squad[5].set_countrol_scheme(Player.ControlScheme.P2)
+
+	
 func on_team_reset() -> void:
 	is_checking_for_kickoff_readiness = true

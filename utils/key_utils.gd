@@ -1,11 +1,6 @@
 extends Node
-
-
-enum Action {LEFT, RIGHT, UP, DOWN, SHOOT, PASS,JUMP}
-
-
-const ACTIONS_MAP : Dictionary = {
-	
+enum Action {LEFT, RIGHT, UP, DOWN, SHOOT, PASS, JUMP}
+const ACTIONS_MAP: Dictionary = {
 	Player.ControlScheme.P1: {
 		Action.LEFT: "p1_left",
 		Action.RIGHT: "p1_right",
@@ -29,15 +24,18 @@ const ACTIONS_MAP : Dictionary = {
 
 func get_input_vector(scheme: Player.ControlScheme) -> Vector2:
 	var map: Dictionary = ACTIONS_MAP[scheme];
-	return Input.get_vector(map[Action.LEFT],map[Action.RIGHT],map[Action.UP],map[Action.DOWN])
+	return Input.get_vector(map[Action.LEFT], map[Action.RIGHT], map[Action.UP], map[Action.DOWN])
 	
 
-func is_action_pressed(scheme:Player.ControlScheme, action: Action) -> bool:
+func is_action_pressed(scheme: Player.ControlScheme, action: Action) -> bool:
 	return Input.is_action_pressed(ACTIONS_MAP[scheme][action])
 
 
-func is_action_just_pressed(scheme:Player.ControlScheme, action: Action) -> bool:
+func is_action_just_pressed(scheme: Player.ControlScheme, action: Action) -> bool:
 	return Input.is_action_just_pressed(ACTIONS_MAP[scheme][action])
 	
-func is_action_just_released(scheme:Player.ControlScheme, action: Action) -> bool:
+func is_action_just_released(scheme: Player.ControlScheme, action: Action) -> bool:
 	return Input.is_action_just_released(ACTIONS_MAP[scheme][action])
+
+func is_action_both_pressed(scheme: Player.ControlScheme, action1: Action, action2: Action) -> bool:
+	return Input.is_action_pressed(ACTIONS_MAP[scheme][action1]) and Input.is_action_pressed(ACTIONS_MAP[scheme][action2])

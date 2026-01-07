@@ -3,8 +3,9 @@ extends PlayerState
 
 func _process(_delta: float) -> void:
 	if player.control_scheme == Player.ControlScheme.CPU:
-		# ai_behavior.process_ai()
-		pass
+		# debug 永远只有2p 移动
+		if player.country == GameManager.player_setup[1]:
+				ai_behavior.process_ai()
 	else:
 		handle_human_movement()
 	player.set_movement_animation()
