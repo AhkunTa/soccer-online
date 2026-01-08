@@ -1,13 +1,13 @@
 extends Node
 
 
-const DURATION_GAME_SEC := 2 * 60
+const DURATION_GAME_SEC := 2 * 5
 
 enum State {IN_PLAY, SCORED, RESET, KICKOFF, OVERTIME, GAMEOVER}
 
 var countries: Array[String] = ['FRANCE', "USA"]
 
-var score := [0, 0]
+var score :Array[int]= [0, 0]
 var state_factory := GameStateFactory.new()
 var time_left: float
 var current_state: GameState = null

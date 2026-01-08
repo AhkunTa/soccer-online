@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://dj6acyrsna4kq"]
+[gd_scene load_steps=17 format=3 uid="uid://dj6acyrsna4kq"]
 
 [ext_resource type="Script" uid="uid://djphemlh42gng" path="res://scenes/camera/camera.gd" id="1_gb53w"]
 [ext_resource type="Script" uid="uid://d3tclpsfa8s4v" path="res://scenes/world/world_manager.gd" id="1_world"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://t44b8v1f4y23" path="res://assets/art/backgrounds/bottom-wall.png" id="7_m114p"]
 [ext_resource type="Texture2D" uid="uid://cja8yg7vi46in" path="res://assets/art/backgrounds/side-wall.png" id="8_71ii3"]
 [ext_resource type="PackedScene" uid="uid://cm1u20oomx017" path="res://scenes/ball/ball.tscn" id="10_wbwoo"]
+[ext_resource type="PackedScene" uid="uid://chexd4cj6rmh8" path="res://scenes/ui/UI.tscn" id="12_dlabj"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_i7141"]
 
@@ -167,5 +168,4 @@ shape = SubResource("CircleShape2D_dlabj")
 [node name="EffectsContainer" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="UILayer" type="CanvasLayer" parent="."]
-layer = 10
+[node name="UI" parent="." instance=ExtResource("12_dlabj")]
