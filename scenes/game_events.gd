@@ -1,5 +1,7 @@
 extends Node
 
+signal ball_possessed
+
 signal kickoff_ready()
 signal kickoff_started()
 

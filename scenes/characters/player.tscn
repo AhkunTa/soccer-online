@@ -1,6 +1,6 @@
 [gd_scene load_steps=33 format=3 uid="uid://dv6q00nlf84ql"]
 
-[ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/charcaters/player.gd" id="1_ct8e2"]
+[ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/characters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/art/characters/soccer-player.png" id="1_mrolr"]
 [ext_resource type="Shader" uid="uid://d0121fgat8g35" path="res://shaders/replace_color.gdshader" id="2_3g0k1"]
 [ext_resource type="Texture2D" uid="uid://cwj17hijrniey" path="res://assets/art/characters/player-shadow.png" id="3_6aipo"]

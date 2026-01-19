@@ -1,4 +1,4 @@
-class_name PlayerStatePrepingShot
+class_name PlayerStatePreppingShot
 extends PlayerState
 
 # 蓄力最大奖励

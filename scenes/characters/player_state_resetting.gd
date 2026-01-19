@@ -1,4 +1,4 @@
-class_name PlayerStateResting
+class_name PlayerStateResetting
 extends PlayerState
 
 var has_arrived: bool = false

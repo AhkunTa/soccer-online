@@ -19,4 +19,4 @@ func _process(_delta: float) -> void:
 	player.velocity = player.velocity.move_toward(Vector2.ZERO, _delta * AIR_FRICTION)
 
 func on_team_reset() -> void:
-	transition_state(Player.State.RESETING, PlayerStateData.build().set_reset_position(player.spawn_position))
+	transition_state(Player.State.RESETTING, PlayerStateData.build().set_reset_position(player.spawn_position))

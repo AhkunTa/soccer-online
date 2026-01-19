@@ -1,6 +1,6 @@
 # soccer-online
 
-fork form https://github.com/nicolasbize/soccer-course 
+fork from https://github.com/nicolasbize/soccer-course
 and want to be an online game
 
 

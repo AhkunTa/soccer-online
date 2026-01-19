@@ -36,7 +36,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var goalie_hands_collider: CollisionShape2D = %GoalieHandsCollider
 
 enum ControlScheme {CPU, P1, P2}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING, RESETING}
+enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING, RESETTING}
 
 
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD, FIELD}
@@ -77,7 +77,7 @@ func _ready() -> void:
 	spawn_position = position
 	GameEvents.team_scored.connect(on_team_scored.bind())
 	var initial_position := kickoff_position if country == GameManager.countries[0] else spawn_position
-	switch_state(Player.State.RESETING, PlayerStateData.build().set_reset_position(initial_position))
+	switch_state(Player.State.RESETTING, PlayerStateData.build().set_reset_position(initial_position))
 
 # 应用玩家配置到属性
 func apply_player_config() -> void:

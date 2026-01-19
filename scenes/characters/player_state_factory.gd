@@ -15,7 +15,7 @@ func _init() -> void:
 		Player.State.CHEST_CONTROL: PlayerStateChestControl,
 		Player.State.TACKLING: PlayerStateTackling,
 		Player.State.SHOOTING: PlayerStateShooting,
-		Player.State.PREPPING_SHOT: PlayerStatePrepingShot,
+		Player.State.PREPPING_SHOT: PlayerStatePreppingShot,
 		Player.State.PASSING: PlayerStatePassing,
 		Player.State.VOLLEY_KICK: PlayerStateVolleyKick,
 		Player.State.HEADER: PlayerStateHeader,
@@ -24,7 +24,7 @@ func _init() -> void:
 		Player.State.DIVING: PlayerStateDiving,
 		Player.State.CELEBRATING: PlayerStateCelebrating,
 		Player.State.MOURNING: PlayerStateMourning,
-		Player.State.RESETING: PlayerStateResting,
+		Player.State.RESETTING: PlayerStateResetting,
 		#TODO 跳跃 跳跃射击
 		Player.State.JUMPING: PlayerStateJumping,
 		Player.State.JUMPING_SHOT: PlayerStateJumpingShot,

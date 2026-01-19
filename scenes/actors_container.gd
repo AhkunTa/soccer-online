@@ -1,7 +1,7 @@
 class_name ActorsContainer
 extends Node2D
 
-const PLAYER_PREFAB := preload('res://scenes/charcaters/player.tscn')
+const PLAYER_PREFAB := preload('res://scenes/characters/player.tscn')
 
 const DURATION_WEIGHT_CACHE := 200
 
