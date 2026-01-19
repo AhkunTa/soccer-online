@@ -1,6 +1,8 @@
 extends Node
 
-signal ball_possessed
+signal ball_possessed(player_name: String)
+
+signal ball_released
 
 signal kickoff_ready()
 signal kickoff_started()

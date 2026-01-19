@@ -12,6 +12,10 @@ func _ready() -> void:
 	update_clock();
 
 	player_label.text = ""
+	GameEvents.ball_possessed.connect(on_ball_possessed.bind())
+
+	GameEvents.ball_released.connect(on_ball_released.bind())
+
 
 func _process(_delta: float) -> void:
 	update_clock()
@@ -27,3 +31,9 @@ func update_clock() -> void:
 	if GameManager.time_left < 0:
 		time_label.modulate = Color.RED
 	time_label.text = TimeHelper.get_time_text(GameManager.time_left)
+
+func on_ball_possessed(player_name: String) -> void:
+	player_label.text = player_name
+
+func on_ball_released() -> void:
+	player_label.text = ""
