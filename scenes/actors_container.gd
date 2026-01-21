@@ -95,8 +95,8 @@ func on_player_swap_request(requester: Player) -> void:
 func switch_control_scheme(player1: Player, player2: Player) -> void:
 	var p1_control_scheme = player1.control_scheme
 	var p2_control_scheme = player2.control_scheme
-	player1.set_countrol_scheme(p2_control_scheme)
-	player2.set_countrol_scheme(p1_control_scheme)
+	player1.set_control_scheme(p2_control_scheme)
+	player2.set_control_scheme(p1_control_scheme)
 	
 func checking_for_kickoff_readiness() -> void:
 	var all_ready := true
@@ -111,20 +111,25 @@ func checking_for_kickoff_readiness() -> void:
 		GameEvents.kickoff_ready.emit()
 
 func setup_control_schemes() -> void:
+	reset_control_schemes()
 	var p1_country := GameManager.player_setup[0]
 	if GameManager.is_coop():
 		var player_squad := squad_home if squad_home[0].country == p1_country else squad_away
-		player_squad[4].set_countrol_scheme(Player.ControlScheme.P1)
-		player_squad[5].set_countrol_scheme(Player.ControlScheme.P2)
+		player_squad[4].set_control_scheme(Player.ControlScheme.P1)
+		player_squad[5].set_control_scheme(Player.ControlScheme.P2)
 	elif GameManager.is_single_player():
 		var player_squad := squad_home if squad_home[0].country == p1_country else squad_away
-		player_squad[5].set_countrol_scheme(Player.ControlScheme.P1)
+		player_squad[5].set_control_scheme(Player.ControlScheme.P1)
 	else:
 		var p1_squad := squad_home if squad_home[0].country == p1_country else squad_away
 		var p2_squad := squad_home if p1_squad == squad_away else squad_away
-		p1_squad[5].set_countrol_scheme(Player.ControlScheme.P1)
-		p2_squad[5].set_countrol_scheme(Player.ControlScheme.P2)
+		p1_squad[5].set_control_scheme(Player.ControlScheme.P1)
+		p2_squad[5].set_control_scheme(Player.ControlScheme.P2)
 
-	
+func reset_control_schemes() -> void:
+	for squad in [squad_home, squad_away]:
+		for player in squad:
+			player.set_control_scheme(Player.ControlScheme.CPU)
+
 func on_team_reset() -> void:
 	is_checking_for_kickoff_readiness = true

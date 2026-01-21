@@ -76,6 +76,7 @@ func _ready() -> void:
 	permanent_damage_emitter_area.body_entered.connect(on_tackle_player.bind())
 	spawn_position = position
 	GameEvents.team_scored.connect(on_team_scored.bind())
+	GameEvents.game_over.connect(on_game_over.bind())
 	var initial_position := kickoff_position if country == GameManager.countries[0] else spawn_position
 	switch_state(Player.State.RESETTING, PlayerStateData.build().set_reset_position(initial_position))
 
@@ -157,7 +158,7 @@ func set_movement_animation() -> void:
 		animation_player.play("run")
 	
 
-func set_countrol_scheme(scheme: ControlScheme) -> void:
+func set_control_scheme(scheme: ControlScheme) -> void:
 	control_scheme = scheme
 	set_control_texture()
 
@@ -218,6 +219,12 @@ func on_team_scored(team_scored_on: String) -> void:
 		switch_state(Player.State.MOURNING)
 	else:
 		switch_state(Player.State.CELEBRATING)
+
+func on_game_over(winning_country: String) -> void:
+	if country == winning_country:
+		switch_state(Player.State.CELEBRATING)
+	else:
+		switch_state(Player.State.MOURNING)
 
 func can_carry_ball() -> bool:
 	return current_state != null and current_state.can_carry_ball()
