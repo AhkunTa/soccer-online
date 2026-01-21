@@ -5,16 +5,22 @@ extends CanvasLayer
 @onready var score_label: Label = %ScoreLabel
 @onready var player_label: Label = %PlayerLabel
 @onready var time_label: Label = %TimeLabel
+@onready var animation_player : AnimationPlayer = %AnimationPlayer
+@onready var goal_scorer_label : Label =  %GoalSoccerLabel
+@onready var soccer_info_label : Label =  %SoccerInfoLabel
+
+
+var last_ball_carrier :String = ""
 
 func _ready() -> void:
 	update_score();
 	update_flags();
 	update_clock();
-
 	player_label.text = ""
 	GameEvents.ball_possessed.connect(on_ball_possessed.bind())
-
 	GameEvents.ball_released.connect(on_ball_released.bind())
+	GameEvents.score_changed.connect(on_score_changed.bind())
+	GameEvents.team_reset.connect(on_team_reset.bind())
 
 
 func _process(_delta: float) -> void:
@@ -34,6 +40,17 @@ func update_clock() -> void:
 
 func on_ball_possessed(player_name: String) -> void:
 	player_label.text = player_name
+	last_ball_carrier = player_name
 
 func on_ball_released() -> void:
 	player_label.text = ""
+
+func on_team_reset() -> void:
+	animation_player.play('goal_hide')
+
+func on_score_changed() -> void:
+	goal_scorer_label.text = "%s SCORED!" % [last_ball_carrier]
+	soccer_info_label.text = ScoreHelper.get_current_score_info(GameManager.countries, GameManager.score)
+	animation_player.play('goal_appear')
+	update_score()
+	

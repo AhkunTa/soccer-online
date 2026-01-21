@@ -4,8 +4,9 @@ signal ball_possessed(player_name: String)
 
 signal ball_released
 
-signal kickoff_ready()
-signal kickoff_started()
+signal kickoff_ready
+signal kickoff_started
 
+signal score_changed
 signal team_scored(country_scored_on: String)
-signal team_reset()
+signal team_reset
