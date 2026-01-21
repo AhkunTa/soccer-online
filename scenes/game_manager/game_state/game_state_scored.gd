@@ -5,6 +5,7 @@ const DURATION_CELEBRATION := 3000
 var time_since_celebration := Time.get_ticks_msec()
 
 func _enter_tree() -> void:
+	# FIXME  country_scored_on might be null
 	manager.increase_score(state_data.country_scored_on)
 	time_since_celebration = Time.get_ticks_msec()
 
