@@ -5,9 +5,14 @@ const DISTANCE_TARGET :=100.0
 const SMOOTHING_BALL_CARRIED :=2
 const SMOOTHING_BALL_DEFAULT :=5
 
+const DURATION_SHAKE := 120
+const SHAKE_INTRNSITY := 8
+
+var time_start_shake := Time.get_ticks_msec()
+var is_shaking := false
+
+
 @export var ball: Ball
-
-
 #噪声采样 相机震动
 @export var shake_noise : FastNoiseLite
 # 震动幅度
@@ -20,6 +25,8 @@ const SMOOTHING_BALL_DEFAULT :=5
 var noise_sample: Vector2
 var current_amplitude: float = 0
 
+func _init() -> void:
+	GameEvents.impact_received.connect(on_impact_reveived.bind())
 
 func _process(_delta: float) -> void:
 	#shake(delta)
@@ -29,6 +36,13 @@ func _process(_delta: float) -> void:
 	else:
 		position = ball.position
 		position_smoothing_speed = SMOOTHING_BALL_DEFAULT
+	
+	if is_shaking and Time.get_ticks_msec() - time_start_shake < DURATION_SHAKE:
+		offset = Vector2(randf_range(-SHAKE_INTRNSITY, SHAKE_INTRNSITY), randf_range(-SHAKE_INTRNSITY, SHAKE_INTRNSITY))
+	else:
+		is_shaking = false
+		offset = Vector2.ZERO
+		
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -49,6 +63,12 @@ func shake(delta: float)->void:
 	else:
 		current_amplitude = 0
 		offset = Vector2.ZERO
-		
-	
+
+
+
+func on_impact_reveived(_impact_position: Vector2, is_high_impact: bool) -> void:
+	if is_high_impact:
+		is_shaking = true
+		time_start_shake = Time.get_ticks_msec()
+
 	
