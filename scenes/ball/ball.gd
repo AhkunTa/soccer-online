@@ -28,7 +28,7 @@ var spawn_position := Vector2.ZERO
 @onready var player_detection_area: Area2D = $PlayerDetection
 @onready var ball_sprite: Sprite2D = %BallSprite
 @onready var scoring_ratcast: RayCast2D = %ScoringRayCast
-
+@onready var shot_particles : GPUParticles2D = %shot_particles
 
 func _ready() -> void:
 	switch_state(State.FREEFORM)
@@ -44,7 +44,7 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, data, player_detection_area, carrier, animation_player, ball_sprite)
+	current_state.setup(self, data, player_detection_area, carrier, animation_player, ball_sprite, shot_particles)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "BallStateMachine"
 	call_deferred('add_child', current_state)

@@ -35,6 +35,10 @@ const WALK_ANIM_THRESHOLD := 0.6
 @onready var permanent_damage_emitter_area: Area2D = %PermanentDamageEmitterArea
 @onready var goalie_hands_collider: CollisionShape2D = %GoalieHandsCollider
 
+@onready var root_particles: Node2D = %RootParticles
+@onready var run_particles: GPUParticles2D = %RunParticles
+
+
 enum ControlScheme {CPU, P1, P2}
 enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING, RESETTING}
 
@@ -186,13 +190,17 @@ func flip_sprites() -> void:
 		player_sprite.flip_h = false
 		tackle_damage_emitter_area.scale.x = 1
 		opponent_detection_area.scale.x = 1
+		root_particles.scale.x = 1
 	elif heading == Vector2.LEFT:
 		player_sprite.flip_h = true
 		tackle_damage_emitter_area.scale.x = -1
 		opponent_detection_area.scale.x = -1
+		root_particles.scale.x = -1
+
 
 func set_sprite_visiable() -> void:
 	control_sprite.visible = has_ball() or not control_scheme == ControlScheme.CPU
+	run_particles.emitting = velocity.length() == speed
 
 func has_ball() -> bool:
 	return ball.carrier == self
