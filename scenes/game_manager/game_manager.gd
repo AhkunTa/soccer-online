@@ -22,7 +22,7 @@ func _ready() -> void:
 	GameEvents.impact_received.connect(on_impact_reveived.bind())
 	switch_state(State.RESET)
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if get_tree().paused and Time.get_ticks_msec() - time_since_pause > DURATION_GAME_SEC:
 		get_tree().paused = false
 
