@@ -34,6 +34,10 @@ window/size/window_height_override=900
 window/stretch/mode="viewport"
 window/stretch/scale_mode="integer"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/ai_chat/plugin.cfg")
+
 [gui]
 
 theme/custom="uid://cgwdtlwyg2ehp"
