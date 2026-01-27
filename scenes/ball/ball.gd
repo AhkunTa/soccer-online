@@ -29,7 +29,7 @@ var spawn_position := Vector2.ZERO
 @onready var ball_sprite: Sprite2D = %BallSprite
 @onready var scoring_ratcast: RayCast2D = %ScoringRayCast
 @onready var shot_particles : GPUParticles2D = %shot_particles
-
+@onready var player_proximity_area : Area2D = %PlayerProximityArea
 func _ready() -> void:
 	switch_state(State.FREEFORM)
 	spawn_position = position
@@ -88,6 +88,10 @@ func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
 	if not scoring_ratcast.is_colliding():
 		return false
 	return scoring_ratcast.get_collider() == scoring_area
+
+func get_proximity_teammates_count(country: String) -> int:
+	var players : = player_proximity_area.get_overlapping_areas()
+	return players.filter(func(p: Player): return p.country == country).size()
 
 func on_team_reset() -> void:
 	position = spawn_position
