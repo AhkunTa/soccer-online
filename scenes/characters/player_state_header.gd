@@ -14,6 +14,7 @@ func _enter_tree() -> void:
 	
 func on_ball_entered(contact_ball: Ball) -> void:
 	if contact_ball.can_air_connect(BALL_HEIGHT_MIN, BALL_HEIGHT_MAX):
+		AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
 		contact_ball.shoot(player.velocity.normalized() * player.power * BONUS_POWER)
 		
 func _process(_delta: float) -> void:

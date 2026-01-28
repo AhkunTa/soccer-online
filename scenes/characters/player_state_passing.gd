@@ -4,6 +4,7 @@ extends PlayerState
 func _enter_tree() -> void:
 	animation_player.play("kick")
 	player.velocity = Vector2.ZERO
+	AudioPlayer.play(AudioPlayer.Sound.PASS)
 
 func _process(_delta: float) -> void:
 	pass

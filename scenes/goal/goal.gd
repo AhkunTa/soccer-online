@@ -18,6 +18,7 @@ func on_ball_enter_back_net(ball: Ball) -> void:
 	ball.stop()
 
 func on_ball_enter_scoring_area(_ball: Ball) -> void:
+	AudioPlayer.play(AudioPlayer.Sound.WHISTLE)
 	GameEvents.team_scored.emit(country)
 
 func get_random_target_position() -> Vector2:
