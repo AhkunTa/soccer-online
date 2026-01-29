@@ -28,6 +28,7 @@ func _process(delta: float) -> void:
 	process_gravity(delta)
 
 	ball.position = carrier.position + Vector2(vx + carrier.heading.x * OFFSET_FROM_PLAYER.x , carrier.heading.y * OFFSET_FROM_PLAYER.y)
+	ball.height = carrier.height
 
 func _exit_tree() -> void:
 	GameEvents.ball_released.emit()

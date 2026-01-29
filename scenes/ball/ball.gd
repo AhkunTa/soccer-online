@@ -49,10 +49,10 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 	current_state.name = "BallStateMachine"
 	call_deferred('add_child', current_state)
 	
-func shoot(shot_velocity: Vector2) -> void:
+func shoot(shot_velocity: Vector2, initial_height: float = -1.0) -> void:
 	velocity = shot_velocity
 	carrier = null
-	switch_state(Ball.State.SHOT)
+	switch_state(Ball.State.SHOT, BallStateData.build().set_shot_height(initial_height))
 
 func tumble(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity

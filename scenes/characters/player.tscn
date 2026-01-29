@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://dv6q00nlf84ql"]
+[gd_scene load_steps=38 format=3 uid="uid://dv6q00nlf84ql"]
 
 [ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/characters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/art/characters/soccer-player.png" id="1_mrolr"]
@@ -365,6 +365,23 @@ tracks/0/keys = {
 "values": [12, 13, 14, 15, 16, 17]
 }
 
+[sub_resource type="Animation" id="Animation_eojnx"]
+resource_name = "jumping"
+length = 0.4
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PlayerSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.30238873),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [18, 0, 1, 3]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ro83n"]
 _data = {
 &"RESET": SubResource("Animation_qjq5t"),
@@ -376,6 +393,7 @@ _data = {
 &"header": SubResource("Animation_ug4v2"),
 &"hurt": SubResource("Animation_kdtft"),
 &"idle": SubResource("Animation_ksry5"),
+&"jumping": SubResource("Animation_eojnx"),
 &"kick": SubResource("Animation_ydfq7"),
 &"mourn": SubResource("Animation_ffrgf"),
 &"prep_kick": SubResource("Animation_6aipo"),
@@ -415,6 +433,7 @@ script = ExtResource("1_ct8e2")
 
 [node name="RootParticles" type="Node2D" parent="."]
 unique_name_in_owner = true
+visible = false
 
 [node name="RunParticles" type="GPUParticles2D" parent="RootParticles"]
 unique_name_in_owner = true
@@ -446,6 +465,7 @@ libraries = {
 }
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
 position = Vector2(0, -3)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydrrd")
@@ -470,7 +490,6 @@ collision_layer = 0
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea"]
-visible = false
 position = Vector2(0, -6)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydfq7")
