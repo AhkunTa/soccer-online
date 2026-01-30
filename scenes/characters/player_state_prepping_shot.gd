@@ -4,7 +4,7 @@ extends PlayerState
 # 蓄力最大奖励
 const DURATION_MAX_BONUS := 1000.0
 # 蓄力过长脱力
-const DURATION_MIN_MALUS := 1500.0
+const DURATION_MAX_CHARGE := 2000.0
 # 
 const EASE_REWARD_FACTOR := 2.0
 
@@ -20,6 +20,10 @@ func _enter_tree() -> void:
 	
 func _process(delta: float) -> void:
 	shot_direction += KeyUtils.get_input_vector(player.control_scheme) * delta
+	var current_time := Time.get_ticks_msec()
+	# 超时惩罚
+	if current_time - time_start_shot >= DURATION_MAX_CHARGE:
+		transition_state(Player.State.HURT)
 	if KeyUtils.is_action_just_released(player.control_scheme, KeyUtils.Action.SHOOT):
 		var prep_time := Time.get_ticks_msec() - time_start_shot
 		var duration_pass := clampf(prep_time, 0.0, DURATION_MAX_BONUS)
@@ -30,10 +34,6 @@ func _process(delta: float) -> void:
 		var shooting_data = PlayerStateData.build().set_shot_direction(shot_direction).set_shot_power(shot_power)
 		transition_state(Player.State.SHOOTING, shooting_data)
 
-		#  超时惩罚
-		if prep_time >= DURATION_MIN_MALUS:
-			# transition_state(Player.State.RECOVERING)
-			pass
 
 func can_pass() -> bool:
 	return true
