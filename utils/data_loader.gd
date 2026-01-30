@@ -1,20 +1,22 @@
-
 extends Node
 
 var squads: Dictionary[String, Array]
+var countries: Array[String] = ["DEFAULT"]
+
 
 func _init() -> void:
-	var  json_file = FileAccess.open("res://assets/json/squads.json", FileAccess.READ)
+	var json_file = FileAccess.open("res://assets/json/squads.json", FileAccess.READ)
 
 	if json_file == null:
 		printerr("Failed to open squads.json")
 		return
 	var json_text = json_file.get_as_text()
-	var json:= JSON.new()
+	var json := JSON.new()
 	if json.parse(json_text) != OK:
 		printerr("Failed to parse squads.json: %s" % json.get_error_message())
 	for team in json.data:
 		var country_name := team["country"] as String
+		countries.append(country_name)
 		var players := team["players"] as Array
 		if not squads.has(country_name):
 			squads.set(country_name, [])
@@ -35,3 +37,6 @@ func get_squad(country: String) -> Array:
 	else:
 		printerr("No squad found for country: %s" % country)
 		return []
+
+func get_countries() -> Array[String]:
+	return countries
