@@ -5,7 +5,7 @@ var countries: Array[String] = ["DEFAULT"]
 
 
 func _init() -> void:
-	var json_file = FileAccess.open("res://assets/json/squads.json", FileAccess.READ)
+	var json_file = FileAccess.open("res://assets/json/squads_en.json", FileAccess.READ)
 
 	if json_file == null:
 		printerr("Failed to open squads.json")

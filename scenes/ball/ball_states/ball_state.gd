@@ -31,6 +31,12 @@ func set_ball_animation_from_velocity()-> void:
 	if ball.velocity  ==  Vector2.ZERO:
 		animation_player.play("idle")
 	elif ball.velocity.x >= 0:
+		if state_data.shot_power >= 150:
+			animation_player.play("power_roll")
+			animation_player.advance(0)
+		elif state_data.shot_power >= 100:
+			animation_player.play("fast_roll")
+			animation_player.advance(0)
 		animation_player.play("roll")
 		animation_player.advance(0)
 	else:

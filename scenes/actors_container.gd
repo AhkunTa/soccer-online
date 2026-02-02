@@ -33,7 +33,6 @@ func _ready() -> void:
 	squad_away = spawn_players(GameManager.countries[1], goal_away)
 	goal_away.initialize(GameManager.countries[1])
 	setup_control_schemes()
-	GameEvents.team_reset.connect(on_team_reset.bind())
 
 func _process(_delta: float) -> void:
 	# 每 200 ms 触发AI 逻辑

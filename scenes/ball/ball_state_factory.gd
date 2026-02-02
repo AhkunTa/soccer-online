@@ -6,6 +6,7 @@ func _init() -> void:
 		Ball.State.CARRIED: BallStateCarried,
 		Ball.State.SHOT: BallStateShot,
 		Ball.State.FREEFORM: BallStateFreeForm,
+		Ball.State.POWER_SHOT: BallStatePowerShot,
 	}
 
 func get_fresh_state(state: Ball.State) ->BallState:

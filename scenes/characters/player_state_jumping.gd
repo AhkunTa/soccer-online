@@ -21,6 +21,11 @@ func _process(_delta: float) -> void:
 	# 落地后转换到 RECOVERING 状态
 	if player.height <= 0:
 		transition_state(Player.State.RECOVERING)
+	# double jump 检测
+	if KeyUtils.is_action_just_pressed(player.control_scheme, KeyUtils.Action.SHOOT):
+			if player.has_ball():
+				transition_state(Player.State.JUMPING_SHOT)
+
 
 func can_pass() -> bool:
 	return false

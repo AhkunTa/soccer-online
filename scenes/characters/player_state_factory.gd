@@ -25,7 +25,7 @@ func _init() -> void:
 		Player.State.CELEBRATING: PlayerStateCelebrating,
 		Player.State.MOURNING: PlayerStateMourning,
 		Player.State.RESETTING: PlayerStateResetting,
-		#TODO 跳跃 跳跃射击
+
 		Player.State.JUMPING: PlayerStateJumping,
 		Player.State.JUMPING_SHOT: PlayerStateJumpingShot,
 	}

@@ -5,7 +5,7 @@ extends Node2D
 @onready var background_layer: Node2D = $Backgrounds
 @onready var actors_layer: Node2D = $ActorsContainer
 @onready var effects_layer: Node2D = $EffectsContainer
-@onready var ui_layer: CanvasLayer = $UILayer
+@onready var ui_layer: CanvasLayer = %UI
 
 # 区域生成器
 var area_generator: Node2D

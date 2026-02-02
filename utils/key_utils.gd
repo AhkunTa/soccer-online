@@ -1,6 +1,10 @@
 class_name KeyUtils
 
 enum Action {LEFT, RIGHT, UP, DOWN, SHOOT, PASS, JUMP}
+
+# 缓冲 时间窗口
+const TOLERANCE_WINDOW = 150  # 毫秒
+
 const ACTIONS_MAP: Dictionary = {
 	Player.ControlScheme.P1: {
 		Action.LEFT: "p1_left",
@@ -22,6 +26,8 @@ const ACTIONS_MAP: Dictionary = {
 	},
 }
 
+static func check_input() -> void:
+	pass
 
 static func get_input_vector(scheme: Player.ControlScheme) -> Vector2:
 	var map: Dictionary = ACTIONS_MAP[scheme];

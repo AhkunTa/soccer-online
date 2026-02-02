@@ -169,3 +169,4 @@ shape = SubResource("CircleShape2D_dlabj")
 y_sort_enabled = true
 
 [node name="UI" parent="." instance=ExtResource("12_dlabj")]
+unique_name_in_owner = true

@@ -1,6 +1,8 @@
 class_name Ball
 extends AnimatableBody2D
-enum State {CARRIED, FREEFORM, SHOT}
+enum State {CARRIED, FREEFORM, SHOT, POWER_SHOT}
+# 绝招射门类型
+enum POWER_SHOT_STATE { NORMAL}
 
 const DISTANCE_HIGH_PASS := 100
 const TUMBLE_HEIGHT_VELOCITY := 3.0
@@ -49,10 +51,10 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 	current_state.name = "BallStateMachine"
 	call_deferred('add_child', current_state)
 	
-func shoot(shot_velocity: Vector2, initial_height: float = -1.0) -> void:
+func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_state: POWER_SHOT_STATE = POWER_SHOT_STATE.NORMAL) -> void:
 	velocity = shot_velocity
 	carrier = null
-	switch_state(Ball.State.SHOT, BallStateData.build().set_shot_height(initial_height))
+	switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_state))
 
 func tumble(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity
