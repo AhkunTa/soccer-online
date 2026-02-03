@@ -20,12 +20,14 @@ func handle_human_movement() -> void:
 	if player.velocity != Vector2.ZERO:
 		teammate_detection_area.rotation = player.velocity.angle()
 
-	if KeyUtils.are_actions_pressed_together(player.control_scheme, [KeyUtils.Action.PASS, KeyUtils.Action.SHOOT]):
-		KeyUtils.consume_actions(player.control_scheme, [KeyUtils.Action.PASS, KeyUtils.Action.SHOOT])
+	# 优先检查组合键（跳跃）
+	if KeyUtils.check_combo_triggered(player.control_scheme, [KeyUtils.Action.PASS, KeyUtils.Action.SHOOT]):
+		print('组合键触发：跳跃')
 		transition_state(Player.State.JUMPING)
 		return
 
-	if KeyUtils.should_trigger_single_action(player.control_scheme, KeyUtils.Action.PASS):
+	# 检查单键：传球
+	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.PASS):
 		if player.has_ball():
 			transition_state(Player.State.PASSING)
 		elif can_teammate_pass_ball():
@@ -34,7 +36,8 @@ func handle_human_movement() -> void:
 			player.swap_requested.emit(player)
 		return
 
-	if KeyUtils.should_trigger_single_action(player.control_scheme, KeyUtils.Action.SHOOT):
+	# 检查单键：射门
+	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.SHOOT):
 		if player.has_ball():
 			transition_state(Player.State.PREPPING_SHOT)
 		elif ball.can_air_interact():

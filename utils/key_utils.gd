@@ -2,8 +2,8 @@ class_name KeyUtils
 
 enum Action {LEFT, RIGHT, UP, DOWN, SHOOT, PASS, JUMP}
 
-# 缓冲 时间窗口
-const TOLERANCE_WINDOW = 150  # 毫秒
+# 组合键容错窗口
+const COMBO_TOLERANCE_WINDOW = 50
 
 # 定义组合键配置: [动作1, 动作2]
 const COMBO_KEYS: Array[Array] = [
@@ -31,70 +31,101 @@ const ACTIONS_MAP: Dictionary = {
 	},
 }
 
-# TODO 先简单实现 组合键检测 后续看情况 实现 输入容错窗口 
-# 记录待定的单键按下时间戳
+# 记录待定的单键按下时间戳 {scheme: {action: timestamp}}
 static var _pending_actions: Dictionary = {}
+
+# 已触发的组合键标记 {scheme: {combo_key: true}}
+static var _triggered_combos: Dictionary = {}
 
 static func _init_dicts() -> void:
 	if _pending_actions.is_empty():
 		for scheme in ACTIONS_MAP.keys():
 			_pending_actions[scheme] = {}
+			_triggered_combos[scheme] = {}
 			for action in Action.values():
 				_pending_actions[scheme][action] = 0
 
-static func check_input() -> void:
-	pass
-
 static func get_input_vector(scheme: Player.ControlScheme) -> Vector2:
-	var map: Dictionary = ACTIONS_MAP[scheme];
+	var map: Dictionary = ACTIONS_MAP[scheme]
 	return Input.get_vector(map[Action.LEFT], map[Action.RIGHT], map[Action.UP], map[Action.DOWN])
-	
 
 static func is_action_pressed(scheme: Player.ControlScheme, action: Action) -> bool:
 	return Input.is_action_pressed(ACTIONS_MAP[scheme][action])
 
-
 static func is_action_just_pressed(scheme: Player.ControlScheme, action: Action) -> bool:
 	return Input.is_action_just_pressed(ACTIONS_MAP[scheme][action])
-	
+
 static func is_action_just_released(scheme: Player.ControlScheme, action: Action) -> bool:
 	return Input.is_action_just_released(ACTIONS_MAP[scheme][action])
 
-static func is_action_both_pressed(scheme: Player.ControlScheme, action1: Action, action2: Action) -> bool:
-	return Input.is_action_pressed(ACTIONS_MAP[scheme][action1]) and Input.is_action_pressed(ACTIONS_MAP[scheme][action2])
-
-# 检查 PASS + SHOOT 组合键
-static func are_actions_pressed_together(scheme: Player.ControlScheme, actions: Array[Action]) -> bool:
-	_init_dicts()
-
+# ========== 组合键检测 ==========
+static func check_combo_triggered(scheme: Player.ControlScheme, actions: Array[Action]) -> bool:
+	"""检查组合键是否触发（只触发一次）"""
 	if actions.size() != 2:
 		return false
 
-	var time1 = _pending_actions[scheme][actions[0]]
-	var time2 = _pending_actions[scheme][actions[1]]
+	var action1 = actions[0]
+	var action2 = actions[1]
+	var combo_key = str(action1) + "_" + str(action2)
 
-	if time1 == 0 or time2 == 0:
+	# 防止重复触发
+	if _triggered_combos[scheme].get(combo_key, false):
+		# 任一按键释放后清除触发标记
+		if not is_action_pressed(scheme, action1) or not is_action_pressed(scheme, action2):
+			_triggered_combos[scheme][combo_key] = false
+			_pending_actions[scheme][action1] = 0
+			_pending_actions[scheme][action2] = 0
 		return false
-	return abs(time1 - time2) <= TOLERANCE_WINDOW
 
-static func should_trigger_single_action(scheme: Player.ControlScheme, action: Action) -> bool:
-	_init_dicts()
-	if Input.is_action_just_pressed(ACTIONS_MAP[scheme][action]):
-		# 如果是组合键的一部分，标记为 待定 不立即触发
+	var time1 = _pending_actions[scheme][action1]
+	var time2 = _pending_actions[scheme][action2]
+
+	# 两个键都有时间戳且在窗口期内
+	if time1 > 0 and time2 > 0:
+		if abs(time1 - time2) <= COMBO_TOLERANCE_WINDOW:
+			# 检查两个键是否都还按着
+			if is_action_pressed(scheme, action1) and is_action_pressed(scheme, action2):
+				# 触发组合键
+				_triggered_combos[scheme][combo_key] = true
+				_pending_actions[scheme][action1] = 0
+				_pending_actions[scheme][action2] = 0
+				return true
+
+	return false
+
+# ========== 单键检测 ==========
+static func check_single_action_triggered(scheme: Player.ControlScheme, action: Action) -> bool:
+	"""检查单键是否应该触发"""
+	var current_time = Time.get_ticks_msec()
+
+	# 按键释放时清除待定状态
+	if is_action_just_released(scheme, action):
+		_pending_actions[scheme][action] = 0
+		return false
+
+	# 按键刚按下
+	if is_action_just_pressed(scheme, action):
 		if _is_part_of_combo(action):
-			_pending_actions[scheme][action] = Time.get_ticks_msec()
+			# 是组合键的一部分，记录时间戳，进入待定状态
+			_pending_actions[scheme][action] = current_time
 			return false
 		else:
+			# 不是组合键的一部分，立即触发
 			return true
 
-	# 检查是否有待定的按键
+	# 检查待定状态
 	var pending_time = _pending_actions[scheme][action]
 	if pending_time > 0:
-		var elapsed = Time.get_ticks_msec() - pending_time
+		var elapsed = current_time - pending_time
 
-		# 如果等待期已过，触发单键
-		if elapsed > TOLERANCE_WINDOW:
-			_pending_actions[scheme][action] = 0  # 清除待定
+		# 按键必须仍然按下
+		if not is_action_pressed(scheme, action):
+			_pending_actions[scheme][action] = 0
+			return false
+
+		# 窗口期已过，触发单键
+		if elapsed > COMBO_TOLERANCE_WINDOW:
+			_pending_actions[scheme][action] = 0
 			return true
 
 	return false

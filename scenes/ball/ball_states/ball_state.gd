@@ -3,19 +3,19 @@ extends Node
 
 signal state_transition_requested(new_state: Ball.State)
 #基础反弹弹力 
-const BOUNCINESS :=0.8
+const BOUNCINESS := 0.8
 const GRAVITY := 10.0
 
 var ball: Ball = null
 var carrier: Player = null
-var player_detection_area :Area2D = null
+var player_detection_area: Area2D = null
 var animation_player: AnimationPlayer = null
-var sprite :Sprite2D = null
+var sprite: Sprite2D = null
 var state_data: BallStateData = null
-var shot_particles : GPUParticles2D = null
+var shot_particles: GPUParticles2D = null
 
 
-func setup(context_ball:Ball, context_state_data: BallStateData,context_player_detection_area:Area2D,context_carrier: Player, context_animation_player: AnimationPlayer, context_sprite: Sprite2D, context_shot_particles: GPUParticles2D) -> void:
+func setup(context_ball: Ball, context_state_data: BallStateData, context_player_detection_area: Area2D, context_carrier: Player, context_animation_player: AnimationPlayer, context_sprite: Sprite2D, context_shot_particles: GPUParticles2D) -> void:
 	ball = context_ball
 	player_detection_area = context_player_detection_area
 	state_data = context_state_data
@@ -27,23 +27,26 @@ func setup(context_ball:Ball, context_state_data: BallStateData,context_player_d
 func transition_state(new_state: BallState, data: BallStateData = BallStateData.new()) -> void:
 	state_transition_requested.emit(new_state, data)
 
-func set_ball_animation_from_velocity()-> void:
-	if ball.velocity  ==  Vector2.ZERO:
+func set_ball_animation_from_velocity() -> void:
+	# TODO 更多绝招特效
+	if ball.velocity == Vector2.ZERO:
 		animation_player.play("idle")
 	elif ball.velocity.x >= 0:
 		if state_data.shot_power >= 150:
-			animation_player.play("power_roll")
+			animation_player.play("power_shot_normal")
 			animation_player.advance(0)
-		elif state_data.shot_power >= 100:
-			animation_player.play("fast_roll")
-			animation_player.advance(0)
+			return
 		animation_player.play("roll")
 		animation_player.advance(0)
 	else:
+		if state_data.shot_power >= 150:
+			animation_player.play_backwards("power_shot_normal")
+			animation_player.advance(0)
+			return
 		animation_player.play_backwards("roll")
 		animation_player.advance(0)
 
-func process_gravity(delta: float, bounciness: float =0.0)-> void:
+func process_gravity(delta: float, bounciness: float = 0.0) -> void:
 	if ball.height > 0 or ball.height_velocity > 0:
 		ball.height_velocity -= GRAVITY * delta
 		ball.height += ball.height_velocity
@@ -51,12 +54,12 @@ func process_gravity(delta: float, bounciness: float =0.0)-> void:
 		if ball.height < 0:
 			ball.height = 0
 			if bounciness > 0 and ball.height_velocity < 0:
-				ball.height_velocity = -ball.height_velocity * bounciness
+				ball.height_velocity = - ball.height_velocity * bounciness
 				ball.velocity *= bounciness
 
-func move_and_bounce(delta: float)-> void:
+func move_and_bounce(delta: float) -> void:
 	var collision := ball.move_and_collide(ball.velocity * delta)
-	if collision !=null:
+	if collision != null:
 		ball.velocity = ball.velocity.bounce(collision.get_normal()) * BOUNCINESS
 		AudioPlayer.play(AudioPlayer.Sound.BOUNCE)
 		ball.switch_state(Ball.State.FREEFORM)
