@@ -18,4 +18,4 @@ func on_ball_entered(connect_ball: Ball) -> void:
 		var destination := target_goal.get_random_target_position()
 		var direction := ball.position.direction_to(destination)
 		AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
-		connect_ball.shoot(direction * player.power * BONUS_POWER)
+		connect_ball.shoot(player.velocity.normalized() * player.power * BONUS_POWER, -1.0, player.power * BONUS_POWER , Ball.PowerShotType.HEIGHT_LIGHT)

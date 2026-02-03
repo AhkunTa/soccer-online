@@ -60,7 +60,7 @@ var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
 var spawn_position := Vector2.ZERO
 var weight_on_duty_steering := 0.0
-
+var power_shot_type := Ball.PowerShotType.NORMAL
 # 临时效果系统
 var active_boosts: Dictionary = {}
 var healing_active: bool = false
@@ -137,6 +137,7 @@ func initialize(context_position: Vector2, context_kickoff_position: Vector2, co
 	role = context_player_data.role
 	skin_color = context_player_data.skin_color
 	fullname = context_player_data.full_name
+	power_shot_type = context_player_data.power_shot_type
 	heading = Vector2.LEFT if target_goal.position.x < position.x else Vector2.RIGHT
 	country = context_country
 	

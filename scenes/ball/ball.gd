@@ -1,8 +1,25 @@
 class_name Ball
 extends AnimatableBody2D
-enum State {CARRIED, FREEFORM, SHOT, POWER_SHOT}
-# 绝招射门类型
-enum POWER_SHOT_STATE { NORMAL}
+enum State {
+	CARRIED,
+	FREEFORM,
+	SHOT,
+	POWER_SHOT_STRONG,
+	POWER_SHOT_NORMAL,
+	POWER_SHOT_RISING,
+	POWER_SHOT_CURVE,
+	POWER_SHOT_HEIGHT_LIGHT,
+	# TODO 可以在这里添加更多绝招状态...,
+}
+
+
+enum PowerShotType {
+	NORMAL, # 普通绝招射门
+	HEIGHT_LIGHT, # 高亮射门 闪烁发光 通常用于 头球和凌空抽射
+	RISING, # 上升射门：球缓慢上升然后直射球门
+	STRONG, # 强力射门：球速度更快，球扁平状
+	CURVE # 弧线射门：球以弧线轨迹飞向球门
+}
 
 const DISTANCE_HIGH_PASS := 100
 const TUMBLE_HEIGHT_VELOCITY := 3.0
@@ -30,8 +47,8 @@ var spawn_position := Vector2.ZERO
 @onready var player_detection_area: Area2D = $PlayerDetection
 @onready var ball_sprite: Sprite2D = %BallSprite
 @onready var scoring_ratcast: RayCast2D = %ScoringRayCast
-@onready var shot_particles : GPUParticles2D = %shot_particles
-@onready var player_proximity_area : Area2D = %PlayerProximityArea
+@onready var shot_particles: GPUParticles2D = %shot_particles
+@onready var player_proximity_area: Area2D = %PlayerProximityArea
 func _ready() -> void:
 	switch_state(State.FREEFORM)
 	spawn_position = position
@@ -46,15 +63,34 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, data, player_detection_area, carrier, animation_player, ball_sprite, shot_particles)
+	current_state.setup(self , data, player_detection_area, carrier, animation_player, ball_sprite, shot_particles)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "BallStateMachine"
 	call_deferred('add_child', current_state)
 	
-func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_state: POWER_SHOT_STATE = POWER_SHOT_STATE.NORMAL) -> void:
+func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NORMAL) -> void:
 	velocity = shot_velocity
 	carrier = null
-	switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_state))
+
+	# 根据绝招类型选择不同的状态
+	match power_shot_type:
+		PowerShotType.STRONG:
+			print("使用强力射门绝招")
+			switch_state(Ball.State.POWER_SHOT_STRONG, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+		PowerShotType.HEIGHT_LIGHT:
+			print("使用高亮射门绝招")
+			switch_state(Ball.State.POWER_SHOT_HEIGHT_LIGHT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+		PowerShotType.RISING:
+			print("使用上升射门绝招")
+			switch_state(Ball.State.POWER_SHOT_RISING, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+		PowerShotType.CURVE:
+			print("使用弧线射门绝招")
+			switch_state(Ball.State.POWER_SHOT_CURVE, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+		PowerShotType.NORMAL:
+			switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+		_:
+			print("使用普通射门状态")
+			switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
 
 func tumble(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity
@@ -92,7 +128,7 @@ func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
 	return scoring_ratcast.get_collider() == scoring_area
 
 func get_proximity_teammates_count(country: String) -> int:
-	var players : = player_proximity_area.get_overlapping_areas()
+	var players := player_proximity_area.get_overlapping_areas()
 	return players.filter(func(p: Player): return p.country == country).size()
 
 func on_team_reset() -> void:

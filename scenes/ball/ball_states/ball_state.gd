@@ -28,21 +28,12 @@ func transition_state(new_state: BallState, data: BallStateData = BallStateData.
 	state_transition_requested.emit(new_state, data)
 
 func set_ball_animation_from_velocity() -> void:
-	# TODO 更多绝招特效
 	if ball.velocity == Vector2.ZERO:
 		animation_player.play("idle")
 	elif ball.velocity.x >= 0:
-		if state_data.shot_power >= 150:
-			animation_player.play("power_shot_normal")
-			animation_player.advance(0)
-			return
 		animation_player.play("roll")
 		animation_player.advance(0)
 	else:
-		if state_data.shot_power >= 150:
-			animation_player.play_backwards("power_shot_normal")
-			animation_player.advance(0)
-			return
 		animation_player.play_backwards("roll")
 		animation_player.advance(0)
 

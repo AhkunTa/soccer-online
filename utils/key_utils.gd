@@ -5,7 +5,6 @@ enum Action {LEFT, RIGHT, UP, DOWN, SHOOT, PASS, JUMP}
 # 组合键容错窗口
 const COMBO_TOLERANCE_WINDOW = 50
 
-# 定义组合键配置: [动作1, 动作2]
 const COMBO_KEYS: Array[Array] = [
 	[Action.PASS, Action.SHOOT],  # 跳跃组合键
 ]
@@ -58,16 +57,13 @@ static func is_action_just_pressed(scheme: Player.ControlScheme, action: Action)
 static func is_action_just_released(scheme: Player.ControlScheme, action: Action) -> bool:
 	return Input.is_action_just_released(ACTIONS_MAP[scheme][action])
 
-# ========== 组合键检测 ==========
 static func check_combo_triggered(scheme: Player.ControlScheme, actions: Array[Action]) -> bool:
-	"""检查组合键是否触发（只触发一次）"""
 	if actions.size() != 2:
 		return false
 
 	var action1 = actions[0]
 	var action2 = actions[1]
 	var combo_key = str(action1) + "_" + str(action2)
-
 	# 防止重复触发
 	if _triggered_combos[scheme].get(combo_key, false):
 		# 任一按键释放后清除触发标记
@@ -95,7 +91,6 @@ static func check_combo_triggered(scheme: Player.ControlScheme, actions: Array[A
 
 # ========== 单键检测 ==========
 static func check_single_action_triggered(scheme: Player.ControlScheme, action: Action) -> bool:
-	"""检查单键是否应该触发"""
 	var current_time = Time.get_ticks_msec()
 
 	# 按键释放时清除待定状态

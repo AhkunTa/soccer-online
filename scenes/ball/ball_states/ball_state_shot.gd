@@ -29,3 +29,13 @@ func _process(delta: float) -> void:
 func _exit_tree() -> void:
 	sprite.scale.y = 1.0
 	shot_particles.emitting = false
+
+func set_ball_animation_from_velocity() -> void:
+	if ball.velocity == Vector2.ZERO:
+		animation_player.play("idle")
+	elif ball.velocity.x >= 0:
+		animation_player.play("roll")
+		animation_player.advance(0)
+	else:
+		animation_player.play_backwards("roll")
+		animation_player.advance(0)

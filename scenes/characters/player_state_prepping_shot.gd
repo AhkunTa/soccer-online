@@ -5,7 +5,7 @@ extends PlayerState
 const DURATION_MAX_BONUS := 1000.0
 # 蓄力过长脱力
 const DURATION_MAX_CHARGE := 2000.0
-# 
+
 const EASE_REWARD_FACTOR := 2.0
 
 var shot_direction := Vector2.ZERO
@@ -32,7 +32,8 @@ func _process(delta: float) -> void:
 		var shot_power := player.power * (1 + bonus)
 		shot_direction = shot_direction.normalized()
 		print('shot power:', shot_power, ' bonus:', bonus, "player power:", player.power)
-		var shooting_data = PlayerStateData.build().set_shot_direction(shot_direction).set_shot_power(shot_power)
+		var shooting_data = PlayerStateData.build().set_shot_direction(shot_direction).set_shot_power(shot_power).set_power_shot_type(player.power_shot_type)
+		# 当 shot_power 超过一定值时，使用强力射门 power_shot 每个角色有自己的绝招
 		transition_state(Player.State.SHOOTING, shooting_data)
 
 

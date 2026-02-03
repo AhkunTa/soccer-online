@@ -139,7 +139,7 @@ unique_name_in_owner = true
 libraries = {
 &"": SubResource("AnimationLibrary_ye0rm")
 }
-autoplay = "power_shot_normal"
+autoplay = "idle"
 
 [node name="ShadowSprite" type="Sprite2D" parent="."]
 visible = false
