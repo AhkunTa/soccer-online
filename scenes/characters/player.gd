@@ -20,9 +20,11 @@ const WALK_ANIM_THRESHOLD := 0.6
 @export var JUMP_IMPULES := 20
 @export var control_scheme: ControlScheme
 @export var ball: Ball
-@export var player_config: PlayerConfig # 玩家配置
 @export var own_goal: Goal
 @export var target_goal: Goal
+# max hp 后续为 临时效果系统预留
+@export var max_hp: float = 100.0
+@export var current_hp: float = 100.0
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
@@ -70,7 +72,7 @@ var healing_rate: float = 0.0
 func _ready() -> void:
 	set_ai_behavior()
 	# 应用配置到玩家属性
-	apply_player_config()
+	# apply_player_config()
 	set_control_texture()
 	set_shader_properties()
 	permanent_damage_emitter_area.monitoring = role == Role.GOALIE
@@ -82,25 +84,6 @@ func _ready() -> void:
 	GameEvents.game_over.connect(on_game_over.bind())
 	var initial_position := kickoff_position if country == GameManager.countries[0] else spawn_position
 	switch_state(Player.State.RESETTING, PlayerStateData.build().set_reset_position(initial_position))
-
-# 应用玩家配置到属性
-func apply_player_config() -> void:
-	if player_config == null:
-		player_config = PlayerConfig.create_default_config()
-	speed = player_config.speed
-	power = player_config.power
-	JUMP_VELOCITY = player_config.jump_velocity
-	strength = player_config.strength
-	JUMP_IMPULES = player_config.jump_impulse
-
-# 设置玩家配置
-func set_player_config(config: PlayerConfig) -> void:
-	player_config = config
-	apply_player_config()
-
-# 获取玩家配置
-func get_player_config() -> PlayerConfig:
-	return player_config
 
 # 着色器
 func set_shader_properties() -> void:
@@ -114,7 +97,7 @@ func set_shader_properties() -> void:
 
 func set_ai_behavior() -> void:
 	current_ai_behavior = ai_behavior_factory.get_ai_behavior(role)
-	current_ai_behavior.setup(self, ball, opponent_detection_area, teammate_detection_area);
+	current_ai_behavior.setup(self , ball, opponent_detection_area, teammate_detection_area);
 
 	current_ai_behavior.name = "AI Behavior"
 	add_child(current_ai_behavior)
@@ -145,7 +128,7 @@ func switch_state(state: State, state_data: PlayerStateData = PlayerStateData.ne
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, state_data, animation_player, ball, teammate_detection_area, ball_detection_area, own_goal, target_goal, tackle_damage_emitter_area, current_ai_behavior)
+	current_state.setup(self , state_data, animation_player, ball, teammate_detection_area, ball_detection_area, own_goal, target_goal, tackle_damage_emitter_area, current_ai_behavior)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)
@@ -244,20 +227,6 @@ func on_tackle_player(player: Player) -> void:
 		print("Tackled player get hurt: ", player.fullname)
 		player.get_hurt(position.direction_to(player.position))
 
-func get_player_info() -> String:
-	if player_config != null:
-		return "Player: %s | Speed: %.1f | Power: %.1f | Strength: %d | Team: %d" % [
-			player_config.player_name,
-			speed,
-			power,
-			strength,
-		]
-	else:
-		return "Player: Unknown | Speed: %.1f | Power: %.1f | Strength: %d" % [speed, power, strength]
-
-# 重置玩家为默认配置
-func reset_to_default() -> void:
-	set_player_config(PlayerConfig.create_default_config())
 
 # 应用临时增益效果
 func apply_temporary_boost(stat_name: String, multiplier: float, duration: float) -> void:
@@ -322,11 +291,6 @@ func update_temporary_effects(delta: float) -> void:
 		# 这里可以实现实际的治疗逻辑
 		pass
 
-# 检查是否与其他玩家在同一队伍
-func is_teammate(other_player: Player) -> bool:
-	if player_config != null and other_player.player_config != null:
-		return player_config.team_id == other_player.player_config.team_id
-	return false
 
 func control_ball() -> void:
 	if ball.height >= BALL_CONTROL_HEIGHT_MAX:
@@ -337,4 +301,4 @@ func is_facing_target_goal() -> bool:
 	return heading.dot(direction_to_target_goal) > 0
 
 func get_direction_to_opponent_goal() -> Vector2:
-	return position.direction_to(target_goal.get_center_target_position())
+	return position.direction_to(target_goal.get_random_target_position())

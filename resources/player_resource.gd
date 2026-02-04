@@ -9,8 +9,10 @@ extends Resource
 @export var speed: float = 80.0
 @export var power: float = 150.0
 @export var power_shot_type: Ball.PowerShotType = Ball.PowerShotType.STRONG
+@export var hp: float = 100.0
 
-func _init(player_name: String, player_skin: Player.SkinColor, player_role: Player.Role, player_speed: float, player_power: float, player_power_shot_type: Ball.PowerShotType) -> void:
+
+func _init(player_name: String, player_skin: Player.SkinColor, player_role: Player.Role, player_speed: float, player_power: float, player_power_shot_type: Ball.PowerShotType, player_hp: float) -> void:
 	# 初始化玩家资源
 	full_name = player_name
 	skin_color = player_skin
@@ -18,3 +20,4 @@ func _init(player_name: String, player_skin: Player.SkinColor, player_role: Play
 	speed = player_speed
 	power = player_power
 	power_shot_type = player_power_shot_type
+	hp = player_hp

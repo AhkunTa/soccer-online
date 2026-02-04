@@ -26,13 +26,10 @@ func _init() -> void:
 			var role := player["role"] as Player.Role
 			var speed := player["speed"] as float
 			var power := player["power"] as float
-			# 默认强力射击 球扁平
-			var power_shot_type: Ball.PowerShotType
-			if player.has("power_shot_type"):
-				power_shot_type = player["power_shot_type"] as Ball.PowerShotType
-			else:
-				power_shot_type = Ball.PowerShotType.STRONG
-			var player_resource := PlayerResource.new(full_name, skin, role, speed, power, power_shot_type)
+			var hp := player["power"] as float if player.has("hp") else 100.0
+			var power_shot_type := player["power_shot_type"] as Ball.PowerShotType if player.has("power_shot_type") else Ball.PowerShotType.NORMAL
+			
+			var player_resource := PlayerResource.new(full_name, skin, role, speed, power, power_shot_type, hp)
 			squads.get(country_name).append(player_resource)
 		assert(players.size() == 6, "Expected 6 players per team, got %d" % players.size())
 	json_file.close()
