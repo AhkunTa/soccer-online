@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dj6acyrsna4kq"]
+[gd_scene format=3 uid="uid://dj6acyrsna4kq"]
 
 [ext_resource type="Script" uid="uid://djphemlh42gng" path="res://scenes/camera/camera.gd" id="1_gb53w"]
 [ext_resource type="Script" uid="uid://d3tclpsfa8s4v" path="res://scenes/world/world_manager.gd" id="1_world"]
@@ -24,10 +24,10 @@ radius = 100.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_dlabj"]
 radius = 150.0
 
-[node name="World" type="Node2D"]
+[node name="World" type="Node2D" unique_id=1693819252]
 script = ExtResource("1_world")
 
-[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("ball")]
+[node name="Camera" type="Camera2D" parent="." unique_id=1816151541 node_paths=PackedStringArray("ball")]
 position = Vector2(140, 90)
 limit_left = 0
 limit_top = 0
@@ -38,136 +38,135 @@ script = ExtResource("1_gb53w")
 ball = NodePath("../ActorsContainer/Ball")
 shake_noise = SubResource("FastNoiseLite_i7141")
 
-[node name="Backgrounds" type="Node2D" parent="."]
+[node name="Backgrounds" type="Node2D" parent="." unique_id=1789790608]
 
-[node name="Grass" type="Sprite2D" parent="Backgrounds"]
+[node name="Grass" type="Sprite2D" parent="Backgrounds" unique_id=209985479]
 modulate = Color(0.517647, 0.803922, 0.164706, 1)
 position = Vector2(426, 178)
 texture = ExtResource("2_5qq27")
 
-[node name="Pattern" type="Sprite2D" parent="Backgrounds"]
+[node name="Pattern" type="Sprite2D" parent="Backgrounds" unique_id=1133219467]
 modulate = Color(0.282353, 0.607843, 0, 1)
 position = Vector2(424, 175)
 texture = ExtResource("3_dlabj")
 
-[node name="Lines" type="Sprite2D" parent="Backgrounds"]
+[node name="Lines" type="Sprite2D" parent="Backgrounds" unique_id=2013971933]
 modulate = Color(0.941176, 0.941176, 0.941176, 1)
 position = Vector2(426, 181)
 texture = ExtResource("4_srmg5")
 
-[node name="ActorsContainer" type="Node2D" parent="." node_paths=PackedStringArray("ball", "goal_home", "goal_away")]
+[node name="ActorsContainer" type="Node2D" parent="." unique_id=1335360116 node_paths=PackedStringArray("ball", "goal_home", "goal_away")]
 y_sort_enabled = true
 script = ExtResource("6_dlabj")
 ball = NodePath("Ball")
 goal_home = NodePath("PitchObjects/GoalLeft")
 goal_away = NodePath("PitchObjects/GoalRight")
 
-[node name="Spawns" type="Node2D" parent="ActorsContainer"]
+[node name="Spawns" type="Node2D" parent="ActorsContainer" unique_id=257936299]
 unique_name_in_owner = true
 position = Vector2(426, 180)
 
-[node name="GoalliePosition" type="Node2D" parent="ActorsContainer/Spawns"]
+[node name="GoalliePosition" type="Node2D" parent="ActorsContainer/Spawns" unique_id=821924612]
 position = Vector2(-330, 5)
 
-[node name="DefensePosition" type="Node2D" parent="ActorsContainer/Spawns"]
+[node name="DefensePosition" type="Node2D" parent="ActorsContainer/Spawns" unique_id=1963248579]
 position = Vector2(-235, -40)
 
-[node name="DefensePosition2" type="Node2D" parent="ActorsContainer/Spawns"]
+[node name="DefensePosition2" type="Node2D" parent="ActorsContainer/Spawns" unique_id=1418984530]
 position = Vector2(-235, 40)
 
-[node name="MidfieldPosition" type="Node2D" parent="ActorsContainer/Spawns"]
+[node name="MidfieldPosition" type="Node2D" parent="ActorsContainer/Spawns" unique_id=838089611]
 position = Vector2(-135, 0)
 
-[node name="offensePosition" type="Node2D" parent="ActorsContainer/Spawns"]
+[node name="offensePosition" type="Node2D" parent="ActorsContainer/Spawns" unique_id=1692833385]
 position = Vector2(-35, -40)
 
-[node name="offensePosition2" type="Node2D" parent="ActorsContainer/Spawns"]
+[node name="offensePosition2" type="Node2D" parent="ActorsContainer/Spawns" unique_id=357068705]
 position = Vector2(-35, 40)
 
-[node name="KickOffs" type="Node2D" parent="ActorsContainer"]
+[node name="KickOffs" type="Node2D" parent="ActorsContainer" unique_id=819215594]
 unique_name_in_owner = true
 position = Vector2(425, 180)
 
-[node name="KickOffPosition" type="Node2D" parent="ActorsContainer/KickOffs"]
+[node name="KickOffPosition" type="Node2D" parent="ActorsContainer/KickOffs" unique_id=2094753430]
 position = Vector2(-10, 0)
 
-[node name="KickOffPosition2" type="Node2D" parent="ActorsContainer/KickOffs"]
+[node name="KickOffPosition2" type="Node2D" parent="ActorsContainer/KickOffs" unique_id=664014673]
 position = Vector2(-5, 30)
 
-[node name="KickOffPosition3" type="Node2D" parent="ActorsContainer/KickOffs"]
+[node name="KickOffPosition3" type="Node2D" parent="ActorsContainer/KickOffs" unique_id=669139263]
 position = Vector2(-5, -30)
 
-[node name="PitchObjects" type="Node2D" parent="ActorsContainer"]
+[node name="PitchObjects" type="Node2D" parent="ActorsContainer" unique_id=1907549540]
 y_sort_enabled = true
 
-[node name="GoalLeft" parent="ActorsContainer/PitchObjects" instance=ExtResource("5_umvgx")]
+[node name="GoalLeft" parent="ActorsContainer/PitchObjects" unique_id=940815188 instance=ExtResource("5_umvgx")]
 position = Vector2(32, 220)
 
-[node name="GoalRight" parent="ActorsContainer/PitchObjects" instance=ExtResource("5_umvgx")]
+[node name="GoalRight" parent="ActorsContainer/PitchObjects" unique_id=1163904714 instance=ExtResource("5_umvgx")]
 position = Vector2(820, 220)
 scale = Vector2(-1, 1)
 
-[node name="TopWall" type="Sprite2D" parent="ActorsContainer/PitchObjects"]
+[node name="TopWall" type="Sprite2D" parent="ActorsContainer/PitchObjects" unique_id=917258680]
 position = Vector2(50, 33)
 texture = ExtResource("6_mxkvs")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/TopWall"]
+[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/TopWall" unique_id=1747834703]
 collision_mask = 0
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/TopWall/StaticBody2D"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/TopWall/StaticBody2D" unique_id=496775224]
 polygon = PackedVector2Array(0, 116, 13, 0, 739, 0, 752, 116, 741, 116, 730, 14, 22, 14, 11, 116)
 
-[node name="BottomWall" type="Sprite2D" parent="ActorsContainer/PitchObjects"]
+[node name="BottomWall" type="Sprite2D" parent="ActorsContainer/PitchObjects" unique_id=1848734048]
 position = Vector2(26, 346)
 texture = ExtResource("7_m114p")
 centered = false
 offset = Vector2(0, -13)
 
-[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/BottomWall"]
+[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/BottomWall" unique_id=1748833903]
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ActorsContainer/PitchObjects/BottomWall/StaticBody2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ActorsContainer/PitchObjects/BottomWall/StaticBody2D" unique_id=213748257]
 position = Vector2(400.75, -5)
 shape = SubResource("RectangleShape2D_7r4gi")
 
-[node name="LeftWall" type="Sprite2D" parent="ActorsContainer/PitchObjects"]
+[node name="LeftWall" type="Sprite2D" parent="ActorsContainer/PitchObjects" unique_id=148881952]
 position = Vector2(25, 222)
 texture = ExtResource("8_71ii3")
 centered = false
 offset = Vector2(0, -13)
 
-[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/LeftWall"]
+[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/LeftWall" unique_id=964607000]
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/LeftWall/StaticBody2D"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/LeftWall/StaticBody2D" unique_id=1333362109]
 polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 
-[node name="RightWall" type="Sprite2D" parent="ActorsContainer/PitchObjects"]
+[node name="RightWall" type="Sprite2D" parent="ActorsContainer/PitchObjects" unique_id=2027031631]
 position = Vector2(827, 224)
 scale = Vector2(-1, 1)
 texture = ExtResource("8_71ii3")
 centered = false
 offset = Vector2(0, -13)
 
-[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/RightWall"]
+[node name="StaticBody2D" type="StaticBody2D" parent="ActorsContainer/PitchObjects/RightWall" unique_id=561065090]
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/RightWall/StaticBody2D"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ActorsContainer/PitchObjects/RightWall/StaticBody2D" unique_id=1290652009]
 polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 
-[node name="Ball" parent="ActorsContainer" instance=ExtResource("10_wbwoo")]
+[node name="Ball" parent="ActorsContainer" unique_id=1055755961 instance=ExtResource("10_wbwoo")]
 position = Vector2(425, 180)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ActorsContainer"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ActorsContainer" unique_id=1046736393]
 position = Vector2(61, 184)
 shape = SubResource("CircleShape2D_5qq27")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="ActorsContainer"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="ActorsContainer" unique_id=510840868]
 position = Vector2(61, 184)
 shape = SubResource("CircleShape2D_dlabj")
 
-[node name="EffectsContainer" type="Node2D" parent="."]
+[node name="EffectsContainer" type="Node2D" parent="." unique_id=1372418196]
 y_sort_enabled = true
 
-[node name="UI" parent="." instance=ExtResource("12_dlabj")]
+[node name="UI" parent="." unique_id=63367791 instance=ExtResource("12_dlabj")]
 unique_name_in_owner = true
-visible = false

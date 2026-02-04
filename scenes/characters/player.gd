@@ -62,7 +62,7 @@ var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
 var spawn_position := Vector2.ZERO
 var weight_on_duty_steering := 0.0
-var power_shot_type := Ball.PowerShotType.NORMAL
+var power_shot_type := Ball.PowerShotType.STRONG
 # 临时效果系统
 var active_boosts: Dictionary = {}
 var healing_active: bool = false

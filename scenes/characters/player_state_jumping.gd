@@ -2,14 +2,13 @@ class_name  PlayerStateJumping
 extends PlayerState
 
 const HEIGHT_START := 0.1
-const HEIGHT_VELOCITY := 3.0
+const HEIGHT_VELOCITY := 2.0
 
 
 func _enter_tree() -> void:
 	animation_player.play("jumping")
 	player.height = HEIGHT_START
 	player.height_velocity = HEIGHT_VELOCITY
-	player.velocity = Vector2.ZERO
 
 func _process(_delta: float) -> void:
 	# 检测在跳跃过程中按下 SHOT 键
