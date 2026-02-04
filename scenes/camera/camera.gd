@@ -26,7 +26,7 @@ var noise_sample: Vector2
 var current_amplitude: float = 0
 
 func _init() -> void:
-	GameEvents.impact_received.connect(on_impact_reveived.bind())
+	GameEvents.impact_received.connect(on_impact_received.bind())
 
 func _process(_delta: float) -> void:
 	#shake(delta)
@@ -66,7 +66,7 @@ func shake(delta: float)->void:
 
 
 
-func on_impact_reveived(_impact_position: Vector2, is_high_impact: bool) -> void:
+func on_impact_received(_impact_position: Vector2, is_high_impact: bool) -> void:
 	if is_high_impact:
 		is_shaking = true
 		time_start_shake = Time.get_ticks_msec()

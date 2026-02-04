@@ -31,7 +31,7 @@ func _init() -> void:
 			if player.has("power_shot_type"):
 				power_shot_type = player["power_shot_type"] as Ball.PowerShotType
 			else:
-				power_shot_type = Ball.PowerShotType.NORMAL
+				power_shot_type = Ball.PowerShotType.STRONG
 			var player_resource := PlayerResource.new(full_name, skin, role, speed, power, power_shot_type)
 			squads.get(country_name).append(player_resource)
 		assert(players.size() == 6, "Expected 6 players per team, got %d" % players.size())

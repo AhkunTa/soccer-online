@@ -335,3 +335,6 @@ func control_ball() -> void:
 func is_facing_target_goal() -> bool:
 	var direction_to_target_goal := position.direction_to(target_goal.position)
 	return heading.dot(direction_to_target_goal) > 0
+
+func get_direction_to_opponent_goal() -> Vector2:
+	return position.direction_to(target_goal.get_center_target_position())

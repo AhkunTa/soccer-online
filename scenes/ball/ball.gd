@@ -70,27 +70,33 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 	
 func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NORMAL) -> void:
 	velocity = shot_velocity
-	carrier = null
+	if power >= 250:
+		# 根据绝招类型选择不同的状态
+		match power_shot_type:
+			PowerShotType.STRONG:
+				print("使用强力射门绝招")
+				switch_state(Ball.State.POWER_SHOT_STRONG, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+			PowerShotType.HEIGHT_LIGHT:
+				print("使用高亮射门绝招")
+				switch_state(Ball.State.POWER_SHOT_HEIGHT_LIGHT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+			PowerShotType.RISING:
+				print("使用上升射门绝招")
+				switch_state(Ball.State.POWER_SHOT_RISING, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+			PowerShotType.CURVE:
+				print("使用弧线射门绝招")
+				switch_state(Ball.State.POWER_SHOT_CURVE, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+			PowerShotType.NORMAL:
+				print("使用普通射门")
+				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+			_:
+				print("使用普通射门")
+				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+	else:
+		print("力量 %s 使用普通射门" % power)
+		switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, PowerShotType.NORMAL))
 
-	# 根据绝招类型选择不同的状态
-	match power_shot_type:
-		PowerShotType.STRONG:
-			print("使用强力射门绝招")
-			switch_state(Ball.State.POWER_SHOT_STRONG, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
-		PowerShotType.HEIGHT_LIGHT:
-			print("使用高亮射门绝招")
-			switch_state(Ball.State.POWER_SHOT_HEIGHT_LIGHT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
-		PowerShotType.RISING:
-			print("使用上升射门绝招")
-			switch_state(Ball.State.POWER_SHOT_RISING, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
-		PowerShotType.CURVE:
-			print("使用弧线射门绝招")
-			switch_state(Ball.State.POWER_SHOT_CURVE, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
-		PowerShotType.NORMAL:
-			switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
-		_:
-			print("使用普通射门状态")
-			switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+	# 在状态切换后清空 carrier
+	carrier = null
 
 func tumble(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity

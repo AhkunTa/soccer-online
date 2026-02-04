@@ -19,7 +19,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	time_left = DURATION_GAME_SEC
-	GameEvents.impact_received.connect(on_impact_reveived.bind())
+	GameEvents.impact_received.connect(on_impact_received.bind())
 	switch_state(State.RESET)
 
 func _process(_delta: float) -> void:
@@ -59,7 +59,7 @@ func increase_score(country_scored_on: String) -> void:
 func has_someone_scored() -> bool:
 	return score[0] > 0 or score[1] > 0
 
-func on_impact_reveived(_impact_position: Vector2, is_high_impact: bool) -> void:
+func on_impact_received(_impact_position: Vector2, is_high_impact: bool) -> void:
 	if is_high_impact:
 		time_since_pause = Time.get_ticks_msec()
 		get_tree().paused = true

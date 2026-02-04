@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://diuenpqh671p4"
-path="res://.godot/imported/power-shot-normal.wav-af16013b438a37cbf43b2f53d3ebbcb6.sample"
+path="res://.godot/imported/power-shot-strong.wav-a8d958ecaeff39c7515938ca908d86b8.sample"
 
 [deps]
 
-source_file="res://assets/sfx/power-shot-normal.wav"
-dest_files=["res://.godot/imported/power-shot-normal.wav-af16013b438a37cbf43b2f53d3ebbcb6.sample"]
+source_file="res://assets/sfx/power-shot-strong.wav"
+dest_files=["res://.godot/imported/power-shot-strong.wav-a8d958ecaeff39c7515938ca908d86b8.sample"]
 
 [params]
 

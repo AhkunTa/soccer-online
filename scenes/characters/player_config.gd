@@ -19,6 +19,7 @@ extends Resource
 # 角色
 @export var player_name: String = "Player"
 
+@export var power_shot_type: Ball.PowerShotType = Ball.PowerShotType.NORMAL
 
 # 构造函数，提供默认值
 func _init(
@@ -28,6 +29,8 @@ func _init(
 	p_strength: int = 5,
 	p_jump_impulse: int = 20,
 	p_name: String = "Player",
+	p_power_shot_type: Ball.PowerShotType = Ball.PowerShotType.NORMAL
+
 ):
 	speed = p_speed
 	power = p_power
@@ -35,7 +38,7 @@ func _init(
 	strength = p_strength
 	jump_impulse = p_jump_impulse
 	player_name = p_name
-
+	power_shot_type = p_power_shot_type
 # 从字典创建配置
 static func from_dict(data: Dictionary) -> PlayerConfig:
 	var config = PlayerConfig.new()
@@ -53,6 +56,8 @@ static func from_dict(data: Dictionary) -> PlayerConfig:
 		config.player_name = data["player_name"]
 	if data.has("team_id"):
 		config.team_id = data["team_id"]
+	if data.has("power_shot_type"):
+		config.power_shot_type = data["power_shot_type"]
 	return config
 
 # 转换为字典

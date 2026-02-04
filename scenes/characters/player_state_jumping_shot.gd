@@ -2,7 +2,7 @@ class_name PlayerStateJumpingShot
 extends PlayerState
 
 const BONUS_POWER := 1.5
-const BALL_HEIGHT_MIN := 1.0
+const BALL_HEIGHT_MIN := 10.0
 const BALL_HEIGHT_MAX := 50.0
 
 func _enter_tree() -> void:
