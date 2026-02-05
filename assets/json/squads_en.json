@@ -9,7 +9,7 @@
         "speed": 75,
         "power": 100,
         "hp": 100,
-				"power_shot_type": 3
+				"power_shot_type": 4
       },
       {
         "name": "J. KOUNDE",
@@ -18,7 +18,7 @@
         "speed": 75,
         "power": 165,
         "hp": 100,
-				"power_shot_type": 3
+				"power_shot_type": 4
       },
       {
         "name": "I. KONATE",
@@ -27,7 +27,7 @@
         "speed": 77,
         "power": 167,
         "hp": 100,
-				"power_shot_type": 3
+				"power_shot_type": 4
       },
       {
         "name": "A. GRIEZMANN",
@@ -36,7 +36,7 @@
         "speed": 74,
         "power": 172,
         "hp": 100,
-				"power_shot_type": 3
+				"power_shot_type": 4
       },
       {
         "name": "K. MBAPPE",
@@ -45,7 +45,7 @@
         "speed": 85,
         "power": 185,
         "hp": 100,
-				"power_shot_type": 3
+				"power_shot_type": 4
       },
       {
         "name": "O. GIROUD",
@@ -54,7 +54,7 @@
         "speed": 79,
         "power": 170,
         "hp": 100,
-				"power_shot_type": 3
+				"power_shot_type": 4
       }
     ]
   },

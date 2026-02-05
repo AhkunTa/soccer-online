@@ -12,6 +12,7 @@ const BALL_CONTROL_HEIGHT_MAX := 10.0
 
 const GRAVITY := 8.0
 const WALK_ANIM_THRESHOLD := 0.6
+const MAX_JUMPS := 2
 
 @export var speed: float = 80.0
 @export var power: float = 150.0
@@ -25,7 +26,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 # max hp 后续为 临时效果系统预留
 @export var max_hp: float = 100.0
 @export var current_hp: float = 100.0
-
+@export var jump_count := 0
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
@@ -199,6 +200,10 @@ func is_ready_for_kickoff() -> bool:
 func get_hurt(hurt_origin: Vector2) -> void:
 	switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(hurt_origin))
 
+# TODO 击飞状态 倒地状态 倒地后站立恢复状态 ...
+func get_knocked_flying(hurt_origin: Vector2) -> void:
+	switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(hurt_origin))
+
 func set_control_texture() -> void:
 	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]
 
@@ -226,7 +231,6 @@ func can_carry_ball() -> bool:
 	return current_state != null and current_state.can_carry_ball()
 
 func on_tackle_player(player: Player) -> void:
-	print("Tackle detected between ", player.country, " and ", country)
 	if player != self and player.country != country and player == ball.carrier:
 		print("Tackled player get hurt: ", player.fullname)
 		player.get_hurt(position.direction_to(player.position))

@@ -2,7 +2,8 @@ class_name PlayerStateJumpingShot
 extends PlayerState
 
 # 跳跃奖励
-const JUMP_BONUS := 1.5
+const JUMP_BONUS := 1.3
+const DOUBLE_JUMP_BONUS := 2.0 
 # 弹反奖励
 const PARRY_BONUS := 2.0
 const BALL_HEIGHT_MIN := 10.0
@@ -35,7 +36,9 @@ func perform_jump_shot() -> void:
 	var destination := target_goal.get_random_target_position()
 	var direction := ball.position.direction_to(destination)
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
-	var bonus_power := JUMP_BONUS * player.power
+	var bonus_power := JUMP_BONUS * player.power if player.jump_count == 1 else DOUBLE_JUMP_BONUS * player.power
+	print("执行跳跃射门 %s 次跳跃 %s 力量 %s bonus_power %s" % [player.jump_count, player.power, bonus_power, bonus_power, player.power_shot_type])
+
 	ball.shoot(direction * bonus_power, player.height, bonus_power, player.power_shot_type)
 
 func can_pass() -> bool:

@@ -75,9 +75,12 @@ func check_player_damage() -> bool:
 			print("球击中玩家: %s, 当前power: %.1f, 玩家HP: %.1f" % [hit_player.fullname, damage, player_hp])
 
 			if damage >= player_hp:
-				print("玩家 %s 被击倒！" % hit_player.fullname)
-				hit_player.current_hp = 0
-				hit_player.get_hurt(ball.position.direction_to(hit_player.position))
+				if damage / 2 >= player_hp:
+					# 伤害足以击飞玩家
+					hit_player.get_knocked_flying(ball.position.direction_to(hit_player.position))
+				else:
+					# 仅击倒玩家
+					hit_player.get_hurt(ball.position.direction_to(hit_player.position))
 				state_data.shot_power -= player_hp
 				state_data.last_hit_player = hit_player
 
@@ -85,7 +88,7 @@ func check_player_damage() -> bool:
 
 				# 如果power耗尽，球转换为自由状态
 				if state_data.shot_power <= 0:
-					ball.velocity = ball.velocity * 0.3  # 减速
+					ball.velocity = ball.velocity * 0.3 # 减速
 					state_transition_requested.emit(Ball.State.FREEFORM)
 					return true
 			else:

@@ -14,6 +14,7 @@ enum State {
 
 
 enum PowerShotType {
+	NULL,
 	NORMAL, # 普通绝招射门
 	HEIGHT_LIGHT, # 高亮射门 闪烁发光 通常用于 头球和凌空抽射
 	RISING, # 上升射门：球缓慢上升然后直射球门
@@ -29,6 +30,8 @@ const DURATION_PASS_LOCK := 500
 
 const KICKOFF_PASS_DISTANCE := 50.0
 
+# 一般角色 power >150 也就是 需要完全蓄力 或者二段跳 才能触发绝招射门
+const POWER_SHOT_STRENGTH := 300.0
 var state_factory := BallStateFactory.new()
 var velocity := Vector2.ZERO
 var current_state: BallState = null
@@ -68,25 +71,26 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 	current_state.name = "BallStateMachine"
 	call_deferred('add_child', current_state)
 	
-func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NORMAL) -> void:
+func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NULL) -> void:
 	velocity = shot_velocity
-	print("力量 %s 使用 %s" % [power, power_shot_type])
+	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else carrier.power_shot_type
+	print("力量 %s 使用 %s" % [power, player_power_shot_type])
 	carrier.is_invincible_to_ball_damage = true
-	if power >= 200:
+	if power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal():
 		# 根据绝招类型选择不同的状态
-		match power_shot_type:
+		match player_power_shot_type:
 			PowerShotType.STRONG:
-				switch_state(Ball.State.POWER_SHOT_STRONG, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+				switch_state(Ball.State.POWER_SHOT_STRONG, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.HEIGHT_LIGHT:
-				switch_state(Ball.State.POWER_SHOT_HEIGHT_LIGHT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+				switch_state(Ball.State.POWER_SHOT_HEIGHT_LIGHT, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.RISING:
-				switch_state(Ball.State.POWER_SHOT_RISING, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+				switch_state(Ball.State.POWER_SHOT_RISING, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.CURVE:
-				switch_state(Ball.State.POWER_SHOT_CURVE, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+				switch_state(Ball.State.POWER_SHOT_CURVE, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.NORMAL:
-				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			_:
-				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, power_shot_type))
+				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 	else:
 		switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, PowerShotType.NORMAL))
 

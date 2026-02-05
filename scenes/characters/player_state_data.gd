@@ -1,15 +1,14 @@
 class_name PlayerStateData
 
+# 玩家状态数据容器 一般存储临时状态数据
 var shot_direction: Vector2
 var shot_power: float
-var power_shot_type: Ball.PowerShotType = Ball.PowerShotType.NORMAL
 var hurt_direction: Vector2
 var pass_target: Player
 var reset_position: Vector2
 
 static func build() -> PlayerStateData:
 	return PlayerStateData.new()
-
 
 func set_shot_direction(direction: Vector2) -> PlayerStateData:
 	shot_direction = direction
@@ -21,10 +20,6 @@ func set_hurt_direction(direction: Vector2) -> PlayerStateData:
 
 func set_shot_power(power: float) -> PlayerStateData:
 	shot_power = power
-	return self
-
-func set_power_shot_type(type: Ball.PowerShotType) -> PlayerStateData:
-	power_shot_type = type
 	return self
 
 func reset() -> PlayerStateData:
