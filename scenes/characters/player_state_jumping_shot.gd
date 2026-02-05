@@ -3,7 +3,7 @@ extends PlayerState
 
 # 跳跃奖励
 const JUMP_BONUS := 1.3
-const DOUBLE_JUMP_BONUS := 2.0 
+const DOUBLE_JUMP_BONUS := 2.0
 # 弹反奖励
 const PARRY_BONUS := 2.0
 const BALL_HEIGHT_MIN := 10.0

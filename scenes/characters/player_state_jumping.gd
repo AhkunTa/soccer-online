@@ -41,7 +41,7 @@ func _process(_delta: float) -> void:
 	# 落地后转换到 RECOVERING 状态
 	if player.height <= 0:
 		transition_state(Player.State.RECOVERING)
-		player.jump_count  = 0
+		player.jump_count = 0
 
 
 func can_pass() -> bool:
