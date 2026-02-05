@@ -26,6 +26,7 @@ const WALK_ANIM_THRESHOLD := 0.6
 @export var max_hp: float = 100.0
 @export var current_hp: float = 100.0
 
+
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_sprite: Sprite2D = %PlayerSprite
 @onready var teammate_detection_area: Area2D = %TeammateDetectionArea
@@ -67,7 +68,8 @@ var power_shot_type := Ball.PowerShotType.STRONG
 var active_boosts: Dictionary = {}
 var healing_active: bool = false
 var healing_rate: float = 0.0
-
+# 球伤害无敌状态
+var is_invincible_to_ball_damage: bool = false
 
 func _ready() -> void:
 	set_ai_behavior()
@@ -121,6 +123,8 @@ func initialize(context_position: Vector2, context_kickoff_position: Vector2, co
 	skin_color = context_player_data.skin_color
 	fullname = context_player_data.full_name
 	power_shot_type = context_player_data.power_shot_type
+	max_hp = context_player_data.hp
+	current_hp = context_player_data.hp
 	heading = Vector2.LEFT if target_goal.position.x < position.x else Vector2.RIGHT
 	country = context_country
 	

@@ -2,8 +2,7 @@ class_name  PlayerStateShooting
 extends PlayerState
 
 func _enter_tree() -> void:
-	animation_player.play("kick")
-	
+	animation_player.play("kick")	
 func on_animation_complete()-> void:
 	
 	if player.control_scheme == Player.ControlScheme.CPU:

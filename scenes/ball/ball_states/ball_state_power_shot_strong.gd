@@ -1,7 +1,7 @@
 class_name  BallStatePowerShotStrong
 extends BallState
 
-const POWER_SHOT_STRENGTH := 200.0
+const POWER_SHOT_STRENGTH := 20.0
 const POWER_SHOT_HEIGHT := 5.0
 var time_since_shot := Time.get_ticks_msec()
 
@@ -17,4 +17,7 @@ func _enter_tree() -> void:
 	ball.velocity = short_direction * POWER_SHOT_STRENGTH
 
 func _process(_delta: float) -> void:
-	move_and_bounce(_delta)
+	# 检查是否击中玩家造成伤害
+	var ball_caught := check_player_damage()
+	if not ball_caught:
+		move_and_bounce(_delta)

@@ -39,17 +39,20 @@ func _enter_tree() -> void:
 
 func _process(delta: float) -> void:
 	var elapsed_time := Time.get_ticks_msec() - time_since_shot
-	
+
 	if elapsed_time >= DURATION_SHOT:
 		# 射门时间结束，转换为自由状态
 		state_transition_requested.emit(Ball.State.FREEFORM)
 	else:
-		# 应用弧线效果
-		var perpendicular := Vector2(-ball.velocity.y, ball.velocity.x).normalized()
-		ball.velocity += perpendicular * curve_direction * CURVE_STRENGTH * delta
-		
-		# 移动球
-		move_and_bounce(delta)
+		# 检查是否击中玩家造成伤害
+		var ball_caught := check_player_damage()
+		if not ball_caught:
+			# 应用弧线效果
+			var perpendicular := Vector2(-ball.velocity.y, ball.velocity.x).normalized()
+			ball.velocity += perpendicular * curve_direction * CURVE_STRENGTH * delta
+
+			# 移动球
+			move_and_bounce(delta)
 
 func _exit_tree() -> void:
 	shot_particles.emitting = false

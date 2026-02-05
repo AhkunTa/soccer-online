@@ -4,6 +4,7 @@ var lock_duration: int
 var shot_height: float = -1.0
 var shot_power: float = 150.0
 var power_shot_type: Ball.PowerShotType = Ball.PowerShotType.NORMAL
+var last_hit_player: Player = null
 
 static func build() -> BallStateData:
 	return BallStateData.new()

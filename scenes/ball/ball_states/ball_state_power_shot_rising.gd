@@ -77,10 +77,15 @@ func enter_shooting_phase() -> void:
 func process_shooting_phase(delta: float) -> void:
 	# 射门阶段：球保持高度，速度不衰减
 	# 不应用摩擦力，速度保持不变
-	
+
 	# 保持高度不变
 	ball.height_velocity = 0.0
-	
+
+	# 检查是否击中玩家造成伤害
+	var ball_caught := check_player_damage()
+	if ball_caught:
+		return
+
 	# 移动球（可能会碰撞）
 	var collision := ball.move_and_collide(ball.velocity * delta)
 	if collision != null:

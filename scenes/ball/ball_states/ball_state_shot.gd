@@ -25,7 +25,10 @@ func _process(delta: float) -> void:
 	if Time.get_ticks_msec() - time_since_shot >= DURATION_SHOT:
 		state_transition_requested.emit(Ball.State.FREEFORM)
 	else:
-		move_and_bounce(delta)
+		# 检查是否击中玩家造成伤害
+		var ball_caught := check_player_damage()
+		if not ball_caught:
+			move_and_bounce(delta)
 
 func _exit_tree() -> void:
 	sprite.scale.y = 1.0

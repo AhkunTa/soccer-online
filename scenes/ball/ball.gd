@@ -71,7 +71,7 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NORMAL) -> void:
 	velocity = shot_velocity
 	print("力量 %s 使用 %s" % [power, power_shot_type])
-
+	carrier.is_invincible_to_ball_damage = true
 	if power >= 200:
 		# 根据绝招类型选择不同的状态
 		match power_shot_type:
@@ -90,7 +90,6 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 	else:
 		switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, PowerShotType.NORMAL))
 
-	# 在状态切换后清空 carrier
 	carrier = null
 
 func tumble(shot_velocity: Vector2) -> void:

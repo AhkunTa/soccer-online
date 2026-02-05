@@ -55,6 +55,51 @@ func move_and_bounce(delta: float) -> void:
 		AudioPlayer.play(AudioPlayer.Sound.BOUNCE)
 		ball.switch_state(Ball.State.FREEFORM)
 
+# 处理球与玩家碰撞造成伤害的逻辑
+func check_player_damage() -> bool:
+	# 获取所有与球碰撞的玩家
+	var overlapping_players := player_detection_area.get_overlapping_bodies()
+
+	for body in overlapping_players:
+		if body is Player:
+			var hit_player: Player = body as Player
+			# 跳过已经击中过的玩家（避免重复伤害）
+			if state_data.last_hit_player == hit_player:
+				continue
+
+			# 跳过处于球伤害无敌状态的玩家（射击者刚射击后）
+			if hit_player.is_invincible_to_ball_damage:
+				continue
+			var damage := state_data.shot_power
+			var player_hp := hit_player.current_hp
+			print("球击中玩家: %s, 当前power: %.1f, 玩家HP: %.1f" % [hit_player.fullname, damage, player_hp])
+
+			if damage >= player_hp:
+				print("玩家 %s 被击倒！" % hit_player.fullname)
+				hit_player.current_hp = 0
+				hit_player.get_hurt(ball.position.direction_to(hit_player.position))
+				state_data.shot_power -= player_hp
+				state_data.last_hit_player = hit_player
+
+				print("剩余power: %.1f" % state_data.shot_power)
+
+				# 如果power耗尽，球转换为自由状态
+				if state_data.shot_power <= 0:
+					ball.velocity = ball.velocity * 0.3  # 减速
+					state_transition_requested.emit(Ball.State.FREEFORM)
+					return true
+			else:
+				# 伤害小于HP，玩家接住球
+				print("玩家 %s 接住了球！" % hit_player.fullname)
+				hit_player.current_hp -= damage
+
+				# 球被接住，转换为carried状态
+				ball.carrier = hit_player
+				hit_player.control_ball()
+				state_transition_requested.emit(Ball.State.CARRIED)
+				return true
+	return false
+
 func can_air_interact() -> bool:
 	return false
 

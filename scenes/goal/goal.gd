@@ -7,6 +7,9 @@ extends Node2D
 
 var country = ''
 
+const BACK_NET_AREA_STRENGTH := 300.0
+
+
 func _ready() -> void:
 	back_net_area.body_entered.connect(on_ball_enter_back_net.bind())
 	scoring_area.body_entered.connect(on_ball_enter_scoring_area.bind())
@@ -15,7 +18,14 @@ func initialize(context_country) -> void:
 	country = context_country
 
 func on_ball_enter_back_net(ball: Ball) -> void:
-	ball.stop()
+	if ball.current_state.state_data.shot_power > BACK_NET_AREA_STRENGTH:
+		# TODO 破网音效 & 破网动画
+		# AudioPlayer.play(AudioPlayer.Sound.NET_HIT_BROKEN)
+		# ball.switch_state(Ball.State.FREEFORM)
+		pass
+	else:
+		ball.switch_state(Ball.State.FREEFORM)
+		ball.stop()
 
 func on_ball_enter_scoring_area(_ball: Ball) -> void:
 	AudioPlayer.play(AudioPlayer.Sound.WHISTLE)
