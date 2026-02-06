@@ -21,3 +21,6 @@ func _process(_delta: float) -> void:
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		move_and_bounce(_delta)
+
+func can_air_interact() -> bool:
+	return true

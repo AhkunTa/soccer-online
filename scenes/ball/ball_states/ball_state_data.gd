@@ -30,3 +30,7 @@ func set_shot_normal_data(height: float, power: float = 150.0, type: Ball.PowerS
 	shot_power = power
 	power_shot_type = type
 	return self
+
+func set_last_hit_player(player: Player) -> BallStateData:
+	last_hit_player = player
+	return self

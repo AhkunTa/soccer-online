@@ -80,8 +80,8 @@ func check_player_damage() -> bool:
 				else:
 					# 仅击倒玩家
 					hit_player.get_hurt(ball.position.direction_to(hit_player.position))
-				state_data.shot_power -= player_hp
-				state_data.last_hit_player = hit_player
+				state_data.set_shot_power(damage - player_hp)
+				state_data.set_last_hit_player(hit_player)
 
 				print("剩余power: %.1f" % state_data.shot_power)
 

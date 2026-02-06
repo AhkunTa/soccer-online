@@ -30,6 +30,9 @@ func _process(delta: float) -> void:
 		if not ball_caught:
 			move_and_bounce(delta)
 
+func can_air_interact() -> bool:
+	return true
+
 func _exit_tree() -> void:
 	sprite.scale.y = 1.0
 	shot_particles.emitting = false

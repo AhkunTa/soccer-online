@@ -28,11 +28,11 @@ func _process(_delta: float) -> void:
 			transition_state(Player.State.JUMPING_SHOT)
 		# TODO 空中射门逻辑待补充
 		elif ball.can_air_interact():
-			if player.velocity == Vector2.ZERO:
-				if player.is_facing_target_goal():
-					transition_state(Player.State.VOLLEY_KICK)
-				else:
-					transition_state(Player.State.BICYCLE_KICK)
+			if player.is_facing_target_goal():
+				transition_state(Player.State.JUMPING_SHOT)
+			else:
+				transition_state(Player.State.BICYCLE_KICK)
+		return
 
 	# 落地后转换到 RECOVERING 状态
 	if player.height <= 0:

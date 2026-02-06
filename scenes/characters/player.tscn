@@ -410,7 +410,7 @@ height = 16.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ydfq7"]
 radius = 6.0
-height = 20.0
+height = 25.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ug4v2"]
 size = Vector2(10, 10)
@@ -483,21 +483,11 @@ centered = false
 offset = Vector2(-8, -9)
 
 [node name="BallDetectionArea" type="Area2D" parent="." unique_id=1314037260]
+unique_name_in_owner = true
 collision_layer = 0
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea" unique_id=317860300]
-position = Vector2(0, -6)
-rotation = 1.5708
-shape = SubResource("CapsuleShape2D_ydfq7")
-
-[node name="BallDetectionArea" type="Area2D" parent="BallDetectionArea" unique_id=282362668]
-unique_name_in_owner = true
-visible = false
-collision_layer = 0
-collision_mask = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea/BallDetectionArea" unique_id=1691069205]
 position = Vector2(0, -6)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydfq7")
@@ -537,6 +527,7 @@ position = Vector2(0, -6)
 shape = SubResource("RectangleShape2D_jmkan")
 
 [node name="GoalieHands" type="AnimatableBody2D" parent="." unique_id=1996849600]
+visible = false
 collision_layer = 32
 collision_mask = 0
 sync_to_physics = false

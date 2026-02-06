@@ -75,7 +75,9 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 	velocity = shot_velocity
 	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else carrier.power_shot_type
 	print("力量 %s 使用 %s" % [power, player_power_shot_type])
-	carrier.is_invincible_to_ball_damage = true
+	# FIXME 添加 player 添加 
+	if carrier != null:
+		carrier.is_invincible_to_ball_damage = true
 	if power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal():
 		# 根据绝招类型选择不同的状态
 		match player_power_shot_type:
