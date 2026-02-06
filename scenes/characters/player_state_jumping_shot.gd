@@ -37,7 +37,7 @@ func perform_jump_shot() -> void:
 	var direction := ball.position.direction_to(destination)
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
 	var bonus_power := JUMP_BONUS * player.power if player.jump_count == 1 else DOUBLE_JUMP_BONUS * player.power
-	print("执行跳跃射门 %s 次跳跃 %s 力量 %s bonus_power %s" % [player.jump_count, player.power, bonus_power, bonus_power, player.power_shot_type])
+	print("执行跳跃射门 %d 次跳跃 %d 点力量  %d 点总力量 power_shot_typ: %d" % [player.jump_count, player.power, bonus_power, player.power_shot_type])
 
 	ball.shoot(direction * bonus_power, player.height, bonus_power, player.power_shot_type)
 

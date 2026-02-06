@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://dv6q00nlf84ql"]
+[gd_scene format=3 uid="uid://dv6q00nlf84ql"]
 
 [ext_resource type="Script" uid="uid://p6p44a0tis42" path="res://scenes/characters/player.gd" id="1_ct8e2"]
 [ext_resource type="Texture2D" uid="uid://8j3jl22ycrq6" path="res://assets/art/characters/soccer-player.png" id="1_mrolr"]
@@ -425,24 +425,24 @@ size = Vector2(8, 8)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f2b2x"]
 size = Vector2(3, 18)
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" unique_id=1406609438]
 physics_interpolation_mode = 2
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_ct8e2")
 
-[node name="RootParticles" type="Node2D" parent="."]
+[node name="RootParticles" type="Node2D" parent="." unique_id=2108810090]
 unique_name_in_owner = true
 visible = false
 
-[node name="RunParticles" type="GPUParticles2D" parent="RootParticles"]
+[node name="RunParticles" type="GPUParticles2D" parent="RootParticles" unique_id=1767411337]
 unique_name_in_owner = true
 position = Vector2(-5, 0)
 texture = ExtResource("8_eojnx")
 lifetime = 0.4
 process_material = SubResource("ParticleProcessMaterial_eojnx")
 
-[node name="PlayerSprite" type="Sprite2D" parent="."]
+[node name="PlayerSprite" type="Sprite2D" parent="." unique_id=2087940513]
 unique_name_in_owner = true
 y_sort_enabled = true
 material = SubResource("ShaderMaterial_sisoe")
@@ -452,59 +452,57 @@ offset = Vector2(-16, -32)
 hframes = 6
 vframes = 13
 
-[node name="ControlSprite" type="Sprite2D" parent="PlayerSprite"]
+[node name="ControlSprite" type="Sprite2D" parent="PlayerSprite" unique_id=1847680711]
 unique_name_in_owner = true
 position = Vector2(-7, -42)
 texture = ExtResource("3_ydfq7")
 centered = false
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2051806116]
 unique_name_in_owner = true
-libraries = {
-&"": SubResource("AnimationLibrary_ro83n")
-}
+libraries/ = SubResource("AnimationLibrary_ro83n")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2140086410]
 position = Vector2(0, -3)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydrrd")
 
-[node name="TeammateDetectionArea" type="Area2D" parent="."]
+[node name="TeammateDetectionArea" type="Area2D" parent="." unique_id=300931284]
 unique_name_in_owner = true
 visible = false
 collision_layer = 0
 collision_mask = 2
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="TeammateDetectionArea"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="TeammateDetectionArea" unique_id=1596846661]
 polygon = PackedVector2Array(0, -40, 280, -150, 330, -100, 330, 100, 280, 150, 0, 40)
 
-[node name="ShadowSprite" type="Sprite2D" parent="."]
+[node name="ShadowSprite" type="Sprite2D" parent="." unique_id=516189514]
 position = Vector2(0, -6)
 texture = ExtResource("3_6aipo")
 centered = false
 offset = Vector2(-8, -9)
 
-[node name="BallDetectionArea" type="Area2D" parent="."]
+[node name="BallDetectionArea" type="Area2D" parent="." unique_id=1314037260]
 collision_layer = 0
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea" unique_id=317860300]
 position = Vector2(0, -6)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydfq7")
 
-[node name="BallDetectionArea" type="Area2D" parent="BallDetectionArea"]
+[node name="BallDetectionArea" type="Area2D" parent="BallDetectionArea" unique_id=282362668]
 unique_name_in_owner = true
 visible = false
 collision_layer = 0
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea/BallDetectionArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BallDetectionArea/BallDetectionArea" unique_id=1691069205]
 position = Vector2(0, -6)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ydfq7")
 
-[node name="TackleDamageEmitterArea" type="Area2D" parent="."]
+[node name="TackleDamageEmitterArea" type="Area2D" parent="." unique_id=1617933194]
 unique_name_in_owner = true
 visible = false
 collision_layer = 0
@@ -512,38 +510,38 @@ collision_mask = 2
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TackleDamageEmitterArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TackleDamageEmitterArea" unique_id=1741030164]
 position = Vector2(15, -3)
 shape = SubResource("RectangleShape2D_ug4v2")
 
-[node name="OpponentDetectionArea" type="Area2D" parent="."]
+[node name="OpponentDetectionArea" type="Area2D" parent="." unique_id=1414591432]
 unique_name_in_owner = true
 visible = false
 collision_layer = 0
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="OpponentDetectionArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OpponentDetectionArea" unique_id=68420207]
 position = Vector2(20, 0)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_ug4v2")
 
-[node name="PermanentDamageEmitterArea" type="Area2D" parent="."]
+[node name="PermanentDamageEmitterArea" type="Area2D" parent="." unique_id=3922908]
 unique_name_in_owner = true
 collision_layer = 0
 collision_mask = 2
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PermanentDamageEmitterArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PermanentDamageEmitterArea" unique_id=1519285089]
 position = Vector2(0, -6)
 shape = SubResource("RectangleShape2D_jmkan")
 
-[node name="GoalieHands" type="AnimatableBody2D" parent="."]
+[node name="GoalieHands" type="AnimatableBody2D" parent="." unique_id=1996849600]
 collision_layer = 32
 collision_mask = 0
 sync_to_physics = false
 
-[node name="GoalieHandsCollider" type="CollisionShape2D" parent="GoalieHands"]
+[node name="GoalieHandsCollider" type="CollisionShape2D" parent="GoalieHands" unique_id=1345697927]
 unique_name_in_owner = true
 position = Vector2(0, -14)
 shape = SubResource("RectangleShape2D_f2b2x")
