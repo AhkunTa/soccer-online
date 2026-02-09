@@ -38,10 +38,6 @@ func _enter_tree() -> void:
 	# 开始淡出
 	current_phase = Phase.FADING_OUT
 	time_since_shot = Time.get_ticks_msec()
-
-	# 播放特效
-	shot_particles.emitting = true
-	GameEvents.impact_received.emit(ball.position, true)
 	print("绝招激活：隐身射门！")
 
 func _process(_delta: float) -> void:
@@ -92,5 +88,4 @@ func can_air_interact() -> bool:
 func _exit_tree() -> void:
 	# 恢复球的透明度
 	sprite.modulate.a = 1.0
-	shot_particles.emitting = false
 	print("隐身射门结束")
