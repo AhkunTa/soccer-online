@@ -10,6 +10,8 @@ func _init() -> void:
 		Ball.State.POWER_SHOT_RISING: BallStatePowerShotRising,
 		Ball.State.POWER_SHOT_CURVE: BallStatePowerShotCurve,
 		Ball.State.POWER_SHOT_NORMAL: BallStatePowerShotNormal,
+		# Ball.State.POWER_SHOT_HEIGHT_LIGHT: BallStatePowerShotHeightLight,
+		Ball.State.POWER_SHOT_INVISIBLE: BallStatePowerShotInvisible,
 		# 添加更多绝招状态
 	}
 

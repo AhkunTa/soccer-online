@@ -34,7 +34,7 @@ func _enter_tree() -> void:
 	time_since_start = Time.get_ticks_msec()
 	
 	# 设置球的动画
-	set_ball_animation_from_velocity()
+	# set_ball_animation_from_velocity()
 	
 	# 播放特效
 	shot_particles.emitting = true

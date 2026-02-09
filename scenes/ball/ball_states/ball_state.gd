@@ -27,7 +27,15 @@ func setup(context_ball: Ball, context_state_data: BallStateData, context_player
 func transition_state(new_state: BallState, data: BallStateData = BallStateData.new()) -> void:
 	state_transition_requested.emit(new_state, data)
 
-func set_ball_animation_from_velocity() -> void:
+func set_ball_animation_from_velocity(animation_name) -> void:
+	if ball.velocity.x >= 0:
+		animation_player.play(animation_name)
+		animation_player.advance(0)
+	else:
+		animation_player.play_backwards(animation_name)
+		animation_player.advance(0)
+
+func set_ball_roll_animation_from_velocity() -> void:
 	if ball.velocity == Vector2.ZERO:
 		animation_player.play("idle")
 	elif ball.velocity.x >= 0:

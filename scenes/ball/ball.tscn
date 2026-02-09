@@ -56,6 +56,9 @@ tracks/0/keys = {
 "values": [0]
 }
 
+[sub_resource type="Animation" id="Animation_jbgth"]
+resource_name = "power_shot_gemini"
+
 [sub_resource type="Animation" id="Animation_xotqv"]
 resource_name = "power_shot_strong"
 length = 0.4
@@ -96,6 +99,7 @@ tracks/0/keys = {
 _data = {
 &"RESET": SubResource("Animation_s88pd"),
 &"idle": SubResource("Animation_nlnnd"),
+&"power_shot_gemini": SubResource("Animation_jbgth"),
 &"power_shot_strong": SubResource("Animation_xotqv"),
 &"roll": SubResource("Animation_gidy6")
 }

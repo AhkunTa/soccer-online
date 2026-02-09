@@ -11,6 +11,3 @@ func _enter_tree() -> void:
 
 func _process(_delta: float) -> void:
 	pass
-
-func set_ball_animation_from_velocity() -> void:
-	sprite.play("power_shot")

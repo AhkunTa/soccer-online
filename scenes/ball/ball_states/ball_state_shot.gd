@@ -8,7 +8,7 @@ const DEFAULT_SHOT_HEIGHT := 10.0
 var time_since_shot := Time.get_ticks_msec()
 
 func _enter_tree() -> void:
-	set_ball_animation_from_velocity()
+	set_ball_roll_animation_from_velocity()
 	sprite.scale.y = SHOT_SPRITE_SCALE
 
 	if state_data.shot_height >= 0:

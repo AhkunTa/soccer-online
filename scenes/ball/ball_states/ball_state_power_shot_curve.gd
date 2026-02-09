@@ -33,7 +33,7 @@ func _enter_tree() -> void:
 	time_since_shot = Time.get_ticks_msec()
 	
 	# 设置动画和特效
-	set_ball_animation_from_velocity()
+	set_ball_roll_animation_from_velocity()
 	shot_particles.emitting = true
 	GameEvents.impact_received.emit(ball.position, true)
 
@@ -57,4 +57,3 @@ func _process(delta: float) -> void:
 func _exit_tree() -> void:
 	shot_particles.emitting = false
 	print("弧线射门结束")
-

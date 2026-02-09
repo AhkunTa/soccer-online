@@ -410,7 +410,7 @@ height = 16.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ydfq7"]
 radius = 6.0
-height = 25.0
+height = 20.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ug4v2"]
 size = Vector2(10, 10)
@@ -494,7 +494,6 @@ shape = SubResource("CapsuleShape2D_ydfq7")
 
 [node name="TackleDamageEmitterArea" type="Area2D" parent="." unique_id=1617933194]
 unique_name_in_owner = true
-visible = false
 collision_layer = 0
 collision_mask = 2
 monitoring = false
@@ -506,7 +505,6 @@ shape = SubResource("RectangleShape2D_ug4v2")
 
 [node name="OpponentDetectionArea" type="Area2D" parent="." unique_id=1414591432]
 unique_name_in_owner = true
-visible = false
 collision_layer = 0
 collision_mask = 2
 

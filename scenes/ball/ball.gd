@@ -4,11 +4,12 @@ enum State {
 	CARRIED,
 	FREEFORM,
 	SHOT,
-	POWER_SHOT_STRONG,
 	POWER_SHOT_NORMAL,
-	POWER_SHOT_RISING,
-	POWER_SHOT_CURVE,
 	POWER_SHOT_HEIGHT_LIGHT,
+	POWER_SHOT_RISING,
+	POWER_SHOT_STRONG,
+	POWER_SHOT_CURVE,
+	POWER_SHOT_INVISIBLE,
 	# TODO 可以在这里添加更多绝招状态...,
 }
 
@@ -19,7 +20,8 @@ enum PowerShotType {
 	HEIGHT_LIGHT, # 高亮射门 闪烁发光 通常用于 头球和凌空抽射
 	RISING, # 上升射门：球缓慢上升然后直射球门
 	STRONG, # 强力射门：球速度更快，球扁平状
-	CURVE # 弧线射门：球以弧线轨迹飞向球门
+	CURVE, # 弧线射门：球以弧线轨迹飞向球门
+	INVISIBLE # 隐形射门：球在飞行过程中变得隐形
 }
 
 const DISTANCE_HIGH_PASS := 100
@@ -91,6 +93,8 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 				switch_state(Ball.State.POWER_SHOT_CURVE, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.NORMAL:
 				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
+			PowerShotType.INVISIBLE:
+				switch_state(Ball.State.POWER_SHOT_INVISIBLE, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			_:
 				switch_state(Ball.State.SHOT, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 	else:
