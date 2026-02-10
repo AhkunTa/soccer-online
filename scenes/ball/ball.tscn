@@ -96,13 +96,18 @@ tracks/0/keys = {
 "values": [0, 1, 2, 3]
 }
 
+[sub_resource type="Animation" id="Animation_yjhvv"]
+resource_name = "shake"
+step = 0.1
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ye0rm"]
 _data = {
 &"RESET": SubResource("Animation_s88pd"),
 &"idle": SubResource("Animation_nlnnd"),
 &"power_shot_gemini": SubResource("Animation_jbgth"),
 &"power_shot_strong": SubResource("Animation_xotqv"),
-&"roll": SubResource("Animation_gidy6")
+&"roll": SubResource("Animation_gidy6"),
+&"shake": SubResource("Animation_yjhvv")
 }
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tpnuj"]

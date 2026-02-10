@@ -45,15 +45,15 @@ func set_ball_roll_animation_from_velocity() -> void:
 		animation_player.play_backwards("roll")
 		animation_player.advance(0)
 
-func process_gravity(delta: float, bounciness: float = 0.0) -> void:
+func process_gravity(delta: float, height_velocity_decay: float = 0.0, velocity_decay: float = 0.0) -> void:
 	if ball.height > 0 or ball.height_velocity > 0:
 		ball.height_velocity -= GRAVITY * delta
 		ball.height += ball.height_velocity
 		if ball.height < 0:
 			ball.height = 0
-			if bounciness > 0 and ball.height_velocity < -0.1:
-				ball.height_velocity = - ball.height_velocity * bounciness
-				ball.velocity *= bounciness
+			if height_velocity_decay > 0 and ball.height_velocity < -0.1:
+				ball.height_velocity = - ball.height_velocity * height_velocity_decay
+				ball.velocity *= velocity_decay
 
 func move_and_bounce(delta: float) -> void:
 	var collision := ball.move_and_collide(ball.velocity * delta)
@@ -115,11 +115,11 @@ func add_highlight_effect() -> void:
 	var time = Time.get_ticks_msec() / 1000.0
 	
 	# 使用 sin 波形实现脉冲
-	var pulse = (sin(time * 10.0) + 1.0) / 2.0  # 0.0 ~ 1.0
+	var pulse = (sin(time * 10.0) + 1.0) / 2.0 # 0.0 ~ 1.0
 	
 	# 在白色和红色之间插值
-	var white = Color(2, 2, 2, 1)    # 高亮白
-	var red = Color(3, 0.3, 0.3, 1)  # 高亮红
+	var white = Color(2, 2, 2, 1) # 高亮白
+	var red = Color(3, 0.3, 0.3, 1) # 高亮红
 	sprite.modulate = white.lerp(red, pulse)
 
 func remove_highlight_effect() -> void:

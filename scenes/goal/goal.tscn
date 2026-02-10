@@ -66,6 +66,12 @@ position = Vector2(21, -35)
 [node name="BottomTarget" type="Node2D" parent="Targets" unique_id=1792599964]
 position = Vector2(21, -10)
 
+[node name="PowerShotTargets" type="Node2D" parent="." unique_id=162750339]
+unique_name_in_owner = true
+
+[node name="BounceTarget" type="Node2D" parent="PowerShotTargets" unique_id=1193875395]
+position = Vector2(90, -40)
+
 [node name="InvisiableWalls" type="StaticBody2D" parent="." unique_id=1568320432]
 collision_layer = 8
 

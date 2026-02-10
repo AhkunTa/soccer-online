@@ -4,6 +4,7 @@ extends Node2D
 @onready var back_net_area := %BackNetArea
 @onready var scoring_area := %ScoringArea
 @onready var targets := %Targets
+@onready var power_shot_targets := %PowerShotTargets
 
 var country = ''
 
@@ -43,6 +44,12 @@ func get_top_target_position() -> Vector2:
 	
 func get_bottom_target_position() -> Vector2:
 	return targets.get_child(targets.get_child_count() - 1).global_position
+
+func get_random_power_shot_target_position() -> Vector2:
+	return power_shot_targets.get_child(randi_range(0, power_shot_targets.get_child_count() - 1)).global_position
+
+func get_bounce_target_position() -> Vector2:
+	return power_shot_targets.get_child(0).global_position
 
 func get_scoring_area() -> Area2D:
 	return scoring_area

@@ -33,6 +33,8 @@ const DURATION_TUMBLE_LOCK := 200
 const DURATION_PASS_LOCK := 500
 
 const KICKOFF_PASS_DISTANCE := 50.0
+# 绝招最短释放距离
+const MIN_POWER_SHOT_DISTANCE := 100.0
 
 # 一般角色 power >150 也就是 需要完全蓄力 或者二段跳 才能触发绝招射门
 const POWER_SHOT_STRENGTH := 300.0
@@ -82,7 +84,7 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 	# FIXME 添加 player 添加 
 	if carrier != null:
 		carrier.is_invincible_to_ball_damage = true
-	if power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal():
+	if power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal() and position.distance_to(carrier.target_goal.position) >= MIN_POWER_SHOT_DISTANCE:
 		# 根据绝招类型选择不同的状态
 		match player_power_shot_type:
 			PowerShotType.STRONG:

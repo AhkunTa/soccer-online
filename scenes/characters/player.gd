@@ -310,3 +310,6 @@ func is_facing_target_goal() -> bool:
 
 func get_direction_to_opponent_goal() -> Vector2:
 	return position.direction_to(target_goal.get_random_target_position())
+
+func get_direction_to_bounce_goal() -> Vector2:
+	return position.direction_to(target_goal.get_bounce_target_position())
