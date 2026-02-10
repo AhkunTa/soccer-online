@@ -58,6 +58,7 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_jbgth"]
 resource_name = "power_shot_gemini"
+step = 0.1
 
 [sub_resource type="Animation" id="Animation_xotqv"]
 resource_name = "power_shot_strong"
@@ -156,6 +157,7 @@ collision_mask = 2
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDetection" unique_id=1463058356]
+visible = false
 shape = SubResource("CircleShape2D_tpnuj")
 
 [node name="ScoringRayCast" type="RayCast2D" parent="." unique_id=217225722]
@@ -177,3 +179,5 @@ monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerProximityArea" unique_id=842225907]
 shape = SubResource("CircleShape2D_xotqv")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=909129139]

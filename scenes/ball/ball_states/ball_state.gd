@@ -110,6 +110,22 @@ func check_player_damage() -> bool:
 				return true
 	return false
 
+
+func add_highlight_effect() -> void:
+	var time = Time.get_ticks_msec() / 1000.0
+	
+	# 使用 sin 波形实现脉冲
+	var pulse = (sin(time * 10.0) + 1.0) / 2.0  # 0.0 ~ 1.0
+	
+	# 在白色和红色之间插值
+	var white = Color(2, 2, 2, 1)    # 高亮白
+	var red = Color(3, 0.3, 0.3, 1)  # 高亮红
+	sprite.modulate = white.lerp(red, pulse)
+
+func remove_highlight_effect() -> void:
+	sprite.modulate = Color(1, 1, 1, 1)
+
+
 func can_air_interact() -> bool:
 	return false
 

@@ -61,7 +61,8 @@ func _enter_tree() -> void:
 	print("绝招激活：弧线射门！类型：%s " % [curve_name])
 
 func _process(delta: float) -> void:
-	# 检查是否击中玩家造成伤害
+	# 弧线射门增加高亮效果
+	add_highlight_effect()
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		apply_curve_effect(delta)
@@ -87,4 +88,5 @@ func can_air_interact() -> bool:
 
 func _exit_tree() -> void:
 	shot_particles.emitting = false
+	remove_highlight_effect()
 	print("弧线射门结束")
