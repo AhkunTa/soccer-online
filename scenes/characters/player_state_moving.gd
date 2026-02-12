@@ -6,7 +6,7 @@ func _process(_delta: float) -> void:
 		pass
 		# FIXME debug
 		# if player.country == GameManager.player_setup[0]:
-		# 		ai_behavior.process_ai()
+				# ai_behavior.process_ai()
 	else:
 		handle_human_movement()
 	player.set_movement_animation()
