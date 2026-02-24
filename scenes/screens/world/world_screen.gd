@@ -1,5 +1,5 @@
-class_name WorldManager
-extends Node2D
+class_name WorldScreen
+extends Screen
 
 # 图层管理
 @onready var background_layer: Node2D = $Backgrounds
@@ -41,7 +41,7 @@ func setup_layers() -> void:
 
 func setup_area_generator() -> void:
 	# 加载区域生成器脚本
-	var area_script = preload("res://scenes/world/area/area_generator.gd")
+	var area_script = preload("res://scenes/screens/world/area/area_generator.gd")
 	area_generator = Node2D.new()
 	area_generator.set_script(area_script)
 	area_generator.name = "AreaGenerator"

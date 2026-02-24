@@ -1,4 +1,5 @@
-extends Control
+class_name MainMenuScreen
+extends Screen
 
 @onready var selection_icon: TextureRect = %SelectionIcon
 @onready var selectable_menu_nodes: Array[TextureRect] = [%SinglePlayerTexture, %TwoPlayerTexture, %OnlineGame]
@@ -25,7 +26,6 @@ func _process(_delta: float) -> void:
 			
 		
 func submit_selection(index: int) -> void:
-	AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
 
 	var country_default := DataLoader.get_countries()[1]
 
@@ -36,8 +36,13 @@ func submit_selection(index: int) -> void:
 		player_two = country_default
 	else:
 		#TODO ONLINE GAME
+		AudioPlayer.play(AudioPlayer.Sound.UI_DISABLE)
+
 		return
+	AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
+
 	GameManager.player_setup = [country_default, player_two]
+	transition_screen(SoccerGame.ScreenType.TEAM_SELECTION)
 
 
 func refresh_ui() -> void:

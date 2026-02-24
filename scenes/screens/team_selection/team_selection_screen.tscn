@@ -1,20 +1,13 @@
 [gd_scene format=3 uid="uid://qicyu0y0pxrv"]
 
 [ext_resource type="Texture2D" uid="uid://n2areom6dxt5" path="res://assets/art/ui/teamselection/team-selection-background.png" id="1_a11dq"]
-[ext_resource type="Script" uid="uid://bm2dol814jgej" path="res://scenes/team_selection/team_selection_screen.gd" id="1_oew46"]
+[ext_resource type="Script" uid="uid://bm2dol814jgej" path="res://scenes/screens/team_selection/team_selection_screen.gd" id="1_oew46"]
 [ext_resource type="Texture2D" uid="uid://q4lsqet1uarn" path="res://assets/art/ui/teamselection/select-team-label.png" id="2_onbiy"]
 
-[node name="TeamSelectionScreen" type="Control" unique_id=1101235658]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="TeamSelectionScreen" type="Node" unique_id=664080883]
 script = ExtResource("1_oew46")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1927246924]
-layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("1_a11dq")

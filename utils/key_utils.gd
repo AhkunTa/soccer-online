@@ -6,9 +6,9 @@ enum Action {LEFT, RIGHT, UP, DOWN, SHOOT, PASS, JUMP}
 const COMBO_TOLERANCE_WINDOW = 50
 
 const COMBO_KEYS: Array[Array] = [
-	[Action.PASS, Action.SHOOT],  # 跳跃组合键
-	[Action.LEFT, Action.SHOOT],  # 左侧绝招组合键 跳跃中向左绝招
-	[Action.RIGHT, Action.SHOOT]  # 右侧绝招组合键 跳跃中向右绝招
+	[Action.PASS, Action.SHOOT], # 跳跃组合键
+	[Action.LEFT, Action.SHOOT], # 左侧绝招组合键 跳跃中向左绝招
+	[Action.RIGHT, Action.SHOOT] # 右侧绝招组合键 跳跃中向右绝招
 ]
 
 const ACTIONS_MAP: Dictionary = {

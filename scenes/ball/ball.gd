@@ -84,7 +84,7 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 	# FIXME 添加 player 添加 
 	if carrier != null:
 		carrier.is_invincible_to_ball_damage = true
-	if power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal() and position.distance_to(carrier.target_goal.position) >= MIN_POWER_SHOT_DISTANCE:
+	if carrier != null and power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal() and position.distance_to(carrier.target_goal.position) >= MIN_POWER_SHOT_DISTANCE:
 		# 根据绝招类型选择不同的状态
 		match player_power_shot_type:
 			PowerShotType.STRONG:

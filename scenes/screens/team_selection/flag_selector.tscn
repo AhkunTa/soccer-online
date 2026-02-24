@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c0fp4t2idoga2"]
 
 [ext_resource type="Texture2D" uid="uid://h01dep303dh2" path="res://assets/art/ui/flags/flag-selection.png" id="1_3ia2b"]
-[ext_resource type="Script" uid="uid://td1rycjfgn4h" path="res://scenes/team_selection/flag_selector.gd" id="1_u0mo3"]
+[ext_resource type="Script" uid="uid://td1rycjfgn4h" path="res://scenes/screens/team_selection/flag_selector.gd" id="1_u0mo3"]
 [ext_resource type="Texture2D" uid="uid://l5nflo672p66" path="res://assets/art/props/1p.png" id="2_dybpe"]
 [ext_resource type="Texture2D" uid="uid://b0lq53mtgixu4" path="res://assets/art/props/2p.png" id="2_k6wrs"]
 
