@@ -10,6 +10,10 @@ extends Screen
 # 区域生成器
 var area_generator: Node2D
 
+func _enter_tree() -> void:
+	GameManager.start_game()
+
+
 func _ready() -> void:
 	# TODO 地图管理器
 	#setup_layers()

@@ -25,7 +25,7 @@ func _process(_delta: float) -> void:
 			submit_selection(current_selected_index)
 			
 		
-func submit_selection(index: int) -> void:
+func submit_selection(_index: int) -> void:
 
 	var country_default := DataLoader.get_countries()[1]
 

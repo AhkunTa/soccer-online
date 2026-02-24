@@ -3,7 +3,7 @@ extends BallState
 
 # 绝招：上升射门
 # 球缓慢上升一定距离，然后直接射击球门，没有速度衰减
-
+# TODO
 # 上升阶段持续时间（毫秒）
 const DURATION_RISING := 500
 # 上升的目标高度

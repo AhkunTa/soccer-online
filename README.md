@@ -32,13 +32,13 @@ Requirements: 300+ power, 100+ units from goal, facing target
 
 ## 🎯 Controls
 
-| Action | Player 1  | Player 2 |
-| ------ | --------- | -------- |
-| Move   | WASD      | ⬆️⬇️⬅️➡️ |
-| Shoot  | K         |          |
-| Pass   | J         |          |
-| Jump   | J+K       |          |
-| Tackle | J(moving) |          |
+| Action | Player 1  | Player 2  |
+| ------ | --------- | --------- |
+| Move   | WASD      | ⬆️⬇️⬅️➡️  |
+| Shoot  | K         | ]         |
+| Pass   | J         | [         |
+| Jump   | J+K       | [+]       |
+| Tackle | k(moving) | ](moving) |
 
 **Tips**: Hold shoot to charge power • Jump + Shoot for aerial shots • Pass without ball to swap players
 
