@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://4xdxuc0ugl25" path="res://assets/art/ui/mainmenu/title.png" id="2_dauu4"]
 [ext_resource type="Texture2D" uid="uid://dwud458ytu6ua" path="res://assets/art/ui/mainmenu/menu-mask.png" id="3_d0tpg"]
 [ext_resource type="Texture2D" uid="uid://cce1336vhg6vu" path="res://assets/art/ui/mainmenu/layout-p1.png" id="4_5g12y"]
-[ext_resource type="Texture2D" uid="uid://bscbn4oydltd2" path="res://assets/art/ui/mainmenu/layout-p2.png" id="5_sf18h"]
+[ext_resource type="Texture2D" uid="uid://dwmxbmspbq882" path="res://assets/art/ui/mainmenu/layout-p2.png" id="5_sf18h"]
 [ext_resource type="Texture2D" uid="uid://cq2v5rhfkwrh2" path="res://assets/art/ui/mainmenu/1-player-selected.png" id="6_filxx"]
 [ext_resource type="Texture2D" uid="uid://dhed4rmss6ekx" path="res://assets/art/ui/mainmenu/2-players.png" id="7_3g2hh"]
 [ext_resource type="Texture2D" uid="uid://bqb268is4lxdk" path="res://assets/art/ui/mainmenu/ball-selection.png" id="8_cs0cy"]
