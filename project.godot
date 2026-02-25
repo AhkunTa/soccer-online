@@ -26,7 +26,7 @@ GameEvents="*res://scenes/game_events.gd"
 GameManager="*res://scenes/game_manager/game_manager.gd"
 AudioPlayer="*res://scenes/audio/audio_player.gd"
 InputManager="*res://utils/input_manager.gd"
-MusicPlayer="*uid://cmi6kwu61p2or"
+MusicPlayer="*res://scenes/audio/music_player.gd"
 
 [debug]
 
