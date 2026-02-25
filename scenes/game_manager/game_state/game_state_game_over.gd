@@ -2,5 +2,5 @@ class_name GameStateGameOver
 extends GameState
 
 func _enter_tree() -> void:
-	var country_winner :String = manager.get_winner_country()
+	var country_winner: String = manager.get_winner_country()
 	GameEvents.game_over.emit(country_winner)

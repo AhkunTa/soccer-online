@@ -7,10 +7,15 @@ extends Screen
 @onready var effects_layer: Node2D = $EffectsContainer
 @onready var ui_layer: CanvasLayer = %UI
 
+# Timer
+@onready var game_over_timer: Timer = %GameOverTimer
+
+
 # 区域生成器
 var area_generator: Node2D
 
 func _enter_tree() -> void:
+	GameEvents.game_over.connect(on_game_over.bind())
 	GameManager.start_game()
 
 
@@ -18,7 +23,18 @@ func _ready() -> void:
 	# TODO 地图管理器
 	#setup_layers()
 	#setup_area_generator()
-	pass
+	game_over_timer.timeout.connect(on_transition.bind())
+
+func on_game_over(_winning: String) -> void:
+	game_over_timer.start()
+
+func on_transition() -> void:
+	if screen_data.tournament != null and GameManager.current_match.winner == GameManager.player_setup[0]:
+		screen_data.tournament.advance()
+		transition_screen(SoccerGame.ScreenType.TOURNAMENT, screen_data)
+	else:
+		transition_screen(SoccerGame.ScreenType.MAIN_MENU)
+
 
 func setup_layers() -> void:
 	# 创建效果图层（如果不存在）
@@ -32,7 +48,7 @@ func setup_layers() -> void:
 	if not has_node("UILayer"):
 		ui_layer = CanvasLayer.new()
 		ui_layer.name = "UILayer"
-		ui_layer.layer = 10  # 确保UI在最上层
+		ui_layer.layer = 10 # 确保UI在最上层
 		add_child(ui_layer)
 	
 	# 设置图层顺序（z_index）
@@ -132,9 +148,9 @@ func print_layer_info() -> void:
 
 # 输入处理（用于调试）
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):  # Space 键
+	if event.is_action_pressed("ui_accept"): # Space 键
 		generate_new_areas()
-	elif event.is_action_pressed("ui_cancel"):  # ESC 键
+	elif event.is_action_pressed("ui_cancel"): # ESC 键
 		clear_all_areas()
-	elif event.is_action_pressed("ui_select"):  # Enter 键
+	elif event.is_action_pressed("ui_select"): # Enter 键
 		print_layer_info()

@@ -76,11 +76,10 @@ func on_selector_selected() -> void:
 	var country_p2 := GameManager.player_setup[1]
 	if not country_p2.is_empty():
 		if country_p1 != country_p2:
+			# P1 作为 home，P2 作为 away
 			GameManager.current_match = Match.new(country_p1, country_p2)
 			transition_screen(SoccerGame.ScreenType.IN_GAME)
 		else :
 			AudioPlayer.play(AudioPlayer.Sound.UI_DISABLE)
 	elif country_p2.is_empty():
-		# TODO single player mode
-		GameManager.current_match = Match.new(country_p1, 'USA')
-		transition_screen(SoccerGame.ScreenType.IN_GAME)
+		transition_screen(SoccerGame.ScreenType.TOURNAMENT, ScreenData.build().set_tournament(Tournament.new()))

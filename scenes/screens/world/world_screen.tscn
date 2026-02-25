@@ -156,3 +156,8 @@ y_sort_enabled = true
 
 [node name="UI" parent="." unique_id=63367791 instance=ExtResource("12_sgfi7")]
 unique_name_in_owner = true
+
+[node name="GameOverTimer" type="Timer" parent="." unique_id=536145426]
+unique_name_in_owner = true
+wait_time = 3.0
+one_shot = true

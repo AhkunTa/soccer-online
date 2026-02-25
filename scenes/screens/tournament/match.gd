@@ -22,7 +22,7 @@ func increase_score(country: String) -> void:
 	update_match_info()
 
 func update_match_info() -> void:
-	winner = country_home if goals_home > goals_away else country_away if goals_away > goals_home else "Tied"
+	winner = country_home if goals_home > goals_away else country_away
 	final_score = "%d - %d" % [max(goals_home, goals_away), min(goals_home, goals_away)]
 
 func has_someone_scored() -> bool:

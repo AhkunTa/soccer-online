@@ -5,12 +5,10 @@ const DURATION_GAME_SEC := 2 * 60 # 2 minutes
 const DURATION_IMPACT_PAUSE := 100
 enum State {IN_PLAY, SCORED, RESET, KICKOFF, OVERTIME, GAMEOVER}
 
-# var countries: Array[String] = ['FRANCE', "USA"]
-
 var current_match: Match = null
 var state_factory := GameStateFactory.new()
 var time_left: float
-var current_state: GameState = null 
+var current_state: GameState = null
 var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 
@@ -33,7 +31,7 @@ func switch_state(state: State, data: GameStateData = GameStateData.build()) -> 
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, data)
+	current_state.setup(self , data)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "GameStateMacheine: " + str(state)
 	call_deferred('add_child', current_state)
@@ -43,9 +41,6 @@ func is_coop() -> bool:
 
 func is_single_player() -> bool:
 	return player_setup[1].is_empty()
-
-# func is_game_tied() -> bool:
-# 	return score[0] == score[1]
 
 func is_time_over() -> bool:
 	return time_left <= 0

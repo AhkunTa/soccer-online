@@ -22,13 +22,16 @@ var player_country: String = GameManager.player_setup[0]
 var tournament: Tournament = null
 
 func _ready() -> void:
-	tournament = Tournament.new()
+	tournament = screen_data.tournament
 	refresh_brackets()
 
 func _process(_delta: float) -> void:
 	if KeyUtils.is_action_just_pressed(Player.ControlScheme.P1, KeyUtils.Action.SHOOT):
-		tournament.advance()
-		refresh_brackets()
+		if tournament.current_stage < Tournament.Stage.COMPLETE:
+			transition_screen(SoccerGame.ScreenType.IN_GAME, screen_data)
+		else:
+			transition_screen(SoccerGame.ScreenType.MAIN_MENU)
+		AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
 
 func refresh_brackets() -> void:
 	stage_texture_node.texture = STAGE_TEXTURES[tournament.current_stage]
@@ -54,7 +57,14 @@ func refresh_bracket_stage(stage: Tournament.Stage) -> void:
 			elif [match.country_home, match.country_away].has(player_country) and stage == tournament.current_stage:
 				var player_flag := flag_node_home if match.country_home == player_country else flag_node_away
 				player_flag.set_as_current_team()
-				GameManager.current_match = match
+
+				# 确保 P1 始终在左边：由于 spawns.scale.x = -1 翻转，home 队在左边
+				# 如果 P1 是 away，需要创建一个交换了 home 和 away 的新 Match
+				print("当前比赛: %s vs %s, 玩家国家: %s" % [match.country_home, match.country_away, player_country])
+				if match.country_away == player_country:
+					GameManager.current_match = Match.new(match.country_away, match.country_home)
+				else:
+					GameManager.current_match = match
 	else:
 		var winner_flag_node := flag_nodes[0] as BracketFlag
 		winner_flag_node.texture = FlagHelper.get_texture(tournament.winner)
