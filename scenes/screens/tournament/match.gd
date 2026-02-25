@@ -2,8 +2,8 @@ class_name Match
 
 var country_home: String
 var country_away: String
-var goals_home: int
-var goals_away: int
+var goals_home: int = 0
+var goals_away: int = 0
 var final_score: String
 var winner: String
 

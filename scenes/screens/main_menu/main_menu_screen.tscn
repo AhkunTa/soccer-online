@@ -249,6 +249,7 @@ _data = {
 
 [node name="MainMenuScreen" type="Node" unique_id=1225610826]
 script = ExtResource("1_kj8vl")
+music = 2
 
 [node name="Background" type="TextureRect" parent="." unique_id=680499268]
 offset_right = 40.0

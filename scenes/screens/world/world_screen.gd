@@ -10,20 +10,16 @@ extends Screen
 # Timer
 @onready var game_over_timer: Timer = %GameOverTimer
 
-
 # 区域生成器
 var area_generator: Node2D
-
-func _enter_tree() -> void:
-	GameEvents.game_over.connect(on_game_over.bind())
-	GameManager.start_game()
-
 
 func _ready() -> void:
 	# TODO 地图管理器
 	#setup_layers()
 	#setup_area_generator()
 	game_over_timer.timeout.connect(on_transition.bind())
+	GameEvents.game_over.connect(on_game_over.bind())
+	GameManager.start_game()
 
 func on_game_over(_winning: String) -> void:
 	game_over_timer.start()

@@ -3,11 +3,15 @@ extends Node
 
 signal screen_transitiom_requested(new_screen: SoccerGame.ScreenType, data: ScreenData)
 
-var game: SoccerGame = null
+@export var music: MusicPlayer.Music
 
 var screen_data: ScreenData = null
+var game: SoccerGame = null
 
-func setup(context_game:SoccerGame, context_data: ScreenData) ->void:
+func _enter_tree() -> void:
+	MusicPlayer.play_music(music)
+
+func setup(context_game: SoccerGame, context_data: ScreenData) -> void:
 	game = context_game
 	screen_data = context_data
 

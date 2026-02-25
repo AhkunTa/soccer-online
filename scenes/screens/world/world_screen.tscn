@@ -20,6 +20,7 @@ size = Vector2(803.5, 8)
 
 [node name="WorldScreen" type="Node" unique_id=279953910]
 script = ExtResource("1_hlf3v")
+music = 1
 
 [node name="Camera" type="Camera2D" parent="." unique_id=1816151541 node_paths=PackedStringArray("ball")]
 position = Vector2(140, 90)
