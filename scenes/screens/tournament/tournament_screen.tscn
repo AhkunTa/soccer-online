@@ -31,6 +31,7 @@ theme_override_constants/separation = 0
 alignment = 1
 
 [node name="QFLeftContainer" type="VBoxContainer" parent="Background/BracketsContainer" unique_id=87108149]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
@@ -64,6 +65,7 @@ custom_minimum_size = Vector2(2, 0)
 layout_mode = 2
 
 [node name="SFLeftContainer" type="VBoxContainer" parent="Background/BracketsContainer" unique_id=1097582905]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
@@ -83,6 +85,7 @@ custom_minimum_size = Vector2(2, 0)
 layout_mode = 2
 
 [node name="FinalLeftContainer" type="VBoxContainer" parent="Background/BracketsContainer" unique_id=1523588307]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
@@ -101,6 +104,7 @@ layout_mode = 2
 texture = ExtResource("5_ru4pj")
 
 [node name="FinalRightContainer" type="VBoxContainer" parent="Background/BracketsContainer" unique_id=931831733]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
@@ -113,6 +117,7 @@ custom_minimum_size = Vector2(2, 0)
 layout_mode = 2
 
 [node name="SFRightContainer" type="VBoxContainer" parent="Background/BracketsContainer" unique_id=25524889]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
@@ -132,6 +137,7 @@ custom_minimum_size = Vector2(2, 0)
 layout_mode = 2
 
 [node name="QFRightContainer" type="VBoxContainer" parent="Background/BracketsContainer" unique_id=1748739355]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
@@ -188,6 +194,7 @@ grow_horizontal = 2
 texture = ExtResource("6_7eqbv")
 
 [node name="StageTexture" type="TextureRect" parent="Background" unique_id=1779329972]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -200,6 +207,7 @@ grow_horizontal = 2
 texture = ExtResource("7_702pu")
 
 [node name="WinnerContainer" type="Control" parent="Background" unique_id=1985536948]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5

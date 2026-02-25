@@ -27,3 +27,9 @@ func update_match_info() -> void:
 
 func has_someone_scored() -> bool:
 	return goals_home > 0 or goals_away > 0
+
+func resolve() -> void:
+	while is_tied():
+		goals_away = randi_range(0, 5)
+		goals_home = randi_range(0, 5)
+	update_match_info()
