@@ -1,7 +1,7 @@
 class_name BallStatePowerShotJump
 extends BallState
 
-# 绝招：跳跃射门
+# 绝招：跳跃射门 作为基础的跳跃射门状态，其他类似的绝招（如鱼跃射门）可以继承这个状态并调整参数
 # 球一边向球门移动，一边像兔子一样一跳一跳前进
 
 # 射门力量
@@ -28,11 +28,13 @@ func _enter_tree() -> void:
 	ball.height_velocity = JUMP_HEIGHT_VELOCITY
 
 	# 设置动画和特效
-	set_ball_roll_animation_from_velocity()
+	play_animation()
 	shot_particles.emitting = true
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
 	print("绝招激活：跳跃射门！目标位置：%s 第一次跳跃！" % target_position)
 
+func play_animation() -> void:
+	set_ball_roll_animation_from_velocity()
 func _process(delta: float) -> void:
 	# 检查是否击中玩家造成伤害
 	var ball_caught := check_player_damage()

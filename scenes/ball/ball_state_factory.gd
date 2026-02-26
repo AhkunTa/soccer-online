@@ -13,7 +13,11 @@ func _init() -> void:
 		Ball.State.POWER_SHOT_HEIGHT_LIGHT: BallStatePowerShotHighlight,
 		Ball.State.POWER_SHOT_INVISIBLE: BallStatePowerShotInvisible,
 		Ball.State.POWER_SHOT_JUMP: BallStatePowerShotJump,
+		Ball.State.POWER_SHOT_FISH: BallStatePowerShotFish,
+		Ball.State.POWER_SHOT_TAIJI: BallStatePowerShotTaiji,
+		Ball.State.POWER_SHOT_GEMINI: BallStatePowerShotGemini,
 		# 添加更多绝招状态
+
 	}
 
 func get_fresh_state(state: Ball.State) ->BallState:

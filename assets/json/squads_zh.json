@@ -1,9 +1,9 @@
 [
   {
-    "country": "FRANCE",
+    "country": "法国",
     "players": [
       {
-        "name": "H. LLORIS",
+        "name": "洛里",
         "skin": 0,
         "role": 0,
         "speed": 75,
@@ -12,7 +12,7 @@
         "power_shot_type": 3
       },
       {
-        "name": "J. KOUNDE",
+        "name": "孔德",
         "skin": 2,
         "role": 1,
         "speed": 75,
@@ -21,7 +21,7 @@
         "power_shot_type": 3
       },
       {
-        "name": "I. KONATE",
+        "name": "科纳特",
         "skin": 2,
         "role": 1,
         "speed": 77,
@@ -30,7 +30,7 @@
         "power_shot_type": 3
       },
       {
-        "name": "A. GRIEZMANN",
+        "name": "格列兹曼",
         "skin": 0,
         "role": 2,
         "speed": 74,
@@ -39,7 +39,7 @@
         "power_shot_type": 3
       },
       {
-        "name": "K. MBAPPE",
+        "name": "姆巴佩",
         "skin": 1,
         "role": 3,
         "speed": 85,
@@ -48,21 +48,21 @@
         "power_shot_type": 3
       },
       {
-        "name": "O. GIROUD",
+        "name": "吉鲁",
         "skin": 0,
         "role": 3,
         "speed": 79,
         "power": 170,
         "hp": 100,
-        "power_shot_type": 10
+        "power_shot_type": 3
       }
     ]
   },
   {
-    "country": "ARGENTINA",
+    "country": "阿根廷",
     "players": [
       {
-        "name": "E. MARTINEZ",
+        "name": "马丁内斯",
         "skin": 0,
         "role": 0,
         "speed": 85,
@@ -71,7 +71,7 @@
         "power_shot_type": 4
       },
       {
-        "name": "N. MOLINA",
+        "name": "莫利纳",
         "skin": 0,
         "role": 1,
         "speed": 80,
@@ -80,7 +80,7 @@
         "power_shot_type": 4
       },
       {
-        "name": "N. OTAMENDI",
+        "name": "奥塔门迪",
         "skin": 0,
         "role": 1,
         "speed": 82,
@@ -89,7 +89,7 @@
         "power_shot_type": 4
       },
       {
-        "name": "A. DI MARIA",
+        "name": "迪马利亚",
         "skin": 0,
         "role": 2,
         "speed": 82,
@@ -98,7 +98,7 @@
         "power_shot_type": 4
       },
       {
-        "name": "L. MESSI",
+        "name": "梅西",
         "skin": 0,
         "role": 3,
         "speed": 84,
@@ -107,7 +107,7 @@
         "power_shot_type": 4
       },
       {
-        "name": "J. ALVAREZ",
+        "name": "阿尔瓦雷斯",
         "skin": 0,
         "role": 3,
         "speed": 79,
@@ -118,10 +118,10 @@
     ]
   },
   {
-    "country": "BRAZIL",
+    "country": "巴西",
     "players": [
       {
-        "name": "A. BECKER",
+        "name": "阿利松",
         "skin": 0,
         "role": 0,
         "speed": 80,
@@ -130,7 +130,7 @@
         "power_shot_type": 5
       },
       {
-        "name": "T. SILVA",
+        "name": "蒂亚戈·席尔瓦",
         "skin": 1,
         "role": 1,
         "speed": 75,
@@ -139,7 +139,7 @@
         "power_shot_type": 5
       },
       {
-        "name": "MARQUINHOS",
+        "name": "马尔基尼奥斯",
         "skin": 1,
         "role": 1,
         "speed": 79,
@@ -148,7 +148,7 @@
         "power_shot_type": 5
       },
       {
-        "name": "CASEMIRO",
+        "name": "卡塞米罗",
         "skin": 1,
         "role": 2,
         "speed": 80,
@@ -157,7 +157,7 @@
         "power_shot_type": 5
       },
       {
-        "name": "NEYMAR",
+        "name": "内马尔",
         "skin": 1,
         "role": 3,
         "speed": 83,
@@ -166,80 +166,80 @@
         "power_shot_type": 5
       },
       {
-        "name": "RICHARLISON",
-        "skin": 0,
+        "name": "维尼修斯",
+        "skin": 2,
         "role": 3,
-        "speed": 78,
-        "power": 184,
+        "speed": 82,
+        "power": 180,
         "hp": 100,
         "power_shot_type": 5
       }
     ]
   },
   {
-    "country": "ENGLAND",
+    "country": "英格兰",
     "players": [
       {
-        "name": "J. PICKFORD",
+        "name": "皮克福德",
         "skin": 0,
         "role": 0,
-        "speed": 80,
+        "speed": 75,
         "power": 100,
         "hp": 100,
         "power_shot_type": 6
       },
       {
-        "name": "H. MAGUIRE",
-        "skin": 0,
+        "name": "沃克",
+        "skin": 2,
         "role": 1,
-        "speed": 70,
-        "power": 165,
+        "speed": 80,
+        "power": 175,
         "hp": 100,
         "power_shot_type": 6
       },
       {
-        "name": "L. SHAW",
+        "name": "斯通斯",
         "skin": 0,
         "role": 1,
-        "speed": 75,
-        "power": 171,
+        "speed": 77,
+        "power": 180,
         "hp": 100,
         "power_shot_type": 6
       },
       {
-        "name": "P. FODEN",
-        "skin": 0,
+        "name": "贝林厄姆",
+        "skin": 1,
         "role": 2,
-        "speed": 76,
-        "power": 165,
+        "speed": 82,
+        "power": 185,
         "hp": 100,
         "power_shot_type": 6
       },
       {
-        "name": "H. KANE",
+        "name": "凯恩",
         "skin": 0,
         "role": 3,
-        "speed": 78,
-        "power": 183,
+        "speed": 79,
+        "power": 188,
         "hp": 100,
         "power_shot_type": 6
       },
       {
-        "name": "R. STERLING",
+        "name": "萨卡",
         "skin": 2,
         "role": 3,
         "speed": 81,
-        "power": 165,
+        "power": 182,
         "hp": 100,
         "power_shot_type": 6
       }
     ]
   },
   {
-    "country": "GERMANY",
+    "country": "德国",
     "players": [
       {
-        "name": "M. NEUER",
+        "name": "诺伊尔",
         "skin": 0,
         "role": 0,
         "speed": 75,
@@ -248,272 +248,287 @@
         "power_shot_type": 7
       },
       {
-        "name": "A. RUDIGER",
+        "name": "吕迪格",
         "skin": 2,
         "role": 1,
-        "speed": 73,
-        "power": 175
-      },
-      {
-        "name": "D. RAUM",
-        "skin": 0,
-        "role": 1,
-        "speed": 75,
-        "power": 170,
-        "hp": 100,
-        "power_shot_type": 7
-      },
-      {
-        "name": "J. KIMMICH",
-        "skin": 0,
-        "role": 2,
-        "speed": 76,
+        "speed": 78,
         "power": 180,
         "hp": 100,
         "power_shot_type": 7
       },
       {
-        "name": "T. MULLER",
+        "name": "施洛特贝克",
+        "skin": 0,
+        "role": 1,
+        "speed": 76,
+        "power": 178,
+        "hp": 100,
+        "power_shot_type": 7
+      },
+      {
+        "name": "基米希",
+        "skin": 0,
+        "role": 2,
+        "speed": 80,
+        "power": 183,
+        "hp": 100,
+        "power_shot_type": 7
+      },
+      {
+        "name": "穆勒",
+        "skin": 0,
+        "role": 3,
+        "speed": 78,
+        "power": 185,
+        "hp": 100,
+        "power_shot_type": 7
+      },
+      {
+        "name": "哈弗茨",
         "skin": 0,
         "role": 3,
         "speed": 81,
         "power": 183,
         "hp": 100,
         "power_shot_type": 7
-      },
-      {
-        "name": "S. GNABRY",
-        "skin": 2,
-        "role": 3,
-        "speed": 81,
-        "power": 178,
-        "hp": 100,
-        "power_shot_type": 7
       }
     ]
   },
   {
-    "country": "ITALY",
+    "country": "意大利",
     "players": [
       {
-        "name": "G. DONNARUMMA",
+        "name": "多纳鲁马",
         "skin": 0,
         "role": 0,
-        "speed": 75,
-        "power": 100,
-        "power_shot_type": 8
-      },
-      {
-        "name": "F. DIMARCO",
-        "skin": 0,
-        "role": 1,
         "speed": 80,
-        "power": 170,
+        "power": 100,
+        "hp": 100,
         "power_shot_type": 8
       },
       {
-        "name": "F. ACERBI",
+        "name": "博努cci",
         "skin": 0,
         "role": 1,
         "speed": 74,
-        "power": 162,
+        "power": 178,
+        "hp": 100,
         "power_shot_type": 8
       },
       {
-        "name": "G. RASPADORI",
+        "name": "巴斯托尼",
+        "skin": 0,
+        "role": 1,
+        "speed": 76,
+        "power": 180,
+        "hp": 100,
+        "power_shot_type": 8
+      },
+      {
+        "name": "若日尼奥",
+        "skin": 0,
+        "role": 2,
+        "speed": 77,
+        "power": 180,
+        "hp": 100,
+        "power_shot_type": 8
+      },
+      {
+        "name": "因西涅",
+        "skin": 0,
+        "role": 3,
+        "speed": 80,
+        "power": 183,
+        "hp": 100,
+        "power_shot_type": 8
+      },
+      {
+        "name": "因莫比莱",
+        "skin": 0,
+        "role": 3,
+        "speed": 79,
+        "power": 182,
+        "hp": 100,
+        "power_shot_type": 8
+      }
+    ]
+  },
+  {
+    "country": "西班牙",
+    "players": [
+      {
+        "name": "西蒙",
+        "skin": 0,
+        "role": 0,
+        "speed": 78,
+        "power": 100,
+        "hp": 100,
+        "power_shot_type": 9
+      },
+      {
+        "name": "卡瓦哈尔",
+        "skin": 0,
+        "role": 1,
+        "speed": 79,
+        "power": 177,
+        "hp": 100,
+        "power_shot_type": 9
+      },
+      {
+        "name": "拉波尔特",
+        "skin": 0,
+        "role": 1,
+        "speed": 76,
+        "power": 179,
+        "hp": 100,
+        "power_shot_type": 9
+      },
+      {
+        "name": "佩德里",
+        "skin": 0,
+        "role": 2,
+        "speed": 80,
+        "power": 181,
+        "hp": 100,
+        "power_shot_type": 9
+      },
+      {
+        "name": "莫拉塔",
+        "skin": 0,
+        "role": 3,
+        "speed": 81,
+        "power": 184,
+        "hp": 100,
+        "power_shot_type": 9
+      },
+      {
+        "name": "费兰·托雷斯",
+        "skin": 0,
+        "role": 3,
+        "speed": 82,
+        "power": 183,
+        "hp": 100,
+        "power_shot_type": 9
+      }
+    ]
+  },
+  {
+    "country": "美国",
+    "players": [
+      {
+        "name": "特纳",
+        "skin": 0,
+        "role": 0,
+        "speed": 72,
+        "power": 100,
+        "hp": 100,
+        "power_shot_type": 10
+      },
+      {
+        "name": "齐默尔曼",
+        "skin": 0,
+        "role": 1,
+        "speed": 73,
+        "power": 170,
+        "hp": 100,
+        "power_shot_type": 10
+      },
+      {
+        "name": "罗宾逊",
+        "skin": 2,
+        "role": 1,
+        "speed": 75,
+        "power": 172,
+        "hp": 100,
+        "power_shot_type": 10
+      },
+      {
+        "name": "麦肯尼",
         "skin": 0,
         "role": 2,
         "speed": 76,
-        "power": 160,
-        "power_shot_type": 8
+        "power": 175,
+        "hp": 100,
+        "power_shot_type": 10
       },
       {
-        "name": "F. CHIESA",
+        "name": "普利西奇",
         "skin": 0,
         "role": 3,
-        "speed": 75,
-        "power": 173,
-        "power_shot_type": 8
+        "speed": 80,
+        "power": 178,
+        "hp": 100,
+        "power_shot_type": 10
       },
       {
-        "name": "S. GNABRY",
+        "name": "韦阿",
         "skin": 2,
         "role": 3,
-        "speed": 80,
-        "power": 175,
-        "power_shot_type": 8
+        "speed": 79,
+        "power": 176,
+        "hp": 100,
+        "power_shot_type": 10
       }
     ]
   },
   {
-    "country": "SPAIN",
+    "country": "加拿大",
     "players": [
       {
-        "name": "U. SIMON",
-        "skin": 0,
-        "role": 0,
-        "speed": 80,
-        "power": 100,
-        "power_shot_type": 9
-      },
-      {
-        "name": "J. ALBA",
-        "skin": 0,
-        "role": 1,
-        "speed": 80,
-        "power": 167,
-        "power_shot_type": 9
-      },
-      {
-        "name": "A. BALDE",
-        "skin": 2,
-        "role": 2,
-        "speed": 77,
-        "power": 165,
-        "power_shot_type": 9
-      },
-      {
-        "name": "GAVI",
-        "skin": 0,
-        "role": 1,
-        "speed": 79,
-        "power": 175,
-        "power_shot_type": 9
-      },
-      {
-        "name": "A. MORATA",
-        "skin": 0,
-        "role": 3,
-        "speed": 79,
-        "power": 181,
-        "power_shot_type": 9
-      },
-      {
-        "name": "F. TORRES",
-        "skin": 0,
-        "role": 3,
-        "speed": 81,
-        "power": 170,
-        "power_shot_type": 9
-      }
-    ]
-  },
-  {
-    "country": "USA",
-    "players": [
-      {
-        "name": "S. STERLING",
+        "name": "博尔扬",
         "skin": 0,
         "role": 0,
         "speed": 70,
         "power": 100,
         "hp": 100,
-        "power_shot_type": 10
+        "power_shot_type": 11
       },
       {
-        "name": "M. MCKENZIE",
-        "skin": 1,
-        "role": 1,
-        "speed": 71,
-        "power": 160,
-        "hp": 100,
-        "power_shot_type": 10
-      },
-      {
-        "name": "J. SCALLY",
-        "skin": 0,
+        "name": "维托里亚",
+        "skin": 2,
         "role": 1,
         "speed": 72,
-        "power": 161,
+        "power": 168,
         "hp": 100,
-        "power_shot_type": 10
+        "power_shot_type": 11
       },
       {
-        "name": "D. LUNA",
+        "name": "米勒",
         "skin": 0,
-        "role": 2,
+        "role": 1,
         "speed": 71,
-        "power": 163,
+        "power": 167,
         "hp": 100,
-        "power_shot_type": 10
+        "power_shot_type": 11
       },
       {
-        "name": "T. WEAH",
-        "skin": 0,
-        "role": 3,
-        "speed": 74,
-        "power": 165,
+        "name": "戴维斯",
+        "skin": 2,
+        "role": 2,
+        "speed": 78,
+        "power": 173,
         "hp": 100,
-        "power_shot_type": 10
+        "power_shot_type": 11
       },
       {
-        "name": "C. PULISIC",
+        "name": "大卫",
         "skin": 0,
         "role": 3,
         "speed": 77,
-        "power": 167,
-        "hp": 100,
-        "power_shot_type": 10
-      }
-    ]
-  },
-  {
-    "country": "CANADA",
-    "players": [
-      {
-        "name": "D.S. CLAIR",
-        "skin": 1,
-        "role": 0,
-        "speed": 75,
-        "power": 100,
+        "power": 175,
         "hp": 100,
         "power_shot_type": 11
       },
       {
-        "name": "A. JOHNSTON",
-        "skin": 0,
-        "role": 1,
-        "speed": 70,
-        "power": 140,
-        "hp": 100,
-        "power_shot_type": 11
-      },
-      {
-        "name": "A. DAVIES",
-        "skin": 2,
-        "role": 1,
-        "speed": 65,
-        "power": 155,
-        "hp": 100,
-        "power_shot_type": 11
-      },
-      {
-        "name": "A. AHMED",
-        "skin": 2,
-        "role": 2,
-        "speed": 65,
-        "power": 140,
-        "hp": 100,
-        "power_shot_type": 11
-      },
-      {
-        "name": "T. BUCHANAN",
-        "skin": 1,
-        "role": 3,
-        "speed": 65,
-        "power": 125,
-        "hp": 100,
-        "power_shot_type": 11
-      },
-      {
-        "name": "J. DAVID",
+        "name": "布坎南",
         "skin": 2,
         "role": 3,
-        "speed": 75,
-        "power": 150,
+        "speed": 76,
+        "power": 173,
         "hp": 100,
         "power_shot_type": 11
       }
     ]
   }
 ]
+
