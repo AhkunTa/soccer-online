@@ -10,8 +10,6 @@
 [ext_resource type="Texture2D" uid="uid://dhed4rmss6ekx" path="res://assets/art/ui/mainmenu/2-players.png" id="7_3g2hh"]
 [ext_resource type="Texture2D" uid="uid://bqb268is4lxdk" path="res://assets/art/ui/mainmenu/ball-selection.png" id="8_cs0cy"]
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_kj8vl"]
-
 [sub_resource type="Animation" id="Animation_g0m07"]
 length = 0.001
 tracks/0/type = "value"
@@ -332,7 +330,6 @@ offset_left = 35.0
 offset_top = 150.0
 offset_right = 177.0
 offset_bottom = 171.0
-texture = SubResource("ViewportTexture_kj8vl")
 stretch_mode = 2
 
 [node name="Label" type="Label" parent="Background/OnlineGame" unique_id=1751692886]
@@ -344,7 +341,8 @@ offset_top = -9.0
 offset_right = 60.0
 offset_bottom = 9.0
 grow_vertical = 2
-text = "OnLine Game （TODO..）"
+theme_override_font_sizes/font_size = 6
+text = "OnLine Game TODO ....."
 
 [node name="SelectionIcon" type="TextureRect" parent="Background" unique_id=1545552825]
 unique_name_in_owner = true

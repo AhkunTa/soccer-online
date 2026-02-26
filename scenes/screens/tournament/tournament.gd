@@ -24,7 +24,7 @@ func advance() -> void:
 		for current_match: Match in stage_matches:
 			current_match.resolve()
 			stage_winners.append(current_match.winner)
-		current_stage = current_stage + 1
+		current_stage = (current_stage + 1) as Stage
 		if current_stage == Stage.COMPLETE:
 			winner = stage_winners[0]
 		else:

@@ -5,6 +5,6 @@ static func get_time_text(seconds: float) -> String:
 		return "OVERTIME TIME !"
 	else:
 		var total_seconds := int(seconds)
-		var minutes := total_seconds / 60
+		var minutes := int(total_seconds / 60.0)
 		var secs := total_seconds - minutes * 60
 		return "%02d:%02d" % [minutes, secs]
