@@ -35,9 +35,8 @@ func submit_selection(_index: int) -> void:
 	elif current_selected_index == 1:
 		player_two = country_default
 	else:
-		#TODO ONLINE GAME
-		AudioPlayer.play(AudioPlayer.Sound.UI_DISABLE)
-
+		AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
+		transition_screen(SoccerGame.ScreenType.ONLINE_LOBBY)
 		return
 	AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
 

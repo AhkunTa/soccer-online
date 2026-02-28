@@ -1,0 +1,328 @@
+[gd_scene format=3 uid="uid://exdj51k5nuuo"]
+
+[ext_resource type="Script" uid="uid://ndjkkpgy5jm0" path="res://scenes/screens/online_search/online_search.gd" id="1_d670a"]
+[ext_resource type="Texture2D" uid="uid://datf3418sdq3m" path="res://assets/art/ui/teamselection/tournament-screen.png" id="1_io10y"]
+[ext_resource type="Theme" uid="uid://x2ffst15kukp" path="res://scenes/ui/common_theme.tres" id="3_ldric"]
+
+[sub_resource type="FontFile" id="FontFile_ldric"]
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
+cache/0/variation_coordinates = {}
+cache/0/face_index = 0
+cache/0/embolden = 0.0
+cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
+cache/0/spacing_top = 0
+cache/0/spacing_bottom = 0
+cache/0/spacing_space = 0
+cache/0/spacing_glyph = 0
+cache/0/baseline_offset = 0.0
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/7/0/ascent = 0.0
+cache/0/7/0/descent = 0.0
+cache/0/7/0/underline_position = 0.0
+cache/0/7/0/underline_thickness = 0.0
+cache/0/7/0/scale = 1.0
+
+[sub_resource type="FontFile" id="FontFile_k4lqj"]
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
+cache/0/variation_coordinates = {}
+cache/0/face_index = 0
+cache/0/embolden = 0.0
+cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
+cache/0/spacing_top = 0
+cache/0/spacing_bottom = 0
+cache/0/spacing_space = 0
+cache/0/spacing_glyph = 0
+cache/0/baseline_offset = 0.0
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/6/0/ascent = 0.0
+cache/0/6/0/descent = 0.0
+cache/0/6/0/underline_position = 0.0
+cache/0/6/0/underline_thickness = 0.0
+cache/0/6/0/scale = 1.0
+
+[sub_resource type="FontFile" id="FontFile_a31l3"]
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
+cache/0/variation_coordinates = {}
+cache/0/face_index = 0
+cache/0/embolden = 0.0
+cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
+cache/0/spacing_top = 0
+cache/0/spacing_bottom = 0
+cache/0/spacing_space = 0
+cache/0/spacing_glyph = 0
+cache/0/baseline_offset = 0.0
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/6/0/ascent = 0.0
+cache/0/6/0/descent = 0.0
+cache/0/6/0/underline_position = 0.0
+cache/0/6/0/underline_thickness = 0.0
+cache/0/6/0/scale = 1.0
+
+[node name="OnlineSearchScreen" type="Node" unique_id=384383999]
+script = ExtResource("1_d670a")
+
+[node name="Background" type="TextureRect" parent="." unique_id=30346526]
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("3_ldric")
+texture = ExtResource("1_io10y")
+
+[node name="Title" type="Label" parent="Background" unique_id=2061682540]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -50.0
+offset_top = 3.0
+offset_right = 50.0
+offset_bottom = 13.0
+grow_horizontal = 2
+theme = ExtResource("3_ldric")
+theme_override_fonts/font = SubResource("FontFile_ldric")
+theme_override_font_sizes/font_size = 7
+text = "Online Rooms"
+horizontal_alignment = 1
+
+[node name="ConnectRow" type="HBoxContainer" parent="Background" unique_id=100000002]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 15.0
+offset_right = 100.0
+offset_bottom = 27.0
+grow_horizontal = 2
+theme = ExtResource("3_ldric")
+theme_override_constants/separation = 3
+
+[node name="IPEdit" type="LineEdit" parent="Background/ConnectRow" unique_id=100000003]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/minimum_character_width = 10
+theme_override_fonts/font = SubResource("FontFile_k4lqj")
+theme_override_font_sizes/font_size = 6
+placeholder_text = "127.0.0.1"
+
+[node name="HostButton" type="Button" parent="Background/ConnectRow" unique_id=100000004]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Host"
+
+[node name="ConnectButton" type="Button" parent="Background/ConnectRow" unique_id=100000005]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Connect"
+
+[node name="StatusLabel" type="Label" parent="Background" unique_id=100000006]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -98.0
+offset_top = 69.0
+offset_right = 102.0
+offset_bottom = 83.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 8
+text = "Not connected"
+horizontal_alignment = 1
+
+[node name="SearchRow" type="HBoxContainer" parent="Background" unique_id=100000007]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 40.0
+offset_right = 100.0
+offset_bottom = 55.0
+grow_horizontal = 2
+theme = ExtResource("3_ldric")
+theme_override_constants/separation = 3
+
+[node name="SearchEdit" type="LineEdit" parent="Background/SearchRow" unique_id=100000008]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = SubResource("FontFile_a31l3")
+theme_override_font_sizes/font_size = 6
+placeholder_text = "Search rooms..."
+
+[node name="SearchButton" type="Button" parent="Background/SearchRow" unique_id=100000009]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Search"
+
+[node name="CreateButton" type="Button" parent="Background/SearchRow" unique_id=100000010]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Create"
+
+[node name="RoomScroll" type="ScrollContainer" parent="Background" unique_id=100000011]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 97.0
+offset_right = -42.0
+offset_bottom = -21.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RoomList" type="VBoxContainer" parent="Background/RoomScroll" unique_id=100000012]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="ButtonContainer" type="HBoxContainer" parent="Background" unique_id=661043617]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+offset_right = -18.0
+offset_bottom = -25.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BackButton2" type="Button" parent="Background/ButtonContainer" unique_id=1479552152]
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Back"
+
+[node name="BackButton" type="Button" parent="Background/ButtonContainer" unique_id=100000013]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Back"
+
+[node name="CreatePanel" type="Panel" parent="Background" unique_id=100000014]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -55.0
+offset_top = -38.0
+offset_right = 55.0
+offset_bottom = 38.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_ldric")
+
+[node name="CreateTitle" type="Label" parent="Background/CreatePanel" unique_id=100000015]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -40.0
+offset_top = 3.0
+offset_right = 40.0
+offset_bottom = 13.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 6
+text = "Create Room"
+horizontal_alignment = 1
+
+[node name="RoomTitleEdit" type="LineEdit" parent="Background/CreatePanel" unique_id=100000016]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -45.0
+offset_top = 12.0
+offset_right = 45.0
+offset_bottom = 27.0
+grow_horizontal = 2
+theme = ExtResource("3_ldric")
+theme_override_font_sizes/font_size = 6
+placeholder_text = "Room Name"
+
+[node name="MaxRow" type="HBoxContainer" parent="Background/CreatePanel" unique_id=100000017]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -45.0
+offset_top = 30.0
+offset_right = 45.0
+offset_bottom = 42.0
+grow_horizontal = 2
+theme_override_constants/separation = 3
+
+[node name="MaxLabel" type="Label" parent="Background/CreatePanel/MaxRow" unique_id=100000018]
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Max Players:"
+
+[node name="MaxPlayersEdit" type="LineEdit" parent="Background/CreatePanel/MaxRow" unique_id=100000019]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/minimum_character_width = 3
+theme_override_font_sizes/font_size = 6
+text = "4"
+
+[node name="PanelButtons" type="HBoxContainer" parent="Background/CreatePanel" unique_id=100000020]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -45.0
+offset_top = 50.0
+offset_right = 45.0
+offset_bottom = 65.0
+grow_horizontal = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="Background/CreatePanel/PanelButtons" unique_id=100000021]
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Cancel"
+
+[node name="ConfirmButton" type="Button" parent="Background/CreatePanel/PanelButtons" unique_id=100000022]
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "Confirm"
+
+[connection signal="pressed" from="Background/ConnectRow/HostButton" to="." method="_on_host_button_pressed"]
+[connection signal="pressed" from="Background/ConnectRow/ConnectButton" to="." method="_on_connect_button_pressed"]
+[connection signal="pressed" from="Background/SearchRow/SearchButton" to="." method="_on_search_button_pressed"]
+[connection signal="pressed" from="Background/SearchRow/CreateButton" to="." method="_on_create_button_pressed"]
+[connection signal="pressed" from="Background/ButtonContainer/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="Background/CreatePanel/PanelButtons/CancelButton" to="." method="_on_cancel_create_pressed"]
+[connection signal="pressed" from="Background/CreatePanel/PanelButtons/ConfirmButton" to="." method="_on_confirm_create_pressed"]

@@ -5,7 +5,9 @@ const DURATION_GAME_SEC := 2 * 60 # 2 minutes
 const DURATION_IMPACT_PAUSE := 100
 enum State {IN_PLAY, SCORED, RESET, KICKOFF, OVERTIME, GAMEOVER}
 
-var current_match: Match = null
+# var current_match: Match = null
+# debug
+var current_match: Match = Match.new("FRANCE", "USA")
 var state_factory := GameStateFactory.new()
 var time_left: float
 var current_state: GameState = null

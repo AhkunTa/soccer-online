@@ -27,6 +27,7 @@ GameManager="*res://scenes/game_manager/game_manager.gd"
 AudioPlayer="*res://scenes/audio/audio_player.gd"
 InputManager="*res://utils/input_manager.gd"
 MusicPlayer="*res://scenes/audio/music_player.gd"
+RoomManager="*res://scenes/network/room_manager.gd"
 
 [debug]
 
@@ -38,7 +39,7 @@ window/size/viewport_width=280
 window/size/viewport_height=180
 window/size/window_width_override=1400
 window/size/window_height_override=900
-window/stretch/mode="viewport"
+window/stretch/mode="canvas_items"
 window/stretch/scale_mode="integer"
 
 [gui]
