@@ -7,6 +7,7 @@ enum ScreenType {
 	TOURNAMENT,
 	IN_GAME,
 	ONLINE_LOBBY,
+	ONLINE_TEAM_SELECTION,
 }
 
 var current_screen: Screen = null
@@ -17,9 +18,10 @@ func _init() -> void:
 	switch_screen(ScreenType.MAIN_MENU)
 
 func switch_screen(screen: ScreenType, data: ScreenData = ScreenData.new()) -> void:
+	print("[SoccerGame] switch_screen called: ", ScreenType.keys()[screen])
 	if current_screen != null:
 		current_screen.queue_free()
 	current_screen = screen_factory.get_fresh_screen(screen)
 	current_screen.setup(self , data)
-	current_screen.screen_transitiom_requested.connect(switch_screen.bind())
+	current_screen.screen_transition_requested.connect(switch_screen.bind())
 	call_deferred("add_child", current_screen)

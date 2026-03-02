@@ -13,6 +13,8 @@ var time_left: float
 var current_state: GameState = null
 var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
+# 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
+var online_slot_assignments: Dictionary = {}
 
 func _init() -> void:
 	process_mode = ProcessMode.PROCESS_MODE_ALWAYS
@@ -43,6 +45,28 @@ func is_coop() -> bool:
 
 func is_single_player() -> bool:
 	return player_setup[1].is_empty()
+
+## 联机模式：接收服务端广播的 match_config 并应用
+## config 格式:
+##   { "room_id": int,
+##     "assignments": [{ "peer_id": int, "team": int, "slot": int, "is_ready": bool }, ...],
+##     "home_country": String,   # 可选，若无则保持现有 player_setup
+##     "away_country": String }
+func apply_online_match_config(config: Dictionary, local_peer_id: int) -> void:
+	# 如果服务端携带了国旗信息则更新比赛
+	if config.has("home_country") and config.has("away_country"):
+		current_match = Match.new(config["home_country"], config["away_country"])
+
+	# 根据本地 peer 的 team 决定 player_setup 控制方案
+	# team=0 (Home) 控制 P1 侧球员, team=1 (Away) 控制 P2 侧球员
+	var assignments: Array = config.get("assignments", [])
+	for entry: Dictionary in assignments:
+		if entry["peer_id"] == local_peer_id:
+			var team: int = entry["team"]
+			var slot: int = entry["slot"]
+			# online_slot_assignments: [team, slot] 供游戏内控制逻辑读取
+			online_slot_assignments = {"team": team, "slot": slot}
+			break
 
 func is_time_over() -> bool:
 	return time_left <= 0

@@ -7,6 +7,10 @@ signal connection_status_changed(status: String)
 signal connection_failed
 signal server_disconnected
 signal error_occurred(message: String)
+# 联机队伍选择相关信号
+signal room_ready(room_id: int, player_ids: Array)
+signal team_selection_updated(selections: Array)
+signal match_config_received(config: Dictionary)
 
 const PORT := 7000
 const MAX_CONNECTIONS := 20
@@ -21,6 +25,8 @@ var my_room_id: int = -1
 var _rooms: Dictionary = {}
 var _next_room_id: int = 1
 var _player_room: Dictionary = {}
+# 队伍选择阶段：room_id → Array[{ peer_id, team, slot, is_ready }]
+var _team_selections: Dictionary = {}
 
 
 func _ready() -> void:
@@ -199,6 +205,11 @@ func _server_join_room(joiner_id: int, room_id: int) -> void:
 	else:
 		_rpc_recv_room_joined.rpc_id(joiner_id, room_id)
 	_broadcast_room_update()
+	# 人数为偶数且 >= 2 时进入队伍选择阶段
+	var players: Array = room["players"]
+	if players.size() >= 2 and players.size() % 2 == 0:
+		print("[Server] Room %d reached player count %d, starting team selection" % [room_id, players.size()])
+		_server_start_team_selection(room_id)
 
 
 func _remove_player_from_room(peer_id: int) -> void:
@@ -300,3 +311,209 @@ func _on_server_disconnected() -> void:
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	_remove_player_from_room(peer_id)
+
+
+# ── 队伍选择：服务端逻辑 ──────────────────────────────────────────────────────
+
+## 初始化该房间的队伍选择状态，并广播 room_ready 给房间内所有玩家
+func _server_start_team_selection(room_id: int) -> void:
+	var room: Dictionary = _rooms[room_id]
+	var players: Array = room["players"]
+	# 初始化每位玩家的选择状态（team=-1 表示未选，slot=-1 表示未选）
+	var selections: Array = []
+	for pid: int in players:
+		selections.append({"peer_id": pid, "team": - 1, "slot": - 1, "is_ready": false})
+	_team_selections[room_id] = selections
+	# 广播给房间内所有客户端
+	for pid: int in players:
+		if pid == 1:
+			_local_room_ready(room_id, players)
+		else:
+			_rpc_recv_room_ready.rpc_id(pid, room_id, players)
+
+
+## Client → Server：玩家请求选择队伍 (team: 0=Home, 1=Away)
+@rpc("any_peer", "reliable")
+func _rpc_select_team(team: int) -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id := multiplayer.get_remote_sender_id()
+	_server_select_team(sender_id, team)
+
+
+func _server_select_team(peer_id: int, team: int) -> void:
+	if not _player_room.has(peer_id):
+		return
+	var room_id: int = _player_room[peer_id]
+	if not _team_selections.has(room_id):
+		return
+	var selections: Array = _team_selections[room_id]
+	for entry: Dictionary in selections:
+		if entry["peer_id"] == peer_id:
+			entry["team"] = team
+			entry["slot"] = -1 # 换队时清空 slot
+			break
+	_broadcast_team_selection(room_id)
+
+
+## Client → Server：玩家请求占用 slot
+@rpc("any_peer", "reliable")
+func _rpc_select_slot(slot: int) -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id := multiplayer.get_remote_sender_id()
+	_server_select_slot(sender_id, slot)
+
+
+func _server_select_slot(peer_id: int, slot: int) -> void:
+	if not _player_room.has(peer_id):
+		return
+	var room_id: int = _player_room[peer_id]
+	if not _team_selections.has(room_id):
+		return
+	var selections: Array = _team_selections[room_id]
+	# 找到当前玩家的 team
+	var my_team := -1
+	for entry: Dictionary in selections:
+		if entry["peer_id"] == peer_id:
+			my_team = entry["team"]
+			break
+	if my_team == -1:
+		return # 还没选队伍，忽略
+	# 检查该 slot 是否已被同队其他人占用
+	for entry: Dictionary in selections:
+		if entry["peer_id"] != peer_id and entry["team"] == my_team and entry["slot"] == slot:
+			# slot 冲突，拒绝
+			if peer_id != 1:
+				_rpc_recv_error.rpc_id(peer_id, "Slot already taken")
+			return
+	# 写入 slot
+	for entry: Dictionary in selections:
+		if entry["peer_id"] == peer_id:
+			entry["slot"] = slot
+			break
+	_broadcast_team_selection(room_id)
+
+
+## Client → Server：玩家确认就绪
+@rpc("any_peer", "reliable")
+func _rpc_confirm_ready() -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id := multiplayer.get_remote_sender_id()
+	_server_confirm_ready(sender_id)
+
+
+func _server_confirm_ready(peer_id: int) -> void:
+	if not _player_room.has(peer_id):
+		return
+	var room_id: int = _player_room[peer_id]
+	if not _team_selections.has(room_id):
+		return
+	var selections: Array = _team_selections[room_id]
+	for entry: Dictionary in selections:
+		if entry["peer_id"] == peer_id:
+			# 必须已选队伍和 slot 才能就绪
+			if entry["team"] == -1 or entry["slot"] == -1:
+				if peer_id != 1:
+					_rpc_recv_error.rpc_id(peer_id, "Select team and player slot first")
+				return
+			entry["is_ready"] = true
+			break
+	_broadcast_team_selection(room_id)
+	# 检查所有人是否就绪
+	var all_ready := true
+	for entry: Dictionary in selections:
+		if not entry["is_ready"]:
+			all_ready = false
+			break
+	if all_ready:
+		_server_launch_match(room_id)
+
+
+## 所有人就绪后构建 match_config 并广播
+func _server_launch_match(room_id: int) -> void:
+	var room: Dictionary = _rooms[room_id]
+	var selections: Array = _team_selections[room_id]
+	# 按 team=0 和 team=1 各找一个代表国家（此处用服务端预设，实际可由房主选旗）
+	# 这里简化：home 队用第一个选了 team=0 的玩家选择的国旗，
+	# 实际国旗选择由 online_team_selection_screen 的国旗 RPC 传入
+	var config: Dictionary = {
+		"room_id": room_id,
+		"assignments": selections
+	}
+	for pid: int in room["players"]:
+		if pid == 1:
+			_local_match_config(config)
+		else:
+			_rpc_recv_match_config.rpc_id(pid, config)
+	_team_selections.erase(room_id)
+
+
+## 向房间内所有人广播当前选择快照
+func _broadcast_team_selection(room_id: int) -> void:
+	if not _rooms.has(room_id) or not _team_selections.has(room_id):
+		return
+	var selections: Array = _team_selections[room_id]
+	for pid: int in _rooms[room_id]["players"]:
+		if pid == 1:
+			_local_team_selection_updated(selections)
+		else:
+			_rpc_recv_team_selection.rpc_id(pid, selections)
+
+
+# ── 队伍选择：Server → Client RPCs ───────────────────────────────────────────
+
+@rpc("authority", "reliable")
+func _rpc_recv_room_ready(room_id: int, player_ids: Array) -> void:
+	_local_room_ready(room_id, player_ids)
+
+
+@rpc("authority", "reliable")
+func _rpc_recv_team_selection(selections: Array) -> void:
+	_local_team_selection_updated(selections)
+
+
+@rpc("authority", "reliable")
+func _rpc_recv_match_config(config: Dictionary) -> void:
+	_local_match_config(config)
+
+
+# ── 队伍选择：客户端 API（供 OnlineTeamSelectionScreen 调用）──────────────────
+
+## 本地玩家选择队伍
+func select_team(team: int) -> void:
+	if multiplayer.is_server():
+		_server_select_team(1, team)
+	else:
+		_rpc_select_team.rpc_id(1, team)
+
+
+## 本地玩家选择球员 slot
+func select_slot(slot: int) -> void:
+	if multiplayer.is_server():
+		_server_select_slot(1, slot)
+	else:
+		_rpc_select_slot.rpc_id(1, slot)
+
+
+## 本地玩家确认就绪
+func confirm_ready() -> void:
+	if multiplayer.is_server():
+		_server_confirm_ready(1)
+	else:
+		_rpc_confirm_ready.rpc_id(1)
+
+
+# ── 队伍选择：本地 handlers ───────────────────────────────────────────────────
+
+func _local_room_ready(room_id: int, player_ids: Array) -> void:
+	room_ready.emit(room_id, player_ids)
+
+
+func _local_team_selection_updated(selections: Array) -> void:
+	team_selection_updated.emit(selections)
+
+
+func _local_match_config(config: Dictionary) -> void:
+	match_config_received.emit(config)

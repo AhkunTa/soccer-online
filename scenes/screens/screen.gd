@@ -1,7 +1,7 @@
 class_name Screen
 extends Node
 
-signal screen_transitiom_requested(new_screen: SoccerGame.ScreenType, data: ScreenData)
+signal screen_transition_requested(new_screen: SoccerGame.ScreenType, data: ScreenData)
 
 @export var music: MusicPlayer.Music
 
@@ -16,4 +16,4 @@ func setup(context_game: SoccerGame, context_data: ScreenData) -> void:
 	screen_data = context_data
 
 func transition_screen(new_screen: SoccerGame.ScreenType, data: ScreenData = ScreenData.new()) -> void:
-	screen_transitiom_requested.emit(new_screen, data)
+	screen_transition_requested.emit(new_screen, data)

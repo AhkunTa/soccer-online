@@ -9,6 +9,7 @@ func _init() -> void:
 		SoccerGame.ScreenType.TEAM_SELECTION: preload("res://scenes/screens/team_selection/team_selection_screen.tscn"),
 		SoccerGame.ScreenType.TOURNAMENT: preload("res://scenes/screens/tournament/tournament_screen.tscn"),
 		SoccerGame.ScreenType.ONLINE_LOBBY: preload("res://scenes/screens/online_search/online_search.tscn"),
+		SoccerGame.ScreenType.ONLINE_TEAM_SELECTION: preload("res://scenes/screens/online_team_selection/online_team_selection_screen.tscn"),
 	}
 
 func get_fresh_screen(screen: SoccerGame.ScreenType) -> Screen:

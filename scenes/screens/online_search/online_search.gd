@@ -21,6 +21,7 @@ func _ready() -> void:
 	RoomManager.error_occurred.connect(_on_error)
 	RoomManager.room_created.connect(_on_room_created)
 	RoomManager.room_joined.connect(_on_room_joined)
+	RoomManager.room_ready.connect(_on_room_ready)
 	create_panel.visible = false
 	var initial: String
 	if RoomManager.state == RoomManager.State.HOSTING:
@@ -34,19 +35,6 @@ func _ready() -> void:
 	if RoomManager.state != RoomManager.State.OFFLINE:
 		RoomManager.request_rooms()
 		_refresh_room_list(RoomManager.rooms_cache)
-
-
-func _exit_tree() -> void:
-	if RoomManager.room_list_updated.is_connected(_on_room_list_updated):
-		RoomManager.room_list_updated.disconnect(_on_room_list_updated)
-	if RoomManager.connection_status_changed.is_connected(_on_status_changed):
-		RoomManager.connection_status_changed.disconnect(_on_status_changed)
-	if RoomManager.error_occurred.is_connected(_on_error):
-		RoomManager.error_occurred.disconnect(_on_error)
-	if RoomManager.room_created.is_connected(_on_room_created):
-		RoomManager.room_created.disconnect(_on_room_created)
-	if RoomManager.room_joined.is_connected(_on_room_joined):
-		RoomManager.room_joined.disconnect(_on_room_joined)
 
 
 func _on_status_changed(status: String) -> void:
@@ -70,6 +58,15 @@ func _on_room_created(_room_id: int) -> void:
 func _on_room_joined(_room_id: int) -> void:
 	status_label.text = "Joined room %d" % RoomManager.my_room_id
 	RoomManager.request_rooms(search_edit.text)
+
+
+func _on_room_ready(room_id: int, player_ids: Array) -> void:
+	print("Room %d is ready with players %s" % [room_id, str(player_ids)])
+	# 查找本地房间对应的 player_count
+	var player_count := player_ids.size()
+	var peer_id := multiplayer.get_unique_id()
+	var data := ScreenData.build().set_online_context(room_id, player_count, peer_id)
+	transition_screen(SoccerGame.ScreenType.ONLINE_TEAM_SELECTION, data)
 
 
 func _update_action_buttons() -> void:
@@ -155,3 +152,18 @@ func _on_confirm_create_pressed() -> void:
 func _on_back_button_pressed() -> void:
 	RoomManager.disconnect_network()
 	transition_screen(SoccerGame.ScreenType.MAIN_MENU)
+
+
+func _exit_tree() -> void:
+	if RoomManager.room_list_updated.is_connected(_on_room_list_updated):
+		RoomManager.room_list_updated.disconnect(_on_room_list_updated)
+	if RoomManager.connection_status_changed.is_connected(_on_status_changed):
+		RoomManager.connection_status_changed.disconnect(_on_status_changed)
+	if RoomManager.error_occurred.is_connected(_on_error):
+		RoomManager.error_occurred.disconnect(_on_error)
+	if RoomManager.room_created.is_connected(_on_room_created):
+		RoomManager.room_created.disconnect(_on_room_created)
+	if RoomManager.room_joined.is_connected(_on_room_joined):
+		RoomManager.room_joined.disconnect(_on_room_joined)
+	if RoomManager.room_ready.is_connected(_on_room_ready):
+		RoomManager.room_ready.disconnect(_on_room_ready)
