@@ -68,6 +68,7 @@ var spawn_position := Vector2.ZERO
 @onready var shot_particles: GPUParticles2D = %shot_particles
 @onready var player_proximity_area: Area2D = %PlayerProximityArea
 func _ready() -> void:
+	player_detection_area.monitoring = true
 	switch_state(State.FREEFORM)
 	spawn_position = position
 	GameEvents.team_reset.connect(on_team_reset.bind())
