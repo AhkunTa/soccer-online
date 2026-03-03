@@ -35,11 +35,12 @@ func submit_selection(_index: int) -> void:
 	elif current_selected_index == 1:
 		player_two = country_default
 	else:
-		AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
+		GameManager.player_setup = [country_default, player_two]
 		transition_screen(SoccerGame.ScreenType.ONLINE_LOBBY)
+		AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
+
 		return
 	AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
-
 	GameManager.player_setup = [country_default, player_two]
 	transition_screen(SoccerGame.ScreenType.TEAM_SELECTION)
 

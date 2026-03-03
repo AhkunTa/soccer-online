@@ -342,7 +342,7 @@ offset_right = 60.0
 offset_bottom = 9.0
 grow_vertical = 2
 theme_override_font_sizes/font_size = 6
-text = "OnLine Game TODO ....."
+text = "OnLine Game"
 
 [node name="SelectionIcon" type="TextureRect" parent="Background" unique_id=1545552825]
 unique_name_in_owner = true
