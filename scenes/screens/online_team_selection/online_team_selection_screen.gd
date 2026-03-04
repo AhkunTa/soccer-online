@@ -2,10 +2,10 @@ class_name OnlineTeamSelectionScreen
 extends Screen
 
 # ── 常量 ─────────────────────────────────────────────────────────────────────
-const NB_COLS := 4
-const NB_ROWS := 2
-const FLAG_ANCHOR_POINT := Vector2(35, 80)
-const FLAG_SPACING := Vector2(55, 50)
+const NB_COLS := 2
+const NB_ROWS := 4
+const FLAG_ANCHOR_POINT := Vector2(10, 10)
+const FLAG_SPACING := Vector2(55, 35)
 const FLAG_SELECTOR_PREFAB := preload("res://scenes/screens/team_selection/flag_selector.tscn")
 
 # ── 节点引用 ──────────────────────────────────────────────────────────────────
@@ -24,9 +24,9 @@ var room_id: int = -1
 var player_count: int = 0
 
 # 本地选择状态
-var my_team: int = -1    # 0=Home, 1=Away
+var my_team: int = -1 # 0=Home, 1=Away
 var my_slot: int = -1
-var my_flag_pos: Vector2i = Vector2i.ZERO  # 旗帜网格坐标
+var my_flag_pos: Vector2i = Vector2i.ZERO # 旗帜网格坐标
 var is_confirmed: bool = false
 
 # 服务端同步的所有人选择快照 Array[{ peer_id, team, slot, is_ready }]
@@ -98,7 +98,7 @@ func _handle_team_select(scheme: Player.ControlScheme) -> void:
 
 ## 阶段二：上下换 slot，确认键就绪（等同于 ready_button）
 func _handle_slot_select(scheme: Player.ControlScheme) -> void:
-	var slots_per_team: int = player_count / 2
+	var slots_per_team: int = max(1, player_count / 2)
 	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.UP):
 		my_slot = posmod(my_slot - 1, slots_per_team)
 		RoomManager.select_slot(my_slot)
@@ -137,7 +137,7 @@ func _place_flags(container: Control, out_nodes: Array[TextureRect]) -> void:
 # ── UI 更新 ───────────────────────────────────────────────────────────────────
 
 func _update_status() -> void:
-	var phase_text := "← → 选队伍" if not in_slot_phase else "↑ ↓ 选球员位置"
+	var phase_text := "A D 选队伍" if not in_slot_phase else "WASD 选球员位置"
 	var team_text: String = (["Home ✓", "Away ✓"] as Array)[my_team] if my_team != -1 else "未选"
 	var slot_text := str(my_slot + 1) if my_slot != -1 else "未选"
 	status_label.text = "[%s]  队伍: %s  位置: %s" % [phase_text, team_text, slot_text]

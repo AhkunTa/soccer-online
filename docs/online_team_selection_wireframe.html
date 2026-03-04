@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>在线队伍选择 - 线框草图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #eee; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  h1 { color: #ffd700; margin-bottom: 10px; font-size: 16px; }
+  .note { color: #888; font-size: 12px; margin-bottom: 20px; text-align: center; max-width: 800px; }
+
+  /* 游戏视口模拟 (280x180 放大 4x) */
+  .viewport {
+    width: 1120px; height: 720px;
+    background: #16213e; border: 3px solid #0f3460;
+    position: relative; overflow: hidden;
+    image-rendering: pixelated;
+  }
+
+  /* 标题 */
+  .title {
+    text-align: center; padding: 8px 0;
+    font-size: 18px; color: #ffd700;
+    letter-spacing: 3px;
+    background: rgba(0,0,0,0.3);
+  }
+
+  /* 主布局：三栏 */
+  .main-layout {
+    display: flex; height: calc(100% - 80px);
+    padding: 8px;
+    gap: 8px;
+  }
+
+  /* 左右队伍面板 */
+  .team-panel {
+    flex: 1; display: flex; flex-direction: column;
+    border: 2px solid #333; border-radius: 4px;
+    background: rgba(0,0,0,0.2);
+    padding: 8px;
+  }
+  .team-panel.home { border-color: #e74c3c; }
+  .team-panel.away { border-color: #3498db; }
+
+  .team-header {
+    text-align: center; font-size: 14px; padding: 4px;
+    margin-bottom: 6px; border-radius: 3px;
+  }
+  .home .team-header { background: rgba(231,76,60,0.3); color: #e74c3c; }
+  .away .team-header { background: rgba(52,152,219,0.3); color: #3498db; }
+
+  /* 国旗选择区 */
+  .flag-section { margin-bottom: 8px; }
+  .flag-section-title { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .flag-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+  .flag-item {
+    width: 100%; aspect-ratio: 4/3;
+    background: #2c3e50; border: 2px solid #444;
+    border-radius: 3px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 10px; cursor: pointer; transition: all 0.15s;
+    position: relative;
+  }
+  .flag-item:hover { border-color: #ffd700; transform: scale(1.05); }
+  .flag-item.selected { border-color: #ffd700; background: rgba(255,215,0,0.15); box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+  .flag-item .emoji { font-size: 22px; margin-bottom: 2px; }
+  .flag-item .name { font-size: 9px; color: #aaa; }
+  .flag-item .vote-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: #e74c3c; color: white; font-size: 8px;
+    width: 16px; height: 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    display: none;
+  }
+  .flag-item .vote-badge.show { display: flex; }
+
+  /* 中间球场阵型区 */
+  .pitch-panel {
+    flex: 1.3; display: flex; flex-direction: column;
+    border: 2px solid #2ecc71; border-radius: 4px;
+    background: rgba(0,0,0,0.2);
+    padding: 8px;
+  }
+  .pitch-header {
+    text-align: center; font-size: 14px; padding: 4px;
+    margin-bottom: 6px; background: rgba(46,204,113,0.2);
+    color: #2ecc71; border-radius: 3px;
+  }
+
+  /* 球场俯视图 */
+  .pitch {
+    flex: 1; background: #1a6b37; border: 2px solid #fff;
+    border-radius: 4px; position: relative; overflow: hidden;
+    min-height: 300px;
+  }
+  /* 球场线条 */
+  .pitch-center-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: rgba(255,255,255,0.3); }
+  .pitch-center-circle {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 80px; height: 80px; border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+  }
+  .pitch-center-dot {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%;
+  }
+  /* 禁区 */
+  .penalty-box {
+    position: absolute; top: 25%; height: 50%;
+    width: 60px; border: 2px solid rgba(255,255,255,0.3);
+  }
+  .penalty-box.left { left: 0; border-left: none; }
+  .penalty-box.right { right: 0; border-right: none; }
+  /* 球门 */
+  .goal-area {
+    position: absolute; top: 37%; height: 26%;
+    width: 20px; border: 2px solid rgba(255,255,255,0.5);
+  }
+  .goal-area.left { left: 0; border-left: none; }
+  .goal-area.right { right: 0; border-right: none; }
+
+  /* 球员位置点 */
+  .player-slot {
+    position: absolute; width: 36px; height: 36px;
+    border-radius: 50%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 8px; cursor: pointer; transition: all 0.2s;
+    transform: translate(-50%, -50%);
+    border: 2px solid transparent;
+  }
+  .player-slot.home-slot { background: rgba(231,76,60,0.5); border-color: rgba(231,76,60,0.8); }
+  .player-slot.away-slot { background: rgba(52,152,219,0.5); border-color: rgba(52,152,219,0.8); }
+  .player-slot:hover { transform: translate(-50%,-50%) scale(1.2); z-index: 10; }
+  .player-slot.occupied { box-shadow: 0 0 10px rgba(255,215,0,0.6); border-color: #ffd700; }
+  .player-slot.my-slot { box-shadow: 0 0 12px rgba(46,204,113,0.8); border-color: #2ecc71; animation: pulse 1.5s infinite; }
+  .player-slot .role-label { font-size: 7px; color: #fff; font-weight: bold; }
+  .player-slot .player-name { font-size: 6px; color: #ffd700; margin-top: 1px; white-space: nowrap; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(46,204,113,0.5); }
+    50% { box-shadow: 0 0 16px rgba(46,204,113,0.9); }
+  }
+
+  /* 底部状态栏 */
+  .bottom-bar {
+    height: 40px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 12px;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid #333;
+  }
+  .status-text { font-size: 11px; color: #aaa; }
+  .ready-btn {
+    background: #2ecc71; color: #000; border: none;
+    padding: 6px 20px; font-family: inherit; font-size: 12px;
+    cursor: pointer; border-radius: 3px; font-weight: bold;
+  }
+  .ready-btn:hover { background: #27ae60; }
+  .ready-btn.disabled { background: #555; color: #888; cursor: not-allowed; }
+
+  /* 玩家列表 */
+  .player-list { margin-top: 6px; flex: 1; overflow-y: auto; }
+  .player-entry {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 6px; font-size: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .player-entry .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .player-entry .dot.ready { background: #2ecc71; }
+  .player-entry .dot.waiting { background: #e67e22; }
+  .player-entry .peer-name { color: #ccc; }
+  .player-entry .role-tag { color: #888; font-size: 9px; }
+  .player-entry.me .peer-name { color: #2ecc71; }
+
+  /* 说明区域 */
+  .legend {
+    margin-top: 20px; max-width: 1120px; width: 100%;
+    background: rgba(0,0,0,0.3); padding: 16px; border-radius: 6px;
+  }
+  .legend h2 { color: #ffd700; font-size: 14px; margin-bottom: 10px; }
+  .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .legend-section h3 { color: #2ecc71; font-size: 12px; margin-bottom: 6px; }
+  .legend-section p, .legend-section li { color: #aaa; font-size: 11px; line-height: 1.6; }
+  .legend-section ul { padding-left: 16px; }
+
+  .phase-flow {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px; flex-wrap: wrap;
+  }
+  .phase-box {
+    padding: 6px 12px; border-radius: 4px; font-size: 11px;
+    border: 1px solid #555;
+  }
+  .phase-box.active { border-color: #2ecc71; color: #2ecc71; background: rgba(46,204,113,0.1); }
+  .phase-arrow { color: #555; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>⚽ 在线队伍选择界面 - 线框草图</h1>
+<div class="note">视口 280×180 (此处 4x 放大展示) · 支持 2/4/10 人 · 两支队伍 · 8 国可选 · 实时阵型预览</div>
+
+<!-- ==================== 游戏视口 ==================== -->
+<div class="viewport">
+
+  <div class="title">⚽ SELECT YOUR TEAM</div>
+
+  <div class="main-layout">
+
+    <!-- ===== 左侧：HOME 队伍 ===== -->
+    <div class="team-panel home">
+      <div class="team-header">◀ HOME</div>
+
+      <div class="flag-section">
+        <div class="flag-section-title">选择国家 (投票)</div>
+        <div class="flag-grid">
+          <div class="flag-item selected">
+            <span class="emoji">🇫🇷</span>
+            <span class="name">FRANCE</span>
+            <span class="vote-badge show">2</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇦🇷</span>
+            <span class="name">ARGENT.</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇧🇷</span>
+            <span class="name">BRAZIL</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+            <span class="name">ENGLAND</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇩🇪</span>
+            <span class="name">GERMANY</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇮🇹</span>
+            <span class="name">ITALY</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇪🇸</span>
+            <span class="name">SPAIN</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇺🇸</span>
+            <span class="name">USA</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="player-list">
+        <div class="flag-section-title">队内玩家</div>
+        <div class="player-entry me">
+          <span class="dot ready"></span>
+          <span class="peer-name">Player 1024 (你)</span>
+          <span class="role-tag">FW #6</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot waiting"></span>
+          <span class="peer-name">Player 2048</span>
+          <span class="role-tag">FW #5</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot waiting"></span>
+          <span class="peer-name">Player 3072</span>
+          <span class="role-tag">MF #4</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot" style="background:#555"></span>
+          <span class="peer-name" style="color:#555">--- 空位 ---</span>
+          <span class="role-tag">DEF #3</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot" style="background:#555"></span>
+          <span class="peer-name" style="color:#555">--- 空位 ---</span>
+          <span class="role-tag">DEF #2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 中间：球场阵型 ===== -->
+    <div class="pitch-panel">
+      <div class="pitch-header">⬟ 阵型预览 (实时)</div>
+      <div class="pitch">
+        <!-- 球场标线 -->
+        <div class="pitch-center-line"></div>
+        <div class="pitch-center-circle"></div>
+        <div class="pitch-center-dot"></div>
+        <div class="penalty-box left"></div>
+        <div class="penalty-box right"></div>
+        <div class="goal-area left"></div>
+        <div class="goal-area right"></div>
+
+        <!-- HOME 球员 (左侧, 红色) -->
+        <!-- GK -->
+        <div class="player-slot home-slot" style="left:7%; top:50%;">
+          <span class="role-label">GK</span>
+          <span class="player-name" style="color:#555">CPU</span>
+        </div>
+        <!-- DEF #2 -->
+        <div class="player-slot home-slot" style="left:22%; top:33%;">
+          <span class="role-label">DEF</span>
+          <span class="player-name" style="color:#555">空位</span>
+        </div>
+        <!-- DEF #3 -->
+        <div class="player-slot home-slot" style="left:22%; top:67%;">
+          <span class="role-label">DEF</span>
+          <span class="player-name" style="color:#555">空位</span>
+        </div>
+        <!-- MF #4 -->
+        <div class="player-slot home-slot occupied" style="left:38%; top:50%;">
+          <span class="role-label">MF</span>
+          <span class="player-name">P3072</span>
+        </div>
+        <!-- FW #5 -->
+        <div class="player-slot home-slot occupied" style="left:47%; top:30%;">
+          <span class="role-label">FW</span>
+          <span class="player-name">P2048</span>
+        </div>
+        <!-- FW #6 (我) -->
+        <div class="player-slot home-slot my-slot" style="left:47%; top:70%;">
+          <span class="role-label">FW</span>
+          <span class="player-name" style="color:#2ecc71">你 ◀</span>
+        </div>
+
+        <!-- AWAY 球员 (右侧, 蓝色) -->
+        <!-- GK -->
+        <div class="player-slot away-slot" style="left:93%; top:50%;">
+          <span class="role-label">GK</span>
+          <span class="player-name" style="color:#555">CPU</span>
+        </div>
+        <!-- DEF -->
+        <div class="player-slot away-slot" style="left:78%; top:33%;">
+          <span class="role-label">DEF</span>
+          <span class="player-name" style="color:#555">空位</span>
+        </div>
+        <!-- DEF -->
+        <div class="player-slot away-slot occupied" style="left:78%; top:67%;">
+          <span class="role-label">DEF</span>
+          <span class="player-name">P4096</span>
+        </div>
+        <!-- MF -->
+        <div class="player-slot away-slot" style="left:62%; top:50%;">
+          <span class="role-label">MF</span>
+          <span class="player-name" style="color:#555">空位</span>
+        </div>
+        <!-- FW -->
+        <div class="player-slot away-slot occupied" style="left:53%; top:30%;">
+          <span class="role-label">FW</span>
+          <span class="player-name">P5120</span>
+        </div>
+        <!-- FW -->
+        <div class="player-slot away-slot" style="left:53%; top:70%;">
+          <span class="role-label">FW</span>
+          <span class="player-name" style="color:#555">空位</span>
+        </div>
+      </div>
+
+      <div style="margin-top:6px; font-size:9px; color:#666; text-align:center;">
+        🟢 你的位置 &nbsp; 🟡 已占位 &nbsp; ⚫ 空位/CPU &nbsp;|&nbsp; 点击球场上的位置来选择
+      </div>
+    </div>
+
+    <!-- ===== 右侧：AWAY 队伍 ===== -->
+    <div class="team-panel away">
+      <div class="team-header">AWAY ▶</div>
+
+      <div class="flag-section">
+        <div class="flag-section-title">选择国家 (投票)</div>
+        <div class="flag-grid">
+          <div class="flag-item">
+            <span class="emoji">🇫🇷</span>
+            <span class="name">FRANCE</span>
+          </div>
+          <div class="flag-item selected">
+            <span class="emoji">🇦🇷</span>
+            <span class="name">ARGENT.</span>
+            <span class="vote-badge show">2</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇧🇷</span>
+            <span class="name">BRAZIL</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+            <span class="name">ENGLAND</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇩🇪</span>
+            <span class="name">GERMANY</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇮🇹</span>
+            <span class="name">ITALY</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇪🇸</span>
+            <span class="name">SPAIN</span>
+          </div>
+          <div class="flag-item">
+            <span class="emoji">🇺🇸</span>
+            <span class="name">USA</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="player-list">
+        <div class="flag-section-title">队内玩家</div>
+        <div class="player-entry">
+          <span class="dot ready"></span>
+          <span class="peer-name">Player 4096</span>
+          <span class="role-tag">DEF #3</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot waiting"></span>
+          <span class="peer-name">Player 5120</span>
+          <span class="role-tag">FW #5</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot" style="background:#555"></span>
+          <span class="peer-name" style="color:#555">--- 空位 ---</span>
+          <span class="role-tag">FW #6</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot" style="background:#555"></span>
+          <span class="peer-name" style="color:#555">--- 空位 ---</span>
+          <span class="role-tag">MF #4</span>
+        </div>
+        <div class="player-entry">
+          <span class="dot" style="background:#555"></span>
+          <span class="peer-name" style="color:#555">--- 空位 ---</span>
+          <span class="role-tag">DEF #2</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 底部状态栏 -->
+  <div class="bottom-bar">
+    <span class="status-text">◀ ▶ 选队伍 &nbsp;|&nbsp; ▲ ▼ 选位置 &nbsp;|&nbsp; 方向键选国旗 &nbsp;|&nbsp; SHOOT 确认</span>
+    <button class="ready-btn">✓ READY</button>
+  </div>
+
+</div>
+
+<!-- ==================== 设计说明 ==================== -->
+<div class="legend">
+  <h2>📐 设计说明</h2>
+  <div class="legend-grid">
+
+    <div class="legend-section">
+      <h3>操作流程</h3>
+      <div class="phase-flow">
+        <span class="phase-box active">① 选队伍<br><small>左/右 → HOME/AWAY</small></span>
+        <span class="phase-arrow">→</span>
+        <span class="phase-box">② 投票选国家<br><small>方向键 + 确认</small></span>
+        <span class="phase-arrow">→</span>
+        <span class="phase-box">③ 选球场位置<br><small>上/下切换 slot</small></span>
+        <span class="phase-arrow">→</span>
+        <span class="phase-box">④ READY<br><small>全员就绪开赛</small></span>
+      </div>
+    </div>
+
+    <div class="legend-section">
+      <h3>人数适配</h3>
+      <ul>
+        <li>2人: 每队 1 人控制, 其余 CPU</li>
+        <li>4人: 每队 2 人控制 (FW×2)</li>
+        <li>10人: 每队 5 人控制 (GK 始终 CPU)</li>
+        <li>空位自动填充 CPU 球员</li>
+        <li>slot 对应 squad 中的 index (0=GK, 1-2=DEF, 3=MF, 4-5=FW)</li>
+      </ul>
+    </div>
+
+    <div class="legend-section">
+      <h3>国旗投票机制</h3>
+      <ul>
+        <li>同队玩家各自投票选国家</li>
+        <li>票数最多的国家为该队国旗</li>
+        <li>平票时取先投的</li>
+        <li>国旗右上角显示投票数 badge</li>
+        <li>两队不能选同一国家</li>
+      </ul>
+    </div>
+
+    <div class="legend-section">
+      <h3>球场阵型预览</h3>
+      <ul>
+        <li>中间区域实时显示两队 6 个位置</li>
+        <li>已占位: 金色高亮 + 显示玩家 ID</li>
+        <li>自己: 绿色脉冲动画</li>
+        <li>空位: 灰色, 标注角色 (GK/DEF/MF/FW)</li>
+        <li>GK 位置锁定为 CPU, 不可选</li>
+        <li>位置布局参考 actors_container 的 spawn 点</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
