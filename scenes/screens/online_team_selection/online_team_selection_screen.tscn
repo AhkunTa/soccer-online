@@ -1,27 +1,8 @@
 [gd_scene format=3 uid="uid://dpct1n2ogioa5"]
 
 [ext_resource type="Script" uid="uid://dneb2xw8dnhv8" path="res://scenes/screens/online_team_selection/online_team_selection_screen.gd" id="1_script"]
-
-[sub_resource type="FontFile" id="FontFile_41ntt"]
-cache/0/variation_coordinates = {}
-cache/0/face_index = 0
-cache/0/embolden = 0.0
-cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
-cache/0/spacing_top = 0
-cache/0/spacing_bottom = 0
-cache/0/spacing_space = 0
-cache/0/spacing_glyph = 0
-cache/0/baseline_offset = 0.0
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/6/0/ascent = 0.0
-cache/0/6/0/descent = 0.0
-cache/0/6/0/underline_position = 0.0
-cache/0/6/0/underline_thickness = 0.0
-cache/0/6/0/scale = 1.0
+[ext_resource type="Texture2D" uid="uid://can5buoltwsuh" path="res://assets/art/backgrounds/small-field.png" id="2_jsq5g"]
+[ext_resource type="Theme" uid="uid://x2ffst15kukp" path="res://scenes/ui/common_theme.tres" id="3_anwl6"]
 
 [node name="OnlineTeamSelectionScreen" type="Node" unique_id=509477033]
 script = ExtResource("1_script")
@@ -58,19 +39,20 @@ grow_vertical = 2
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="HomePanel" type="VBoxContainer" parent="Background/TeamsContainer" unique_id=1343190743]
-custom_minimum_size = Vector2(140, 180)
+[node name="HomePanel" type="VBoxContainer" parent="Background/TeamsContainer" unique_id=932928383]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="HomeLabel" type="Label" parent="Background/TeamsContainer/HomePanel" unique_id=1532294233]
 layout_mode = 2
-text = "[ HOME ]"
+text = "HOME"
 horizontal_alignment = 1
 
 [node name="HomeFlagContainer" type="Control" parent="Background/TeamsContainer/HomePanel" unique_id=649816539]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="HomeFlagSelector" type="Control" parent="Background/TeamsContainer/HomePanel" unique_id=1874906444]
 unique_name_in_owner = true
@@ -81,20 +63,39 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="AwayPanel" type="VBoxContainer" parent="Background/TeamsContainer" unique_id=1850361880]
-custom_minimum_size = Vector2(140, 180)
+[node name="PitchPanel" type="Control" parent="Background/TeamsContainer" unique_id=1626537003]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Background/TeamsContainer/PitchPanel" unique_id=1289347751]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -30.0
+offset_right = 50.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_jsq5g")
+
+[node name="AwayPanel" type="VBoxContainer" parent="Background/TeamsContainer" unique_id=867553122]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="AwayLabel" type="Label" parent="Background/TeamsContainer/AwayPanel" unique_id=1666031203]
 layout_mode = 2
-text = "[ AWAY ]"
+text = "AWAY"
 horizontal_alignment = 1
 
 [node name="AwayFlagContainer" type="Control" parent="Background/TeamsContainer/AwayPanel" unique_id=500327637]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="AwayFlagSelector" type="Control" parent="Background/TeamsContainer/AwayPanel" unique_id=1865082291]
 unique_name_in_owner = true
@@ -114,6 +115,7 @@ anchor_bottom = 1.0
 offset_top = -15.0
 grow_horizontal = 2
 grow_vertical = 0
+theme = ExtResource("3_anwl6")
 alignment = 1
 
 [node name="StatusLabel" type="Label" parent="Background/BottomBar" unique_id=118234108]
@@ -125,6 +127,4 @@ text = "← → 选队伍"
 [node name="ReadyButton" type="Button" parent="Background/BottomBar" unique_id=875651417]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_fonts/font = SubResource("FontFile_41ntt")
-theme_override_font_sizes/font_size = 6
 text = "READY"

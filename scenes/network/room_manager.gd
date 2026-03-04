@@ -322,7 +322,7 @@ func _server_start_team_selection(room_id: int) -> void:
 	# 初始化每位玩家的选择状态（team=-1 表示未选，slot=-1 表示未选）
 	var selections: Array = []
 	for pid: int in players:
-		selections.append({"peer_id": pid, "team": - 1, "slot": - 1, "is_ready": false})
+		selections.append({"peer_id": pid, "team": -1, "slot": -1, "is_ready": false, "country": ""})
 	_team_selections[room_id] = selections
 	# 广播给房间内所有客户端
 	for pid: int in players:
@@ -435,12 +435,22 @@ func _server_confirm_ready(peer_id: int) -> void:
 func _server_launch_match(room_id: int) -> void:
 	var room: Dictionary = _rooms[room_id]
 	var selections: Array = _team_selections[room_id]
-	# 按 team=0 和 team=1 各找一个代表国家（此处用服务端预设，实际可由房主选旗）
-	# 这里简化：home 队用第一个选了 team=0 的玩家选择的国旗，
-	# 实际国旗选择由 online_team_selection_screen 的国旗 RPC 传入
+	# 从 selections 中提取 home/away 国家（取各队第一个非空 country）
+	var home_country := ""
+	var away_country := ""
+	for entry: Dictionary in selections:
+		var c: String = entry.get("country", "")
+		if c == "":
+			continue
+		if entry["team"] == 0 and home_country == "":
+			home_country = c
+		elif entry["team"] == 1 and away_country == "":
+			away_country = c
 	var config: Dictionary = {
 		"room_id": room_id,
-		"assignments": selections
+		"assignments": selections,
+		"home_country": home_country,
+		"away_country": away_country,
 	}
 	for pid: int in room["players"]:
 		if pid == 1:
@@ -487,6 +497,37 @@ func select_team(team: int) -> void:
 		_server_select_team(1, team)
 	else:
 		_rpc_select_team.rpc_id(1, team)
+
+
+## Client → Server：玩家请求选择国家
+@rpc("any_peer", "reliable")
+func _rpc_select_country(country: String) -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id := multiplayer.get_remote_sender_id()
+	_server_select_country(sender_id, country)
+
+
+func _server_select_country(peer_id: int, country: String) -> void:
+	if not _player_room.has(peer_id):
+		return
+	var room_id: int = _player_room[peer_id]
+	if not _team_selections.has(room_id):
+		return
+	var selections: Array = _team_selections[room_id]
+	for entry: Dictionary in selections:
+		if entry["peer_id"] == peer_id:
+			entry["country"] = country
+			break
+	_broadcast_team_selection(room_id)
+
+
+## 本地玩家选择国家
+func select_country(country: String) -> void:
+	if multiplayer.is_server():
+		_server_select_country(1, country)
+	else:
+		_rpc_select_country.rpc_id(1, country)
 
 
 ## 本地玩家选择球员 slot

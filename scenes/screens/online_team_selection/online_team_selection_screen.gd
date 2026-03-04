@@ -5,7 +5,7 @@ extends Screen
 const NB_COLS := 2
 const NB_ROWS := 4
 const FLAG_ANCHOR_POINT := Vector2(10, 10)
-const FLAG_SPACING := Vector2(55, 35)
+const FLAG_SPACING := Vector2(30, 20)
 const FLAG_SELECTOR_PREFAB := preload("res://scenes/screens/team_selection/flag_selector.tscn")
 
 # ── 节点引用 ──────────────────────────────────────────────────────────────────
@@ -15,8 +15,6 @@ const FLAG_SELECTOR_PREFAB := preload("res://scenes/screens/team_selection/flag_
 @onready var away_slots_container: VBoxContainer = %AwaySlotsContainer
 @onready var status_label: Label = %StatusLabel
 @onready var ready_button: Button = %ReadyButton
-@onready var home_flag_selector: Control = %HomeFlagSelector
-@onready var away_flag_selector: Control = %AwayFlagSelector
 
 # ── 运行时状态 ────────────────────────────────────────────────────────────────
 var my_peer_id: int = -1
@@ -25,21 +23,23 @@ var player_count: int = 0
 
 # 本地选择状态
 var my_team: int = -1 # 0=Home, 1=Away
+var my_country: String = "" # 已选国家
 var my_slot: int = -1
-var my_flag_pos: Vector2i = Vector2i.ZERO # 旗帜网格坐标
 var is_confirmed: bool = false
 
-# 服务端同步的所有人选择快照 Array[{ peer_id, team, slot, is_ready }]
+# 阶段：TEAM -> FLAG -> SLOT
+enum Phase {TEAM, FLAG, SLOT}
+var phase: Phase = Phase.TEAM
+
+# 旗帜网格光标位置
+var flag_cursor: Vector2i = Vector2i.ZERO
+
+# 服务端同步快照 Array[{ peer_id, team, slot, is_ready, country }]
 var all_selections: Array = []
-
-# 旗帜选择模式：false=选队伍阶段, true=选球员slot阶段
-var in_slot_phase: bool = false
-
-# 当前激活的旗帜选择器（0=home, 1=away）
-var active_flag_selector: int = -1
 
 var _home_flag_nodes: Array[TextureRect] = []
 var _away_flag_nodes: Array[TextureRect] = []
+var _my_flag_selector: FlagSelector = null
 
 # ── 生命周期 ──────────────────────────────────────────────────────────────────
 
@@ -73,32 +73,56 @@ func _exit_tree() -> void:
 func _process(_delta: float) -> void:
 	if is_confirmed:
 		return
-	# P1 控制方案操作（目前联机每端只控制自己）
 	var scheme := Player.ControlScheme.P1
-	if not in_slot_phase:
-		_handle_team_select(scheme)
-	else:
-		_handle_slot_select(scheme)
+	match phase:
+		Phase.TEAM: _handle_team_select(scheme)
+		Phase.FLAG: _handle_flag_select(scheme)
+		Phase.SLOT: _handle_slot_select(scheme)
 
 
 # ── 输入处理 ──────────────────────────────────────────────────────────────────
 
-## 阶段一：左右选队伍，确认键进入选 slot 阶段
+## 阶段一：左右选队伍，SHOOT 确认进入国旗选择
 func _handle_team_select(scheme: Player.ControlScheme) -> void:
 	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.LEFT):
 		_set_my_team(0)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.RIGHT):
 		_set_my_team(1)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.SHOOT) and my_team != -1:
-		in_slot_phase = true
-		my_slot = 0
-		RoomManager.select_slot(my_slot)
+		_enter_flag_phase()
+
+
+## 阶段二：WASD 移动旗帜光标，SHOOT 确认国家，PASS 返回
+func _handle_flag_select(scheme: Player.ControlScheme) -> void:
+	var moved := false
+	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.LEFT):
+		flag_cursor.x = max(0, flag_cursor.x - 1)
+		moved = true
+	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.RIGHT):
+		flag_cursor.x = min(NB_COLS - 1, flag_cursor.x + 1)
+		moved = true
+	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.UP):
+		flag_cursor.y = max(0, flag_cursor.y - 1)
+		moved = true
+	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.DOWN):
+		flag_cursor.y = min(NB_ROWS - 1, flag_cursor.y + 1)
+		moved = true
+
+	if moved:
+		AudioPlayer.play(AudioPlayer.Sound.UI_NAV)
+		_update_flag_selector_position()
+	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.SHOOT):
+		_confirm_country()
+	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.PASS):
+		phase = Phase.TEAM
 		_update_status()
 
 
-## 阶段二：上下换 slot，确认键就绪（等同于 ready_button）
+## 阶段三：上下换 slot，PASS 返回国旗选择
 func _handle_slot_select(scheme: Player.ControlScheme) -> void:
-	var slots_per_team: int = max(1, player_count / 2)
+	var slots_per_team: int = player_count >> 1
+	if slots_per_team < 1:
+		slots_per_team = 1
 	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.UP):
 		my_slot = posmod(my_slot - 1, slots_per_team)
 		RoomManager.select_slot(my_slot)
@@ -106,16 +130,78 @@ func _handle_slot_select(scheme: Player.ControlScheme) -> void:
 		my_slot = (my_slot + 1) % slots_per_team
 		RoomManager.select_slot(my_slot)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.PASS):
-		# 返回队伍选择阶段
-		in_slot_phase = false
-		_update_status()
+		if not _is_team_country_locked():
+			phase = Phase.FLAG
+	_update_status()
 
+
+# ── 阶段切换 ──────────────────────────────────────────────────────────────────
 
 func _set_my_team(team: int) -> void:
 	my_team = team
 	RoomManager.select_team(team)
 	AudioPlayer.play(AudioPlayer.Sound.UI_NAV)
 	_update_status()
+
+
+## 进入国旗选择阶段
+## 多人情况：如果本队已有队友选好了国家，直接跳到 slot 阶段并高亮该国家
+func _enter_flag_phase() -> void:
+	var locked_country := _get_team_locked_country()
+	if locked_country != "":
+		my_country = locked_country
+		RoomManager.select_country(my_country)
+		_highlight_country(my_country)
+		phase = Phase.SLOT
+		my_slot = 0
+		RoomManager.select_slot(my_slot)
+	else:
+		phase = Phase.FLAG
+		flag_cursor = Vector2i.ZERO
+		_spawn_flag_selector()
+		_update_flag_selector_position()
+	_update_status()
+
+
+## 确认当前光标所在国家
+func _confirm_country() -> void:
+	var flag_index := flag_cursor.y * NB_COLS + flag_cursor.x
+	var country := DataLoader.get_countries()[1 + flag_index]
+	var opponent_team := 1 - my_team
+	if _get_locked_country_for_team(opponent_team) == country:
+		AudioPlayer.play(AudioPlayer.Sound.UI_DISABLE)
+		return
+	my_country = country
+	RoomManager.select_country(my_country)
+	AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
+	phase = Phase.SLOT
+	my_slot = 0
+	RoomManager.select_slot(my_slot)
+	_update_status()
+
+
+# ── 旗帜选择器 ────────────────────────────────────────────────────────────────
+
+func _spawn_flag_selector() -> void:
+	var container := home_flag_container if my_team == 0 else away_flag_container
+	if _my_flag_selector != null and is_instance_valid(_my_flag_selector):
+		_my_flag_selector.queue_free()
+	_my_flag_selector = FLAG_SELECTOR_PREFAB.instantiate()
+	_my_flag_selector.scale = Vector2(.5,.5)
+	_my_flag_selector.control_scheme = Player.ControlScheme.P1
+	# 禁用 FlagSelector 自身的输入处理，由本屏幕统一管理
+	_my_flag_selector.set_process(false)
+	container.add_child(_my_flag_selector)
+	_update_flag_selector_position()
+
+
+func _update_flag_selector_position() -> void:
+	if _my_flag_selector == null or not is_instance_valid(_my_flag_selector):
+		return
+	var flag_index := flag_cursor.y * NB_COLS + flag_cursor.x
+	var container := home_flag_container if my_team == 0 else away_flag_container
+	if flag_index < container.get_child_count() - 1:
+		_my_flag_selector.position = container.get_child(flag_index).position
 
 
 # ── 旗帜放置 ─────────────────────────────────────────────────────────────────
@@ -128,20 +214,67 @@ func _place_flags(container: Control, out_nodes: Array[TextureRect]) -> void:
 			var country_index := 1 + i + NB_COLS * j
 			var country := DataLoader.get_countries()[country_index]
 			flag_texture.texture = FlagHelper.get_texture(country)
-			flag_texture.scale = Vector2(2, 2)
 			flag_texture.z_index = 1
 			container.add_child(flag_texture)
 			out_nodes.append(flag_texture)
 
 
+## 高亮已锁定国家，其余变暗
+func _highlight_country(country: String) -> void:
+	var flag_nodes := _home_flag_nodes if my_team == 0 else _away_flag_nodes
+	var countries := DataLoader.get_countries()
+	for i in flag_nodes.size():
+		var c_index := 1 + i
+		if c_index < countries.size() and countries[c_index] == country:
+			flag_nodes[i].modulate = Color(1.5, 1.5, 0.5)
+		else:
+			flag_nodes[i].modulate = Color(0.5, 0.5, 0.5)
+
+
+# ── 多人辅助查询 ──────────────────────────────────────────────────────────────
+
+func _get_team_locked_country() -> String:
+	return _get_locked_country_for_team(my_team)
+
+
+func _get_locked_country_for_team(team: int) -> String:
+	for entry: Dictionary in all_selections:
+		if entry["peer_id"] != my_peer_id and entry["team"] == team:
+			var c: String = entry.get("country", "")
+			if c != "":
+				return c
+	return ""
+
+
+func _is_team_country_locked() -> bool:
+	return _get_team_locked_country() != ""
+
+
 # ── UI 更新 ───────────────────────────────────────────────────────────────────
 
 func _update_status() -> void:
-	var phase_text := "A D 选队伍" if not in_slot_phase else "WASD 选球员位置"
-	var team_text: String = (["Home ✓", "Away ✓"] as Array)[my_team] if my_team != -1 else "未选"
-	var slot_text := str(my_slot + 1) if my_slot != -1 else "未选"
-	status_label.text = "[%s]  队伍: %s  位置: %s" % [phase_text, team_text, slot_text]
-	ready_button.disabled = my_team == -1 or my_slot == -1 or is_confirmed
+	var hint: String
+	match phase:
+		Phase.TEAM:
+			hint = "A/D 选队伍  SHOOT 确认"
+		Phase.FLAG:
+			hint = "WASD 选国家  SHOOT 确认  PASS 返回"
+		Phase.SLOT:
+			var country_text := my_country if my_country != "" else "?"
+			hint = "[ %s ] W/S 选位置  PASS 返回" % country_text
+	var team_text: String
+	if my_team == 0:
+		team_text = "HOME"
+	elif my_team == 1:
+		team_text = "AWAY"
+	else:
+		team_text = "---"
+	status_label.text = "%s | %s | %s" % [hint, team_text, _slot_text()]
+	ready_button.disabled = my_team == -1 or my_slot == -1 or my_country == "" or is_confirmed
+
+
+func _slot_text() -> String:
+	return "---" if my_slot == -1 else "位置:%d" % (my_slot + 1)
 
 
 func _rebuild_slot_labels() -> void:
@@ -149,32 +282,30 @@ func _rebuild_slot_labels() -> void:
 		child.queue_free()
 	for child in away_slots_container.get_children():
 		child.queue_free()
-
-	var slots_per_team: int = max(1, player_count / 2)
-	# 收集当前占用情况
-	var home_occupants: Dictionary = {}
-	var away_occupants: Dictionary = {}
+	var slots_per_team: int = player_count >> 1
+	if slots_per_team < 1:
+		slots_per_team = 1
+	var home_occ: Dictionary = {}
+	var away_occ: Dictionary = {}
 	for entry: Dictionary in all_selections:
 		if entry["team"] == 0 and entry["slot"] >= 0:
-			home_occupants[entry["slot"]] = entry["peer_id"]
+			home_occ[entry["slot"]] = entry["peer_id"]
 		elif entry["team"] == 1 and entry["slot"] >= 0:
-			away_occupants[entry["slot"]] = entry["peer_id"]
-
+			away_occ[entry["slot"]] = entry["peer_id"]
 	for s in range(slots_per_team):
-		home_slots_container.add_child(_build_slot_label(s, home_occupants))
-		away_slots_container.add_child(_build_slot_label(s, away_occupants))
+		home_slots_container.add_child(_build_slot_label(s, home_occ))
+		away_slots_container.add_child(_build_slot_label(s, away_occ))
 
 
 func _build_slot_label(slot_idx: int, occupants: Dictionary) -> Label:
 	var lbl := Label.new()
-	lbl.add_theme_font_size_override("font_size", 8)
 	if occupants.has(slot_idx):
 		var pid: int = occupants[slot_idx]
-		var marker := " ✓" if _is_ready(pid) else ""
-		var mine := " ◀" if pid == my_peer_id else ""
-		lbl.text = "  [%d] Player %d%s%s" % [slot_idx + 1, pid, marker, mine]
+		var marker := " v" if _is_ready(pid) else ""
+		var mine := " <" if pid == my_peer_id else ""
+		lbl.text = "[ %d ] P%d%s%s" % [slot_idx + 1, pid, marker, mine]
 	else:
-		lbl.text = "  [%d] ---" % (slot_idx + 1)
+		lbl.text = "[ %d ] ---" % (slot_idx + 1)
 	return lbl
 
 
@@ -188,7 +319,7 @@ func _is_ready(peer_id: int) -> bool:
 # ── 信号回调 ──────────────────────────────────────────────────────────────────
 
 func _on_ready_button_pressed() -> void:
-	if my_team == -1 or my_slot == -1:
+	if my_team == -1 or my_slot == -1 or my_country == "":
 		return
 	is_confirmed = true
 	ready_button.disabled = true
@@ -199,11 +330,12 @@ func _on_ready_button_pressed() -> void:
 func _on_team_selection_updated(selections: Array) -> void:
 	all_selections = selections
 	_rebuild_slot_labels()
+	if phase == Phase.FLAG and _is_team_country_locked():
+		_enter_flag_phase()
 	_update_status()
 
 
 func _on_match_config_received(config: Dictionary) -> void:
-	# 将配置写入 GameManager 后跳转游戏
 	GameManager.apply_online_match_config(config, my_peer_id)
 	transition_screen(SoccerGame.ScreenType.IN_GAME)
 
@@ -211,4 +343,4 @@ func _on_match_config_received(config: Dictionary) -> void:
 func _on_error(message: String) -> void:
 	status_label.text = "! " + message
 	is_confirmed = false
-	ready_button.disabled = my_team == -1 or my_slot == -1
+	ready_button.disabled = my_team == -1 or my_slot == -1 or my_country == ""
