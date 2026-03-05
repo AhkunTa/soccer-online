@@ -65,7 +65,7 @@ func apply_online_match_config(config: Dictionary, local_peer_id: int) -> void:
 			var team: int = entry["team"]
 			var slot: int = entry["slot"]
 			# online_slot_assignments: [team, slot] 供游戏内控制逻辑读取
-			online_slot_assignments = {"team": team, "slot": slot}
+			online_slot_assignments = {"team": team, "slot": slot, "position": entry.get("position", Vector2.ZERO)}
 			break
 
 func is_time_over() -> bool:

@@ -324,10 +324,17 @@ func _build_slot_label(slot_idx: int, occupants: Dictionary) -> Label:
 		var pid: int = occupants[slot_idx]
 		var marker := " v" if _is_ready(pid) else ""
 		var mine := " <" if pid == my_peer_id else ""
-		lbl.text = "[ %d ] P%d%s%s" % [slot_idx + 1, pid, marker, mine]
+		lbl.text = "[ %d ] %s%s%s" % [slot_idx + 1, _get_name_for_peer(pid), marker, mine]
 	else:
 		lbl.text = "[ %d ] ---" % (slot_idx + 1)
 	return lbl
+
+
+func _get_name_for_peer(pid: int) -> String:
+	for entry: Dictionary in all_selections:
+		if entry["peer_id"] == pid:
+			return entry.get("name", "P%d" % pid)
+	return "P%d" % pid
 
 
 func _is_ready(peer_id: int) -> bool:
@@ -357,6 +364,14 @@ func _on_team_selection_updated(selections: Array) -> void:
 
 
 func _on_match_config_received(config: Dictionary) -> void:
+	# 将 slot 序号解析为实际出生位置，写入每个 assignment 的 position 字段
+	var assignments: Array = config.get("assignments", [])
+	for entry: Dictionary in assignments:
+		var s: int = entry.get("slot", 0)
+		if s >= 0 and s < player_positions.size():
+			entry["position"] = player_positions[s]
+		else:
+			entry["position"] = Vector2.ZERO
 	GameManager.apply_online_match_config(config, my_peer_id)
 	transition_screen(SoccerGame.ScreenType.IN_GAME)
 

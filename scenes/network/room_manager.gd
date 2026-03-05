@@ -25,8 +25,10 @@ var my_room_id: int = -1
 var _rooms: Dictionary = {}
 var _next_room_id: int = 1
 var _player_room: Dictionary = {}
-# 队伍选择阶段：room_id → Array[{ peer_id, team, slot, is_ready }]
+# 队伍选择阶段：room_id → Array[{ peer_id, name, team, slot, is_ready, country }]
 var _team_selections: Dictionary = {}
+# 玩家信息（服务端专用）：peer_id → { "name": String }
+var _player_info: Dictionary = {}
 
 
 func _ready() -> void:
@@ -55,8 +57,10 @@ func start_as_host() -> Error:
 		error_occurred.emit("Failed to start server (port %d may be in use)" % PORT)
 		return err
 	multiplayer.multiplayer_peer = peer
+	_player_info[1] = {"name": "Host"}  # 初始化服务端自身
 	multiplayer.peer_connected.connect(func(id: int) -> void:
-		print("[Server] peer_connected: id=%d" % id))
+		print("[Server] peer_connected: id=%d" % id)
+		_player_info[id] = {"name": "P%d" % id})  # 默认昵称，等待客户端上传覆盖
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	state = State.HOSTING
 	connection_status_changed.emit("Hosting on port %d" % PORT)
@@ -94,6 +98,7 @@ func disconnect_network() -> void:
 	my_room_id = -1
 	_rooms.clear()
 	_player_room.clear()
+	_player_info.clear()
 	_next_room_id = 1
 	connection_status_changed.emit("Offline")
 
@@ -164,7 +169,9 @@ func _deliver_room_list(requester_id: int, filter: String) -> void:
 				"id": room_id,
 				"title": room["title"],
 				"players": room["players"].size(),
-				"max_players": room["max_players"]
+				"max_players": room["max_players"],
+				"host_name": get_player_name(room.get("host_id", 0)),
+				"status": room.get("status", "waiting"),
 			})
 	if requester_id == 1:
 		_local_receive_room_list(result)
@@ -177,7 +184,7 @@ func _server_create_room(creator_id: int, title: String, max_players: int) -> vo
 		_remove_player_from_room(creator_id)
 	var room_id := _next_room_id
 	_next_room_id += 1
-	_rooms[room_id] = {"title": title, "max_players": max_players, "players": [creator_id]}
+	_rooms[room_id] = {"title": title, "max_players": max_players, "players": [creator_id], "host_id": creator_id, "status": "waiting"}
 	_player_room[creator_id] = room_id
 	if creator_id == 1:
 		_local_room_created(room_id)
@@ -192,6 +199,10 @@ func _server_join_room(joiner_id: int, room_id: int) -> void:
 			_rpc_recv_error.rpc_id(joiner_id, "Room does not exist")
 		return
 	var room: Dictionary = _rooms[room_id]
+	if room.get("status", "waiting") != "waiting":
+		if joiner_id != 1:
+			_rpc_recv_error.rpc_id(joiner_id, "Room is not open for joining")
+		return
 	if room["players"].size() >= room["max_players"]:
 		if joiner_id != 1:
 			_rpc_recv_error.rpc_id(joiner_id, "Room is full")
@@ -233,7 +244,9 @@ func _broadcast_room_update() -> void:
 			"id": room_id,
 			"title": room["title"],
 			"players": room["players"].size(),
-			"max_players": room["max_players"]
+			"max_players": room["max_players"],
+			"host_name": get_player_name(room.get("host_id", 0)),
+			"status": room.get("status", "waiting"),
 		})
 	# 推送给服务端自身（如果服务端也在显示大厅）
 	if state == State.HOSTING:
@@ -288,6 +301,7 @@ func _on_connected_to_server() -> void:
 	print("[RoomManager] connected_to_server fired, peer id=", multiplayer.get_unique_id())
 	state = State.CONNECTED
 	connection_status_changed.emit("Connected")
+	upload_player_name("P%d" % multiplayer.get_unique_id())  # 连接后立即上传默认昵称
 	request_rooms()
 
 
@@ -311,6 +325,38 @@ func _on_server_disconnected() -> void:
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	_remove_player_from_room(peer_id)
+	_player_info.erase(peer_id)
+
+
+# ── 玩家信息 ──────────────────────────────────────────────────────────────────
+
+## 获取昵称（服务端有完整数据；客户端返回默认值）
+func get_player_name(peer_id: int) -> String:
+	if _player_info.has(peer_id):
+		return _player_info[peer_id]["name"]
+	return "P%d" % peer_id
+
+
+## 客户端上传自己的昵称（连接后自动调用，也可由 UI 主动调用覆盖）
+func upload_player_name(name: String) -> void:
+	if multiplayer.is_server():
+		_server_store_player_info(1, name)
+	else:
+		_rpc_upload_player_info.rpc_id(1, name)
+
+
+@rpc("any_peer", "reliable")
+func _rpc_upload_player_info(name: String) -> void:
+	if not multiplayer.is_server():
+		return
+	_server_store_player_info(multiplayer.get_remote_sender_id(), name)
+
+
+func _server_store_player_info(peer_id: int, name: String) -> void:
+	if _player_info.has(peer_id):
+		_player_info[peer_id]["name"] = name
+	else:
+		_player_info[peer_id] = {"name": name}
 
 
 # ── 队伍选择：服务端逻辑 ──────────────────────────────────────────────────────
@@ -318,11 +364,12 @@ func _on_peer_disconnected(peer_id: int) -> void:
 ## 初始化该房间的队伍选择状态，并广播 room_ready 给房间内所有玩家
 func _server_start_team_selection(room_id: int) -> void:
 	var room: Dictionary = _rooms[room_id]
+	room["status"] = "in_selection"
 	var players: Array = room["players"]
 	# 初始化每位玩家的选择状态（team=-1 表示未选，slot=-1 表示未选）
 	var selections: Array = []
 	for pid: int in players:
-		selections.append({"peer_id": pid, "team": -1, "slot": -1, "is_ready": false, "country": ""})
+		selections.append({"peer_id": pid, "name": get_player_name(pid), "team": -1, "slot": -1, "is_ready": false, "country": ""})
 	_team_selections[room_id] = selections
 	# 广播给房间内所有客户端
 	for pid: int in players:
@@ -434,6 +481,7 @@ func _server_confirm_ready(peer_id: int) -> void:
 ## 所有人就绪后构建 match_config 并广播
 func _server_launch_match(room_id: int) -> void:
 	var room: Dictionary = _rooms[room_id]
+	room["status"] = "in_game"
 	var selections: Array = _team_selections[room_id]
 	# 从 selections 中提取 home/away 国家（取各队第一个非空 country）
 	var home_country := ""

@@ -88,11 +88,21 @@ func _build_room_row(room_data: Dictionary) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 3)
 
+	var host_name: String = room_data.get("host_name", "")
+	var status: String = room_data.get("status", "waiting")
+
 	var title_lbl := Label.new()
-	title_lbl.text = room_data["title"]
+	var title_suffix := (" [%s]" % host_name) if host_name != "" else ""
+	title_lbl.text = room_data["title"] + title_suffix
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_lbl.add_theme_font_size_override("font_size", 6)
 	row.add_child(title_lbl)
+
+	var status_lbl := Label.new()
+	status_lbl.text = status
+	status_lbl.add_theme_font_size_override("font_size", 5)
+	status_lbl.modulate = Color(0.7, 1.0, 0.7) if status == "waiting" else Color(1.0, 0.7, 0.3)
+	row.add_child(status_lbl)
 
 	var count_lbl := Label.new()
 	count_lbl.text = "%d/%d" % [room_data["players"], room_data["max_players"]]
@@ -102,8 +112,9 @@ func _build_room_row(room_data: Dictionary) -> HBoxContainer:
 	var join_btn := Button.new()
 	var is_full: bool = room_data["players"] >= room_data["max_players"]
 	var is_mine: bool = RoomManager.my_room_id == room_data["id"]
+	var not_open: bool = status != "waiting"
 	join_btn.text = "In" if is_mine else "Join"
-	join_btn.disabled = is_full or is_mine
+	join_btn.disabled = is_full or is_mine or not_open
 	join_btn.add_theme_font_size_override("font_size", 6)
 	var room_id: int = room_data["id"]
 	join_btn.pressed.connect(func() -> void: RoomManager.join_room(room_id))
