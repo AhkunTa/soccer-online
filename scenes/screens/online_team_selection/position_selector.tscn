@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://dfm2xm1tty7u3"]
+
+[ext_resource type="Theme" uid="uid://x2ffst15kukp" path="res://scenes/ui/common_theme.tres" id="1_se255"]
+[ext_resource type="Script" uid="uid://dm0dxm5pg807m" path="res://scenes/screens/online_team_selection/position_selector.gd" id="2_fnqsl"]
+[ext_resource type="Texture2D" uid="uid://0h6lfhswd53m" path="res://assets/art/props/position-selector.png" id="3_fnqsl"]
+
+[sub_resource type="Animation" id="Animation_fnqsl"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Label:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TextureRect:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_n616q"]
+resource_name = "active"
+loop_mode = 1
+step = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Label:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1.353256, 1.353256, 1.353256, 0), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TextureRect:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_y3f0b"]
+_data = {
+&"RESET": SubResource("Animation_fnqsl"),
+&"active": SubResource("Animation_n616q")
+}
+
+[node name="PositionSelector" type="Control" unique_id=393233466]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 15.0
+offset_bottom = 11.0
+theme = ExtResource("1_se255")
+script = ExtResource("2_fnqsl")
+
+[node name="Label" type="Label" parent="." unique_id=1358800469]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -6.0
+offset_top = -7.0
+offset_right = 21.0
+offset_bottom = 1.0
+text = "阿昆他阿昆他"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1233205407]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 15.0
+offset_bottom = 11.0
+texture = ExtResource("3_fnqsl")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=414503804]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_y3f0b")

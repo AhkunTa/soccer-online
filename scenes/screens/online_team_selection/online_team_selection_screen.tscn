@@ -63,13 +63,14 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="PitchPanel" type="Control" parent="Background/TeamsContainer" unique_id=1626537003]
+[node name="CenterPanel" type="Control" parent="Background/TeamsContainer" unique_id=713154371]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="Background/TeamsContainer/PitchPanel" unique_id=1289347751]
-layout_mode = 1
-anchors_preset = 8
+[node name="PitchPanel" type="TextureRect" parent="Background/TeamsContainer/CenterPanel" unique_id=1289347751]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 60)
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5

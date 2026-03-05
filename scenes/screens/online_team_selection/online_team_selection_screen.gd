@@ -7,7 +7,7 @@ const NB_ROWS := 4
 const FLAG_ANCHOR_POINT := Vector2(10, 10)
 const FLAG_SPACING := Vector2(30, 20)
 const FLAG_SELECTOR_PREFAB := preload("res://scenes/screens/team_selection/flag_selector.tscn")
-
+const POSITION_SELECTOR_PREFAB := preload("res://scenes/screens/online_team_selection/position_selector.tscn")
 # ── 节点引用 ──────────────────────────────────────────────────────────────────
 @onready var home_flag_container: Control = %HomeFlagContainer
 @onready var away_flag_container: Control = %AwayFlagContainer
@@ -15,6 +15,19 @@ const FLAG_SELECTOR_PREFAB := preload("res://scenes/screens/team_selection/flag_
 @onready var away_slots_container: VBoxContainer = %AwaySlotsContainer
 @onready var status_label: Label = %StatusLabel
 @onready var ready_button: Button = %ReadyButton
+@onready var pitch_panel: TextureRect = %PitchPanel
+
+
+# 选位界面上预设的出生点位置（相对于 pitch_panel）
+const player_positions := [
+	Vector2(5, 30),
+	Vector2(20, 15),
+	Vector2(20, 45),
+	Vector2(30, 30),
+	Vector2(40, 20),
+	Vector2(40, 40),
+]
+
 
 # ── 运行时状态 ────────────────────────────────────────────────────────────────
 var my_peer_id: int = -1
@@ -40,6 +53,8 @@ var all_selections: Array = []
 var _home_flag_nodes: Array[TextureRect] = []
 var _away_flag_nodes: Array[TextureRect] = []
 var _my_flag_selector: FlagSelector = null
+var _home_selectors: Array[PositionSelector] = []
+var _away_selectors: Array[PositionSelector] = []
 
 # ── 生命周期 ──────────────────────────────────────────────────────────────────
 
@@ -52,7 +67,7 @@ func _ready() -> void:
 
 	_place_flags(home_flag_container, _home_flag_nodes)
 	_place_flags(away_flag_container, _away_flag_nodes)
-
+	spawn_positions()
 	if screen_data and screen_data.is_online:
 		my_peer_id = screen_data.peer_id
 		room_id = screen_data.room_id
@@ -118,17 +133,21 @@ func _handle_flag_select(scheme: Player.ControlScheme) -> void:
 		_update_status()
 
 
-## 阶段三：上下换 slot，PASS 返回国旗选择
+## 阶段三：左右换 slot，PASS 返回国旗选择
 func _handle_slot_select(scheme: Player.ControlScheme) -> void:
 	var slots_per_team: int = player_count >> 1
 	if slots_per_team < 1:
 		slots_per_team = 1
-	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.UP):
+	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.LEFT):
 		my_slot = posmod(my_slot - 1, slots_per_team)
 		RoomManager.select_slot(my_slot)
-	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.DOWN):
+		_update_slot_visuals()
+		AudioPlayer.play(AudioPlayer.Sound.UI_NAV)
+	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.RIGHT):
 		my_slot = (my_slot + 1) % slots_per_team
 		RoomManager.select_slot(my_slot)
+		_update_slot_visuals()
+		AudioPlayer.play(AudioPlayer.Sound.UI_NAV)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.PASS):
 		if not _is_team_country_locked():
 			phase = Phase.FLAG
@@ -155,6 +174,7 @@ func _enter_flag_phase() -> void:
 		phase = Phase.SLOT
 		my_slot = 0
 		RoomManager.select_slot(my_slot)
+		_update_slot_visuals()
 	else:
 		phase = Phase.FLAG
 		flag_cursor = Vector2i.ZERO
@@ -177,6 +197,7 @@ func _confirm_country() -> void:
 	phase = Phase.SLOT
 	my_slot = 0
 	RoomManager.select_slot(my_slot)
+	_update_slot_visuals()
 	_update_status()
 
 
@@ -187,7 +208,7 @@ func _spawn_flag_selector() -> void:
 	if _my_flag_selector != null and is_instance_valid(_my_flag_selector):
 		_my_flag_selector.queue_free()
 	_my_flag_selector = FLAG_SELECTOR_PREFAB.instantiate()
-	_my_flag_selector.scale = Vector2(.5,.5)
+	_my_flag_selector.scale = Vector2(.5, .5)
 	_my_flag_selector.control_scheme = Player.ControlScheme.P1
 	# 禁用 FlagSelector 自身的输入处理，由本屏幕统一管理
 	_my_flag_selector.set_process(false)
@@ -261,7 +282,7 @@ func _update_status() -> void:
 			hint = "WASD 选国家  SHOOT 确认  PASS 返回"
 		Phase.SLOT:
 			var country_text := my_country if my_country != "" else "?"
-			hint = "[ %s ] W/S 选位置  PASS 返回" % country_text
+			hint = "[ %s ] A/D 选位置  PASS 返回" % country_text
 	var team_text: String
 	if my_team == 0:
 		team_text = "HOME"
@@ -344,3 +365,30 @@ func _on_error(message: String) -> void:
 	status_label.text = "! " + message
 	is_confirmed = false
 	ready_button.disabled = my_team == -1 or my_slot == -1 or my_country == ""
+
+
+func spawn_positions() -> void:
+	const PANEL_WIDTH := 100.0
+	const selector_size := Vector2(9, 15)
+	for i in range(player_positions.size()):
+		# 左侧（Home）
+		var sel_home: PositionSelector = POSITION_SELECTOR_PREFAB.instantiate()
+		sel_home.position = player_positions[i]
+		sel_home.scale = Vector2(0.5, 0.5)
+		pitch_panel.add_child(sel_home)
+		_home_selectors.append(sel_home)
+		# 右侧（Away）：水平镜像
+		var sel_away: PositionSelector = POSITION_SELECTOR_PREFAB.instantiate()
+		sel_away.position = Vector2(PANEL_WIDTH - player_positions[i].x - selector_size.x, player_positions[i].y)
+		sel_away.scale = Vector2(0.5, 0.5)
+		pitch_panel.add_child(sel_away)
+		_away_selectors.append(sel_away)
+
+
+func _update_slot_visuals() -> void:
+	var selectors := _home_selectors if my_team == 0 else _away_selectors
+	for i in selectors.size():
+		if i == my_slot:
+			selectors[i].set_choosing(true)
+		else:
+			selectors[i].set_choose(false)

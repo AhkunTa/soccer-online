@@ -62,6 +62,16 @@ cache/0/5/0/descent = 0.0
 cache/0/5/0/underline_position = 0.0
 cache/0/5/0/underline_thickness = 0.0
 cache/0/5/0/scale = 1.0
+cache/0/8/0/ascent = 0.0
+cache/0/8/0/descent = 0.0
+cache/0/8/0/underline_position = 0.0
+cache/0/8/0/underline_thickness = 0.0
+cache/0/8/0/scale = 1.0
+cache/0/6/0/ascent = 0.0
+cache/0/6/0/descent = 0.0
+cache/0/6/0/underline_position = 0.0
+cache/0/6/0/underline_thickness = 0.0
+cache/0/6/0/scale = 1.0
 
 [sub_resource type="FontFile" id="FontFile_gmeei"]
 cache/0/variation_coordinates = {}

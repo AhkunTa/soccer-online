@@ -28,6 +28,7 @@ AudioPlayer="*res://scenes/audio/audio_player.gd"
 InputManager="*res://utils/input_manager.gd"
 MusicPlayer="*res://scenes/audio/music_player.gd"
 RoomManager="*res://scenes/network/room_manager.gd"
+NetworkGameManager="*res://scenes/network/network_game_manager.gd"
 
 [debug]
 
