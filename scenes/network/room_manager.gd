@@ -1,6 +1,6 @@
 extends Node
 
-signal room_list_updated(rooms: Array)
+signal room_list_updated(rooms: Array[RoomData])
 signal room_created(room_id: int)
 signal room_joined(room_id: int)
 signal connection_status_changed(status: String)
@@ -18,7 +18,7 @@ const MAX_CONNECTIONS := 20
 enum State {OFFLINE, HOSTING, CONNECTED}
 
 var state: State = State.OFFLINE
-var rooms_cache: Array = []
+var rooms_cache: Array[RoomData] = []
 var my_room_id: int = -1
 
 # Server-only
@@ -161,7 +161,7 @@ func _rpc_join_room(room_id: int) -> void:
 # ── Server logic ─────────────────────────────────────────────────────────────
 
 func _deliver_room_list(requester_id: int, filter: String) -> void:
-	var result: Array = []
+	var result: Array[Dictionary] = []
 	for room_id: int in _rooms:
 		var room: Dictionary = _rooms[room_id]
 		if filter.is_empty() or room["title"].to_lower().contains(filter.to_lower()):
@@ -218,7 +218,7 @@ func _server_join_room(joiner_id: int, room_id: int) -> void:
 	_broadcast_room_update()
 	# 人数为偶数且 >= 2 时进入队伍选择阶段
 	var players: Array = room["players"]
-	if players.size() >= 2 and players.size() % 2 == 0:
+	if players.size() >= room["max_players"] and players.size() % 2 == 0:
 		print("[Server] Room %d reached player count %d, starting team selection" % [room_id, players.size()])
 		_server_start_team_selection(room_id)
 
@@ -237,7 +237,7 @@ func _remove_player_from_room(peer_id: int) -> void:
 
 ## 向所有已连接的 peer 广播最新房间列表（不含搜索过滤）
 func _broadcast_room_update() -> void:
-	var result: Array = []
+	var result: Array[Dictionary] = []
 	for room_id: int in _rooms:
 		var room: Dictionary = _rooms[room_id]
 		result.append({
@@ -281,7 +281,9 @@ func _rpc_recv_error(message: String) -> void:
 # ── Local handlers ────────────────────────────────────────────────────────────
 
 func _local_receive_room_list(rooms: Array) -> void:
-	rooms_cache = rooms
+	rooms_cache.clear()
+	for d: Dictionary in rooms:
+		rooms_cache.append(RoomData.from_dict(d))
 	room_list_updated.emit(rooms_cache)
 
 

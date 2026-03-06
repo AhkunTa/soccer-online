@@ -17,7 +17,6 @@ const POSITION_SELECTOR_PREFAB := preload("res://scenes/screens/online_team_sele
 @onready var ready_button: Button = %ReadyButton
 @onready var pitch_panel: TextureRect = %PitchPanel
 
-
 # 选位界面上预设的出生点位置（相对于 pitch_panel）
 const player_positions := [
 	Vector2(5, 30),

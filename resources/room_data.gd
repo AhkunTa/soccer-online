@@ -4,7 +4,6 @@
 ## 内部类（通过 RoomData.XYZ 访问）：
 ##   RoomData.PlayerSelection  — 队伍选择阶段每位玩家的状态快照
 ##   RoomData.MatchConfig      — 服务端广播的对局配置
-##
 ## 所有类均提供 from_dict() ↔ to_dict() 与裸 Dictionary 互转，
 ## 保持与现有 RPC 传输格式的兼容性。
 class_name RoomData
@@ -50,26 +49,36 @@ func with_status(v: String) -> RoomData:
 	status = v
 	return self
 
+func update_data(context_id: int, context_players: int, context_max: int, context_status: String, context_host_name: String, context_title: String) -> RoomData:
+	id = context_id
+	players = context_players
+	max_players = context_max
+	status = context_status
+	host_name = context_host_name
+	title = context_title
+	return self
 
 ## 从裸 Dictionary 转换（兼容 RPC 传输格式）
 static func from_dict(d: Dictionary) -> RoomData:
-	return RoomData.build() \
-.with_id(d.get("id", -1)) \
-.with_title(d.get("title", "")) \
-.with_players(d.get("players", 0), d.get("max_players", 4)) \
-.with_host_name(d.get("host_name", "")) \
-.with_status(d.get("status", "waiting"))
+	return RoomData.build().update_data(
+		d.get("id", -1),
+		d.get("players", 0),
+		d.get("max_players", 4),
+		d.get("status", "waiting"),
+		d.get("host_name", ""),
+		d.get("title", "")
+	)
 
 
 ## 转换回裸 Dictionary（用于 RPC 序列化）
 func to_dict() -> Dictionary:
 	return {
-	"id": id,
-	"title": title,
-	"players": players,
-	"max_players": max_players,
-	"host_name": host_name,
-	"status": status,
+		"id": id,
+		"title": title,
+		"players": players,
+		"max_players": max_players,
+		"host_name": host_name,
+		"status": status,
 	}
 
 

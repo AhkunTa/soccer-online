@@ -13,6 +13,7 @@ extends Screen
 @onready var create_panel: Panel = %CreatePanel
 @onready var room_title_edit: LineEdit = %RoomTitleEdit
 @onready var max_players_edit: LineEdit = %MaxPlayersEdit
+@onready var player_name_edit: LineEdit = %PlayerNameEdit
 
 
 func _ready() -> void:
@@ -37,9 +38,18 @@ func _ready() -> void:
 		_refresh_room_list(RoomManager.rooms_cache)
 
 
+func _get_player_name() -> String:
+	var n := player_name_edit.text.strip_edges()
+	if n.is_empty():
+		return "P%d" % multiplayer.get_unique_id()
+	return n
+
+
 func _on_status_changed(status: String) -> void:
 	status_label.text = status
 	_update_action_buttons()
+	if status == "Connected":
+		RoomManager.upload_player_name(_get_player_name())
 
 
 func _on_error(message: String) -> void:
@@ -47,7 +57,7 @@ func _on_error(message: String) -> void:
 	_update_action_buttons()
 
 
-func _on_room_list_updated(rooms: Array) -> void:
+func _on_room_list_updated(rooms: Array[RoomData]) -> void:
 	_refresh_room_list(rooms)
 
 
@@ -77,46 +87,43 @@ func _update_action_buttons() -> void:
 	search_button.disabled = not online
 
 
-func _refresh_room_list(rooms: Array) -> void:
+func _refresh_room_list(rooms: Array[RoomData]) -> void:
 	for child in room_list.get_children():
 		child.queue_free()
-	for room_data: Dictionary in rooms:
+	for room_data: RoomData in rooms:
 		room_list.add_child(_build_room_row(room_data))
 
 
-func _build_room_row(room_data: Dictionary) -> HBoxContainer:
+# TODO room list 使用 scene 实现更复杂的交互和样式
+func _build_room_row(room_data: RoomData) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 3)
 
-	var host_name: String = room_data.get("host_name", "")
-	var status: String = room_data.get("status", "waiting")
+	var title_suffix := (" [%s]" % room_data.host_name) if room_data.host_name != "" else ""
 
 	var title_lbl := Label.new()
-	var title_suffix := (" [%s]" % host_name) if host_name != "" else ""
-	title_lbl.text = room_data["title"] + title_suffix
+	title_lbl.text = room_data.title + title_suffix
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_lbl.add_theme_font_size_override("font_size", 6)
 	row.add_child(title_lbl)
 
 	var status_lbl := Label.new()
-	status_lbl.text = status
+	status_lbl.text = room_data.status
 	status_lbl.add_theme_font_size_override("font_size", 5)
-	status_lbl.modulate = Color(0.7, 1.0, 0.7) if status == "waiting" else Color(1.0, 0.7, 0.3)
+	status_lbl.modulate = Color(0.7, 1.0, 0.7) if room_data.status == "waiting" else Color(1.0, 0.7, 0.3)
 	row.add_child(status_lbl)
 
 	var count_lbl := Label.new()
-	count_lbl.text = "%d/%d" % [room_data["players"], room_data["max_players"]]
+	count_lbl.text = "%d/%d" % [room_data.players, room_data.max_players]
 	count_lbl.add_theme_font_size_override("font_size", 6)
 	row.add_child(count_lbl)
 
 	var join_btn := Button.new()
-	var is_full: bool = room_data["players"] >= room_data["max_players"]
-	var is_mine: bool = RoomManager.my_room_id == room_data["id"]
-	var not_open: bool = status != "waiting"
+	var is_mine: bool = RoomManager.my_room_id == room_data.id
 	join_btn.text = "In" if is_mine else "Join"
-	join_btn.disabled = is_full or is_mine or not_open
+	join_btn.disabled = room_data.is_full() or is_mine or not room_data.is_joinable()
 	join_btn.add_theme_font_size_override("font_size", 6)
-	var room_id: int = room_data["id"]
+	var room_id: int = room_data.id
 	join_btn.pressed.connect(func() -> void: RoomManager.join_room(room_id))
 	row.add_child(join_btn)
 
@@ -127,6 +134,7 @@ func _build_room_row(room_data: Dictionary) -> HBoxContainer:
 
 func _on_host_button_pressed() -> void:
 	RoomManager.start_as_host()
+	RoomManager.upload_player_name(_get_player_name())
 
 
 func _on_connect_button_pressed() -> void:
@@ -142,7 +150,7 @@ func _on_search_button_pressed() -> void:
 
 func _on_create_button_pressed() -> void:
 	room_title_edit.text = ""
-	max_players_edit.text = "4"
+	max_players_edit.text = "2"
 	create_panel.visible = true
 
 
@@ -155,7 +163,8 @@ func _on_confirm_create_pressed() -> void:
 	if title.is_empty():
 		title = "Room %d" % (randi() % 900 + 100)
 	var max_p := max_players_edit.text.to_int()
-	max_p = clampi(max_p, 2, 16)
+
+	max_p = clampi(max_p, 2, 10)
 	create_panel.visible = false
 	RoomManager.create_room(title, max_p)
 
