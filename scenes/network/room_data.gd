@@ -12,11 +12,13 @@ class_name RoomData
 
 var id: int = -1
 var title: String = ""
-var players: int = 0
+var current_players: int = 0
 var max_players: int = 4
 var host_name: String = ""
 ## 房间状态："waiting" | "in_selection" | "in_game"
 var status: String = "waiting"
+## 当前房间内所有玩家数据（由服务端广播填充）
+var players: Array[PlayerSelection] = []
 
 # ── Builder ───────────────────────────────────────────────────────────────────
 
@@ -35,7 +37,7 @@ func with_title(v: String) -> RoomData:
 
 
 func with_players(current: int, maximum: int) -> RoomData:
-	players = current
+	current_players = current
 	max_players = maximum
 	return self
 
@@ -49,41 +51,50 @@ func with_status(v: String) -> RoomData:
 	status = v
 	return self
 
-func update_data(context_id: int, context_players: int, context_max: int, context_status: String, context_host_name: String, context_title: String) -> RoomData:
+func update_data(context_id: int, context_current_players: int, context_max: int, context_status: String, context_host_name: String, context_title: String, context_players: Array[PlayerSelection] = []) -> RoomData:
 	id = context_id
-	players = context_players
+	current_players = context_current_players
 	max_players = context_max
 	status = context_status
 	host_name = context_host_name
 	title = context_title
+	players = context_players
 	return self
 
 ## 从裸 Dictionary 转换（兼容 RPC 传输格式）
 static func from_dict(d: Dictionary) -> RoomData:
+	var player_list: Array[PlayerSelection] = []
+	for p in d.get("players", []):
+		player_list.append(PlayerSelection.from_dict(p))
 	return RoomData.build().update_data(
 		d.get("id", -1),
-		d.get("players", 0),
+		d.get("current_players", 0),
 		d.get("max_players", 4),
 		d.get("status", "waiting"),
 		d.get("host_name", ""),
-		d.get("title", "")
+		d.get("title", ""),
+		player_list
 	)
 
 
 ## 转换回裸 Dictionary（用于 RPC 序列化）
 func to_dict() -> Dictionary:
+	var raw_players: Array = []
+	for p: PlayerSelection in players:
+		raw_players.append(p.to_dict())
 	return {
 		"id": id,
 		"title": title,
-		"players": players,
+		"current_players": current_players,
 		"max_players": max_players,
 		"host_name": host_name,
 		"status": status,
+		"players": raw_players,
 	}
 
 
 func is_full() -> bool:
-	return players >= max_players
+	return current_players >= max_players
 
 
 func is_joinable() -> bool:

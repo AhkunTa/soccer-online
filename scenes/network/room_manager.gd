@@ -20,6 +20,10 @@ enum State {OFFLINE, HOSTING, CONNECTED}
 var state: State = State.OFFLINE
 var rooms_cache: Array[RoomData] = []
 var my_room_id: int = -1
+## 本地玩家当前所在房间（加入或创建后自动更新，离开后置 null）
+var current_room: RoomData = null
+## 本地玩家昵称（upload_player_name 时同步保存）
+var local_player_name: String = ""
 
 # Server-only
 var _rooms: Dictionary = {}
@@ -96,6 +100,7 @@ func disconnect_network() -> void:
 	state = State.OFFLINE
 	rooms_cache.clear()
 	my_room_id = -1
+	current_room = null
 	_rooms.clear()
 	_player_room.clear()
 	_player_info.clear()
@@ -165,13 +170,17 @@ func _deliver_room_list(requester_id: int, filter: String) -> void:
 	for room_id: int in _rooms:
 		var room: Dictionary = _rooms[room_id]
 		if filter.is_empty() or room["title"].to_lower().contains(filter.to_lower()):
+			var player_list: Array = []
+			for pid: int in room["players"]:
+				player_list.append({"peer_id": pid, "name": get_player_name(pid)})
 			result.append({
 				"id": room_id,
 				"title": room["title"],
-				"players": room["players"].size(),
+				"current_players": room["players"].size(),
 				"max_players": room["max_players"],
 				"host_name": get_player_name(room.get("host_id", 0)),
 				"status": room.get("status", "waiting"),
+				"players": player_list,
 			})
 	if requester_id == 1:
 		_local_receive_room_list(result)
@@ -240,13 +249,17 @@ func _broadcast_room_update() -> void:
 	var result: Array[Dictionary] = []
 	for room_id: int in _rooms:
 		var room: Dictionary = _rooms[room_id]
+		var player_list: Array = []
+		for pid: int in room["players"]:
+			player_list.append({"peer_id": pid, "name": get_player_name(pid)})
 		result.append({
 			"id": room_id,
 			"title": room["title"],
-			"players": room["players"].size(),
+			"current_players": room["players"].size(),
 			"max_players": room["max_players"],
 			"host_name": get_player_name(room.get("host_id", 0)),
 			"status": room.get("status", "waiting"),
+			"players": player_list,
 		})
 	# 推送给服务端自身（如果服务端也在显示大厅）
 	if state == State.HOSTING:
@@ -284,6 +297,12 @@ func _local_receive_room_list(rooms: Array) -> void:
 	rooms_cache.clear()
 	for d: Dictionary in rooms:
 		rooms_cache.append(RoomData.from_dict(d))
+	# 同步更新当前房间数据（人数、状态等可能变化）
+	if my_room_id != -1:
+		for r: RoomData in rooms_cache:
+			if r.id == my_room_id:
+				current_room = r
+				break
 	room_list_updated.emit(rooms_cache)
 
 
@@ -303,7 +322,6 @@ func _on_connected_to_server() -> void:
 	print("[RoomManager] connected_to_server fired, peer id=", multiplayer.get_unique_id())
 	state = State.CONNECTED
 	connection_status_changed.emit("Connected")
-	upload_player_name("P%d" % multiplayer.get_unique_id())  # 连接后立即上传默认昵称
 	request_rooms()
 
 
@@ -341,6 +359,7 @@ func get_player_name(peer_id: int) -> String:
 
 ## 客户端上传自己的昵称（连接后自动调用，也可由 UI 主动调用覆盖）
 func upload_player_name(name: String) -> void:
+	local_player_name = name
 	if multiplayer.is_server():
 		_server_store_player_info(1, name)
 	else:
@@ -359,6 +378,9 @@ func _server_store_player_info(peer_id: int, name: String) -> void:
 		_player_info[peer_id]["name"] = name
 	else:
 		_player_info[peer_id] = {"name": name}
+	# 若该玩家已在某个房间，广播更新让所有客户端看到最新名字
+	if _player_room.has(peer_id):
+		_broadcast_room_update()
 
 
 # ── 队伍选择：服务端逻辑 ──────────────────────────────────────────────────────

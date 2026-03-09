@@ -14,6 +14,9 @@ extends Screen
 @onready var room_title_edit: LineEdit = %RoomTitleEdit
 @onready var max_players_edit: LineEdit = %MaxPlayersEdit
 @onready var player_name_edit: LineEdit = %PlayerNameEdit
+@onready var connect_panel: Panel = %ConnectPanel
+@onready var connect_ip_edit: LineEdit = %ConnectIPEdit
+@onready var connect_name_edit: LineEdit = %ConnectNameEdit
 
 
 func _ready() -> void:
@@ -24,6 +27,7 @@ func _ready() -> void:
 	RoomManager.room_joined.connect(_on_room_joined)
 	RoomManager.room_ready.connect(_on_room_ready)
 	create_panel.visible = false
+	connect_panel.visible = false
 	var initial: String
 	if RoomManager.state == RoomManager.State.HOSTING:
 		initial = "Hosting on port %d" % RoomManager.PORT
@@ -49,7 +53,10 @@ func _on_status_changed(status: String) -> void:
 	status_label.text = status
 	_update_action_buttons()
 	if status == "Connected":
-		RoomManager.upload_player_name(_get_player_name())
+		var upload_name := RoomManager.local_player_name
+		if upload_name.is_empty():
+			upload_name = "P%d" % multiplayer.get_unique_id()
+		RoomManager.upload_player_name(upload_name)
 
 
 func _on_error(message: String) -> void:
@@ -114,9 +121,20 @@ func _build_room_row(room_data: RoomData) -> HBoxContainer:
 	row.add_child(status_lbl)
 
 	var count_lbl := Label.new()
-	count_lbl.text = "%d/%d" % [room_data.players, room_data.max_players]
+	count_lbl.text = "%d/%d" % [room_data.current_players, room_data.max_players]
 	count_lbl.add_theme_font_size_override("font_size", 6)
 	row.add_child(count_lbl)
+
+	if not room_data.players.is_empty():
+		var names_lbl := Label.new()
+		var display_names: Array[String] = []
+		for p: RoomData.PlayerSelection in room_data.players:
+			display_names.append(p.name if p.name != "" else "P%d" % p.peer_id)
+		names_lbl.text = ", ".join(display_names)
+		names_lbl.add_theme_font_size_override("font_size", 5)
+		names_lbl.modulate = Color(0.85, 0.85, 0.85)
+		names_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(names_lbl)
 
 	var join_btn := Button.new()
 	var is_mine: bool = RoomManager.my_room_id == room_data.id
@@ -133,14 +151,33 @@ func _build_room_row(room_data: RoomData) -> HBoxContainer:
 # ── Button handlers ───────────────────────────────────────────────────────────
 
 func _on_host_button_pressed() -> void:
+	var host_name := RoomManager.local_player_name
+	if host_name.is_empty():
+		host_name = "Host"
+	RoomManager.local_player_name = host_name
 	RoomManager.start_as_host()
-	RoomManager.upload_player_name(_get_player_name())
+	RoomManager.upload_player_name(host_name)
 
 
 func _on_connect_button_pressed() -> void:
-	var ip := ip_edit.text.strip_edges()
+	connect_ip_edit.text = ip_edit.text
+	connect_name_edit.text = RoomManager.local_player_name
+	connect_panel.visible = true
+
+
+func _on_cancel_connect_pressed() -> void:
+	connect_panel.visible = false
+
+
+func _on_confirm_connect_pressed() -> void:
+	var ip := connect_ip_edit.text.strip_edges()
 	if ip.is_empty():
 		ip = "127.0.0.1"
+	ip_edit.text = ip
+	var name := connect_name_edit.text.strip_edges()
+	if not name.is_empty():
+		RoomManager.local_player_name = name
+	connect_panel.visible = false
 	RoomManager.connect_to_host(ip)
 
 
