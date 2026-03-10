@@ -174,9 +174,9 @@ func _on_confirm_connect_pressed() -> void:
 	if ip.is_empty():
 		ip = "127.0.0.1"
 	ip_edit.text = ip
-	var name := connect_name_edit.text.strip_edges()
-	if not name.is_empty():
-		RoomManager.local_player_name = name
+	var player_name := connect_name_edit.text.strip_edges()
+	if not player_name.is_empty():
+		RoomManager.local_player_name = player_name
 	connect_panel.visible = false
 	RoomManager.connect_to_host(ip)
 

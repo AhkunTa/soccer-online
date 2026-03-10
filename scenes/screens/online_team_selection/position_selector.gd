@@ -30,5 +30,5 @@ func set_choose(isOwn: bool) -> void:
 	else:
 		label.add_theme_color_override("font_color", Color.WHITE)
 
-func set_choosing(isOwn: bool) -> void:
+func set_choosing(_isOwn: bool) -> void:
 	animation_player.play('active')

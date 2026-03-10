@@ -358,26 +358,26 @@ func get_player_name(peer_id: int) -> String:
 
 
 ## 客户端上传自己的昵称（连接后自动调用，也可由 UI 主动调用覆盖）
-func upload_player_name(name: String) -> void:
-	local_player_name = name
+func upload_player_name(player_name: String) -> void:
+	local_player_name = player_name
 	if multiplayer.is_server():
-		_server_store_player_info(1, name)
+		_server_store_player_info(1, player_name)
 	else:
-		_rpc_upload_player_info.rpc_id(1, name)
+		_rpc_upload_player_info.rpc_id(1, player_name)
 
 
 @rpc("any_peer", "reliable")
-func _rpc_upload_player_info(name: String) -> void:
+func _rpc_upload_player_info(player_name: String) -> void:
 	if not multiplayer.is_server():
 		return
-	_server_store_player_info(multiplayer.get_remote_sender_id(), name)
+	_server_store_player_info(multiplayer.get_remote_sender_id(), player_name)
 
 
-func _server_store_player_info(peer_id: int, name: String) -> void:
+func _server_store_player_info(peer_id: int, player_name: String) -> void:
 	if _player_info.has(peer_id):
-		_player_info[peer_id]["name"] = name
+		_player_info[peer_id]["name"] = player_name
 	else:
-		_player_info[peer_id] = {"name": name}
+		_player_info[peer_id] = {"name": player_name}
 	# 若该玩家已在某个房间，广播更新让所有客户端看到最新名字
 	if _player_room.has(peer_id):
 		_broadcast_room_update()
