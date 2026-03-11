@@ -37,6 +37,7 @@ var player_count: int = 0
 var my_team: int = -1 # 0=Home, 1=Away
 var my_country: String = "" # 已选国家
 var my_slot: int = -1
+var cursor_slot: int = 0 # 位置光标（预览），分离于 my_slot（已向服务端确认占位）
 var is_confirmed: bool = false
 
 # 阶段：TEAM -> FLAG -> SLOT
@@ -98,10 +99,17 @@ func _process(_delta: float) -> void:
 
 ## 阶段一：左右选队伍，SHOOT 确认进入国旗选择
 func _handle_team_select(scheme: Player.ControlScheme) -> void:
+	var capacity := maxi(1, player_count >> 1)
 	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.LEFT):
-		_set_my_team(0)
+		if _count_team_members(0) < capacity or my_team == 0:
+			_set_my_team(0)
+		else:
+			AudioPlayer.play(AudioPlayer.Sound.UI_DISABLE)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.RIGHT):
-		_set_my_team(1)
+		if _count_team_members(1) < capacity or my_team == 1:
+			_set_my_team(1)
+		else:
+			AudioPlayer.play(AudioPlayer.Sound.UI_DISABLE)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.SHOOT) and my_team != -1:
 		_enter_flag_phase()
 
@@ -129,34 +137,61 @@ func _handle_flag_select(scheme: Player.ControlScheme) -> void:
 		_confirm_country()
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.PASS):
 		phase = Phase.TEAM
+		_my_flag_selector.queue_free()
 		_update_status()
 
 
-## 阶段三：左右换 slot，PASS 返回国旗选择
+## 阶段三：左右移动光标预览位置，SHOOT 确认占位，PASS 返回国旗选择
 func _handle_slot_select(scheme: Player.ControlScheme) -> void:
-	var slots_per_team: int = player_count >> 1
-	if slots_per_team < 1:
-		slots_per_team = 1
+	var slots_per_team: int = maxi(1, player_count >> 1)
 	if KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.LEFT):
-		my_slot = posmod(my_slot - 1, slots_per_team)
-		RoomManager.select_slot(my_slot)
+		cursor_slot = posmod(cursor_slot - 1, slots_per_team)
+		RoomManager.preview_slot(cursor_slot)
 		_update_slot_visuals()
 		AudioPlayer.play(AudioPlayer.Sound.UI_NAV)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.RIGHT):
-		my_slot = (my_slot + 1) % slots_per_team
-		RoomManager.select_slot(my_slot)
+		cursor_slot = (cursor_slot + 1) % slots_per_team
+		RoomManager.preview_slot(cursor_slot)
 		_update_slot_visuals()
 		AudioPlayer.play(AudioPlayer.Sound.UI_NAV)
+	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.SHOOT):
+		_claim_slot(cursor_slot)
 	elif KeyUtils.is_action_just_pressed(scheme, KeyUtils.Action.PASS):
 		if not _is_team_country_locked():
 			phase = Phase.FLAG
+			my_slot = -1
+			cursor_slot = 0
+			RoomManager.select_slot(-1)
+			_update_slot_visuals()
+	_update_status()
+
+
+## 确认占用指定位置（SHOOT 时调用，服务端为最终权威）
+func _claim_slot(slot: int) -> void:
+	# 本地预检：同队是否已有人占据该 slot
+	for entry: Dictionary in all_selections:
+		if entry.get("peer_id") != my_peer_id \
+				and entry.get("team") == my_team \
+				and entry.get("slot") == slot:
+			AudioPlayer.play(AudioPlayer.Sound.UI_DISABLE)
+			_update_status()
+			return
+	my_slot = slot
+	RoomManager.select_slot(my_slot)
+	AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
+	_update_slot_visuals()
 	_update_status()
 
 
 # ── 阶段切换 ──────────────────────────────────────────────────────────────────
 
 func _set_my_team(team: int) -> void:
+	if my_team == team:
+		return
 	my_team = team
+	my_country = ""
+	my_slot = -1
+	cursor_slot = 0
 	RoomManager.select_team(team)
 	AudioPlayer.play(AudioPlayer.Sound.UI_NAV)
 	_update_status()
@@ -171,8 +206,8 @@ func _enter_flag_phase() -> void:
 		RoomManager.select_country(my_country)
 		_highlight_country(my_country)
 		phase = Phase.SLOT
-		my_slot = 0
-		RoomManager.select_slot(my_slot)
+		my_slot = -1
+		cursor_slot = 0
 		_update_slot_visuals()
 	else:
 		phase = Phase.FLAG
@@ -194,8 +229,8 @@ func _confirm_country() -> void:
 	RoomManager.select_country(my_country)
 	AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
 	phase = Phase.SLOT
-	my_slot = 0
-	RoomManager.select_slot(my_slot)
+	my_slot = -1
+	cursor_slot = 0
 	_update_slot_visuals()
 	_update_status()
 
@@ -270,6 +305,14 @@ func _is_team_country_locked() -> bool:
 	return _get_team_locked_country() != ""
 
 
+func _count_team_members(team: int) -> int:
+	var count := 0
+	for entry: Dictionary in all_selections:
+		if entry.get("team") == team:
+			count += 1
+	return count
+
+
 # ── UI 更新 ───────────────────────────────────────────────────────────────────
 
 func _update_status() -> void:
@@ -281,7 +324,10 @@ func _update_status() -> void:
 			hint = "WASD 选国家  SHOOT 确认  PASS 返回"
 		Phase.SLOT:
 			var country_text := my_country if my_country != "" else "?"
-			hint = "[ %s ] A/D 选位置  PASS 返回" % country_text
+			if my_slot >= 0:
+				hint = "[ %s ] A/D 预览  SHOOT 换位  PASS 返回" % country_text
+			else:
+				hint = "[ %s ] A/D 预览  SHOOT 确认占位  PASS 返回" % country_text
 	var team_text: String
 	if my_team == 0:
 		team_text = "HOME"
@@ -302,9 +348,16 @@ func _rebuild_slot_labels() -> void:
 		child.queue_free()
 	for child in away_slots_container.get_children():
 		child.queue_free()
-	var slots_per_team: int = player_count >> 1
-	if slots_per_team < 1:
-		slots_per_team = 1
+	var slots_per_team: int = maxi(1, player_count >> 1)
+	var home_count := _count_team_members(0)
+	var away_count := _count_team_members(1)
+	# 队伍人数标题
+	var home_title := Label.new()
+	home_title.text = "HOME %d/%d" % [home_count, slots_per_team]
+	home_slots_container.add_child(home_title)
+	var away_title := Label.new()
+	away_title.text = "AWAY %d/%d" % [away_count, slots_per_team]
+	away_slots_container.add_child(away_title)
 	var home_occ: Dictionary = {}
 	var away_occ: Dictionary = {}
 	for entry: Dictionary in all_selections:
@@ -356,7 +409,14 @@ func _on_ready_button_pressed() -> void:
 
 func _on_team_selection_updated(selections: Array) -> void:
 	all_selections = selections
+	# 从服务端快照同步 my_slot，防止客户端与服务端不一致
+	for entry: Dictionary in selections:
+		if entry.get("peer_id") == my_peer_id:
+			my_slot = entry.get("slot", -1)
+			break
 	_rebuild_slot_labels()
+	_update_slot_visuals()
+	# 当队伍国家被锁定（同队已有人确认），自动进入对应阶段
 	if phase == Phase.FLAG and _is_team_country_locked():
 		_enter_flag_phase()
 	_update_status()
@@ -378,7 +438,13 @@ func _on_match_config_received(config: Dictionary) -> void:
 func _on_error(message: String) -> void:
 	status_label.text = "! " + message
 	is_confirmed = false
-	ready_button.disabled = my_team == -1 or my_slot == -1 or my_country == ""
+	# 根据错误类型重置对应状态
+	if message == "队伍已满":
+		my_team = -1
+	elif message == "Slot already taken":
+		my_slot = -1
+	_update_slot_visuals()
+	ready_button.disabled = my_team == -1 or my_slot == -1 or my_country == "" or is_confirmed
 
 
 func spawn_positions() -> void:
@@ -400,9 +466,33 @@ func spawn_positions() -> void:
 
 
 func _update_slot_visuals() -> void:
-	var selectors := _home_selectors if my_team == 0 else _away_selectors
-	for i in selectors.size():
-		if i == my_slot:
-			selectors[i].set_choosing(true)
-		else:
-			selectors[i].set_choose(false)
+	# 重置所有选位显示
+	for sel in _home_selectors:
+		sel.set_choose(false)
+	for sel in _away_selectors:
+		sel.set_choose(false)
+	# 展示服务端已确认的所有玩家位置（静态）
+	for entry: Dictionary in all_selections:
+		var t: int = entry.get("team", -1)
+		var s: int = entry.get("slot", -1)
+		if t == -1 or s == -1:
+			continue
+		var sels := _home_selectors if t == 0 else _away_selectors
+		if s < sels.size():
+			sels[s].set_choose(entry.get("peer_id") == my_peer_id)
+	# 展示其他玩家的预览光标（闪烁）
+	for entry: Dictionary in all_selections:
+		if entry.get("peer_id") == my_peer_id:
+			continue
+		var t: int = entry.get("team", -1)
+		var ps: int = entry.get("preview_slot", -1)
+		if t == -1 or ps == -1:
+			continue
+		var sels := _home_selectors if t == 0 else _away_selectors
+		if ps < sels.size():
+			sels[ps].set_choosing(false)
+	# 展示我的光标预览（仅 SLOT 阶段，给自己的闪烁覆盖已确认状态）
+	if my_team != -1 and phase == Phase.SLOT:
+		var my_sels := _home_selectors if my_team == 0 else _away_selectors
+		if cursor_slot >= 0 and cursor_slot < my_sels.size():
+			my_sels[cursor_slot].set_choosing(true)

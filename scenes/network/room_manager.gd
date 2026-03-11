@@ -393,7 +393,7 @@ func _server_start_team_selection(room_id: int) -> void:
 	# 初始化每位玩家的选择状态（team=-1 表示未选，slot=-1 表示未选）
 	var selections: Array = []
 	for pid: int in players:
-		selections.append({"peer_id": pid, "name": get_player_name(pid), "team": -1, "slot": -1, "is_ready": false, "country": ""})
+		selections.append({"peer_id": pid, "name": get_player_name(pid), "team": -1, "slot": -1, "preview_slot": -1, "is_ready": false, "country": ""})
 	_team_selections[room_id] = selections
 	# 广播给房间内所有客户端
 	for pid: int in players:
@@ -418,11 +418,26 @@ func _server_select_team(peer_id: int, team: int) -> void:
 	var room_id: int = _player_room[peer_id]
 	if not _team_selections.has(room_id):
 		return
+	# 队伍满员检查
+	var room: Dictionary = _rooms[room_id]
+	var players_per_team: int = maxi(1, room["max_players"] / 2)
 	var selections: Array = _team_selections[room_id]
+	var team_count := 0
+	for entry: Dictionary in selections:
+		if entry["peer_id"] != peer_id and entry["team"] == team:
+			team_count += 1
+	if team_count >= players_per_team:
+		if peer_id == 1:
+			error_occurred.emit("队伍已满")
+		else:
+			_rpc_recv_error.rpc_id(peer_id, "队伍已满")
+		return
 	for entry: Dictionary in selections:
 		if entry["peer_id"] == peer_id:
 			entry["team"] = team
 			entry["slot"] = -1 # 换队时清空 slot
+			entry["preview_slot"] = -1 # 换队时清空预览光标
+			entry["country"] = "" # 换队时清空国家
 			break
 	_broadcast_team_selection(room_id)
 
@@ -587,6 +602,40 @@ func _server_select_country(peer_id: int, country: String) -> void:
 	if not _team_selections.has(room_id):
 		return
 	var selections: Array = _team_selections[room_id]
+	# 获取当前玩家的队伍
+	var my_team_id := -1
+	for entry: Dictionary in selections:
+		if entry["peer_id"] == peer_id:
+			my_team_id = entry["team"]
+			break
+	if my_team_id == -1:
+		return
+	# 先到先得：检查同队是否已有人锁定国家
+	var locked_country := ""
+	for entry: Dictionary in selections:
+		if entry["peer_id"] != peer_id and entry["team"] == my_team_id:
+			var c: String = entry.get("country", "")
+			if c != "":
+				locked_country = c
+				break
+	if locked_country != "":
+		# 同队已锁定，强制跟随
+		for entry: Dictionary in selections:
+			if entry["peer_id"] == peer_id:
+				entry["country"] = locked_country
+				break
+		_broadcast_team_selection(room_id)
+		return
+	# 检查对方队伍是否已选该国家
+	var opponent_team := 1 - my_team_id
+	for entry: Dictionary in selections:
+		if entry["team"] == opponent_team and entry.get("country", "") == country:
+			if peer_id == 1:
+				error_occurred.emit("该国家已被对方选取")
+			else:
+				_rpc_recv_error.rpc_id(peer_id, "该国家已被对方选取")
+			return
+	# 写入国家
 	for entry: Dictionary in selections:
 		if entry["peer_id"] == peer_id:
 			entry["country"] = country
@@ -608,6 +657,36 @@ func select_slot(slot: int) -> void:
 		_server_select_slot(1, slot)
 	else:
 		_rpc_select_slot.rpc_id(1, slot)
+
+
+## Client → Server：同步预览光标位置（不占位，仅用于展示给其他玩家）
+@rpc("any_peer", "unreliable")
+func _rpc_preview_slot(slot: int) -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id := multiplayer.get_remote_sender_id()
+	_server_preview_slot(sender_id, slot)
+
+
+func _server_preview_slot(peer_id: int, slot: int) -> void:
+	if not _player_room.has(peer_id):
+		return
+	var room_id: int = _player_room[peer_id]
+	if not _team_selections.has(room_id):
+		return
+	for entry: Dictionary in _team_selections[room_id]:
+		if entry["peer_id"] == peer_id:
+			entry["preview_slot"] = slot
+			break
+	_broadcast_team_selection(room_id)
+
+
+## 本地玩家同步预览光标（仅广播，不占位）
+func preview_slot(slot: int) -> void:
+	if multiplayer.is_server():
+		_server_preview_slot(1, slot)
+	else:
+		_rpc_preview_slot.rpc_id(1, slot)
 
 
 ## 本地玩家确认就绪
