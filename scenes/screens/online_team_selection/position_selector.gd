@@ -20,15 +20,21 @@ func _process(_delta: float) -> void:
 		is_selected = true
 		AudioPlayer.play(AudioPlayer.Sound.UI_SELECT)
 		selected_signal.emit()
-	elif is_selected and KeyUtils.is_action_just_pressed(control_scheme, KeyUtils.Action.SHOOT):
+	elif is_selected and KeyUtils.is_action_just_pressed(control_scheme, KeyUtils.Action.PASS):
 		is_selected = false
 
-func set_choose(isOwn: bool) -> void:
+func set_occupied(player_name: String, color: Color) -> void:
 	animation_player.play("RESET")
-	if isOwn:
-		label.add_theme_color_override("font_color", Color.YELLOW)
-	else:
-		label.add_theme_color_override("font_color", Color.WHITE)
+	label.text = player_name
+	label.add_theme_color_override("font_color", color)
 
-func set_choosing(_isOwn: bool) -> void:
-	animation_player.play('active')
+
+func set_empty() -> void:
+	animation_player.play("RESET")
+	label.text = ""
+	label.remove_theme_color_override("font_color")
+
+
+func set_choosing(player_name: String) -> void:
+	label.text = player_name
+	animation_player.play("active")

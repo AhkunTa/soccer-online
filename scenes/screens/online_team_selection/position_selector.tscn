@@ -81,7 +81,10 @@ offset_left = -6.0
 offset_top = -7.0
 offset_right = 21.0
 offset_bottom = 1.0
-text = "阿昆他阿昆他"
+theme_override_constants/outline_size = 2
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 8
+text = "NPC"
 horizontal_alignment = 1
 vertical_alignment = 1
 
