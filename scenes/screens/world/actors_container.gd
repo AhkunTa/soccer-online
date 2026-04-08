@@ -20,6 +20,9 @@ var time_since_last_cache_refresh := Time.get_ticks_msec()
 
 var is_checking_for_kickoff_readiness := false
 
+## 联机模式：所有 12 个玩家的有序引用 (home 0-5, away 6-11)
+var all_players: Array[Player] = []
+
 
 func _init() -> void:
 	GameEvents.team_reset.connect(on_team_reset.bind())
@@ -32,7 +35,20 @@ func _ready() -> void:
 	kickoffs.scale.x = -1
 	squad_away = spawn_players(GameManager.current_match.country_away, goal_away)
 	goal_away.initialize(GameManager.current_match.country_away)
-	setup_control_schemes()
+	# 建立全局玩家索引：home[0-5] + away[6-11]
+	all_players.clear()
+	for i in squad_home.size():
+		squad_home[i].network_index = i
+		all_players.append(squad_home[i])
+	for i in squad_away.size():
+		squad_away[i].network_index = squad_home.size() + i
+		all_players.append(squad_away[i])
+	# 根据模式设置控制方案
+	if GameManager.is_online():
+		setup_online_control_schemes()
+		SyncManager.register_game_entities(all_players, ball)
+	else:
+		setup_control_schemes()
 
 func _process(_delta: float) -> void:
 	# 每 200 ms 触发AI 逻辑
@@ -79,6 +95,9 @@ func set_on_duty_weights() -> void:
 	
 
 func on_player_swap_request(requester: Player) -> void:
+	# 联机模式：不允许换人，每人只控制自己的 slot
+	if GameManager.is_online():
+		return
 	var squad := squad_home if requester.country == squad_home[0].country else squad_away
 	var cpu_players: Array[Player] = squad.filter(
 		func(p: Player): return p.control_scheme == Player.ControlScheme.CPU and p.role != Player.Role.GOALIE
@@ -106,7 +125,10 @@ func checking_for_kickoff_readiness() -> void:
 				all_ready = false
 				break
 	if all_ready:
-		setup_control_schemes()
+		if GameManager.is_online():
+			setup_online_control_schemes()
+		else:
+			setup_control_schemes()
 		is_checking_for_kickoff_readiness = false
 		GameEvents.kickoff_ready.emit()
 
@@ -130,6 +152,29 @@ func reset_control_schemes() -> void:
 	for squad in [squad_home, squad_away]:
 		for player in squad:
 			player.set_control_scheme(Player.ControlScheme.CPU)
+
+## 联机模式：根据 match_config 中的 assignments 分配控制方案
+func setup_online_control_schemes() -> void:
+	reset_control_schemes()
+	var local_peer_id: int = SyncManager.local_peer_id
+	var assignments: Array = GameManager.online_all_assignments
+	for entry: Dictionary in assignments:
+		var peer_id: int = entry["peer_id"]
+		var team: int = entry["team"]
+		var slot: int = entry["slot"]
+		if slot < 0:
+			continue
+		# team=0 → squad_home, team=1 → squad_away
+		var squad := squad_home if team == 0 else squad_away
+		if slot >= squad.size():
+			continue
+		var player := squad[slot]
+		player.owner_peer_id = peer_id
+		if peer_id == local_peer_id:
+			player.set_control_scheme(Player.ControlScheme.ONLINE_LOCAL)
+		else:
+			player.set_control_scheme(Player.ControlScheme.ONLINE_REMOTE)
+	print("[ActorsContainer] online control schemes assigned")
 
 func on_team_reset() -> void:
 	is_checking_for_kickoff_readiness = true

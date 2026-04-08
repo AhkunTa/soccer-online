@@ -12,7 +12,17 @@ func _enter_tree() -> void:
 	player.jump_count += 1
 
 func _process(_delta: float) -> void:
-		# double jump 检测
+	if player.control_scheme == Player.ControlScheme.ONLINE_REMOTE:
+		_handle_online_remote()
+	elif player.control_scheme == Player.ControlScheme.CPU:
+		# CPU 跳跃后直接等落地
+		if player.height <= 0:
+			transition_state(Player.State.RECOVERING)
+	else:
+		_handle_local_input()
+
+func _handle_local_input() -> void:
+	# double jump 检测
 	if KeyUtils.check_combo_triggered(player.control_scheme, [KeyUtils.Action.PASS, KeyUtils.Action.SHOOT]) and player.jump_count < player.MAX_JUMPS:
 		player.height_velocity = DOUBLE_JUMP_VELOCITY
 		player.jump_count += 1
@@ -26,15 +36,41 @@ func _process(_delta: float) -> void:
 	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.SHOOT):
 		if player.has_ball():
 			transition_state(Player.State.JUMPING_SHOT)
-		# TODO 空中射门逻辑待补充
 		elif ball.can_air_interact():
 			if player.is_facing_target_goal():
 				transition_state(Player.State.JUMPING_SHOT)
 			else:
 				transition_state(Player.State.BICYCLE_KICK)
 		return
-
 	# 落地后转换到 RECOVERING 状态
+	if player.height <= 0:
+		transition_state(Player.State.RECOVERING)
+
+func _handle_online_remote() -> void:
+	if not multiplayer.is_server():
+		return
+	var idx := player.network_index
+	# double jump
+	if KeyUtils.is_network_jump_pressed(idx) and player.jump_count < player.MAX_JUMPS:
+		player.height_velocity = DOUBLE_JUMP_VELOCITY
+		player.jump_count += 1
+		return
+	# 传球
+	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.PASS):
+		if player.has_ball():
+			transition_state(Player.State.PASSING)
+		return
+	# 射门
+	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.SHOOT):
+		if player.has_ball():
+			transition_state(Player.State.JUMPING_SHOT)
+		elif ball.can_air_interact():
+			if player.is_facing_target_goal():
+				transition_state(Player.State.JUMPING_SHOT)
+			else:
+				transition_state(Player.State.BICYCLE_KICK)
+		return
+	# 落地
 	if player.height <= 0:
 		transition_state(Player.State.RECOVERING)
 

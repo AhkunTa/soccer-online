@@ -46,6 +46,9 @@ func set_ball_roll_animation_from_velocity() -> void:
 		animation_player.advance(0)
 
 func process_gravity(delta: float, height_velocity_decay: float = 0.0, velocity_decay: float = 0.0) -> void:
+	# 联机模式：客户端不执行物理
+	if GameManager.is_online() and not ball.multiplayer.is_server():
+		return
 	if ball.height > 0 or ball.height_velocity > 0:
 		ball.height_velocity -= GRAVITY * delta
 		ball.height += ball.height_velocity
@@ -56,6 +59,9 @@ func process_gravity(delta: float, height_velocity_decay: float = 0.0, velocity_
 				ball.velocity *= velocity_decay
 
 func move_and_bounce(delta: float) -> void:
+	# 联机模式：客户端不执行物理
+	if GameManager.is_online() and not ball.multiplayer.is_server():
+		return
 	var collision := ball.move_and_collide(ball.velocity * delta)
 	if collision != null:
 		ball.velocity = ball.velocity.bounce(collision.get_normal()) * BOUNCINESS
@@ -64,6 +70,9 @@ func move_and_bounce(delta: float) -> void:
 
 # 处理球与玩家碰撞造成伤害的逻辑
 func check_player_damage() -> bool:
+	# 联机模式：仅服务端处理伤害判定
+	if GameManager.is_online() and not ball.multiplayer.is_server():
+		return false
 	# 获取所有与球碰撞的玩家
 	var overlapping_players := player_detection_area.get_overlapping_bodies()
 

@@ -30,6 +30,15 @@ const ACTIONS_MAP: Dictionary = {
 		Action.PASS: "p2_pass",
 		Action.JUMP: "p2_jump"
 	},
+	Player.ControlScheme.ONLINE_LOCAL: {
+		Action.LEFT: "p1_left",
+		Action.RIGHT: "p1_right",
+		Action.UP: "p1_up",
+		Action.DOWN: "p1_down",
+		Action.SHOOT: "p1_shoot",
+		Action.PASS: "p1_pass",
+		Action.JUMP: "p1_jump"
+	},
 }
 
 # 记录待定的单键按下时间戳 {scheme: {action: timestamp}}
@@ -37,6 +46,56 @@ static var _pending_actions: Dictionary = {}
 
 # 已触发的组合键标记 {scheme: {combo_key: true}}
 static var _triggered_combos: Dictionary = {}
+
+# ── 网络输入注入（服务端用）──────────────────────────────────────────────────
+# network_index → InputSnapshot
+static var _network_inputs: Dictionary = {}
+
+## 服务端注入远程客户端的输入快照
+static func inject_network_input(index: int, snapshot: Dictionary) -> void:
+	_network_inputs[index] = snapshot
+
+## 获取网络注入的移动方向
+static func get_network_input_vector(index: int) -> Vector2:
+	if _network_inputs.has(index):
+		return _network_inputs[index].get("dir", Vector2.ZERO)
+	return Vector2.ZERO
+
+## 检查网络注入的动作是否按下
+static func is_network_action_pressed(index: int, action: Action) -> bool:
+	if not _network_inputs.has(index):
+		return false
+	var snap: Dictionary = _network_inputs[index]
+	match action:
+		Action.SHOOT: return snap.get("sh_p", false)
+		Action.PASS: return snap.get("pa_jp", false)
+		_: return false
+
+## 检查网络注入的动作是否刚按下
+static func is_network_action_just_pressed(index: int, action: Action) -> bool:
+	if not _network_inputs.has(index):
+		return false
+	var snap: Dictionary = _network_inputs[index]
+	match action:
+		Action.SHOOT: return snap.get("sh_jp", false)
+		Action.PASS: return snap.get("pa_jp", false)
+		_: return false
+
+## 检查网络注入的射门键是否刚释放
+static func is_network_shoot_just_released(index: int) -> bool:
+	if not _network_inputs.has(index):
+		return false
+	return _network_inputs[index].get("sh_jr", false)
+
+## 检查网络注入的跳跃是否触发
+static func is_network_jump_pressed(index: int) -> bool:
+	if not _network_inputs.has(index):
+		return false
+	return _network_inputs[index].get("jmp", false)
+
+## 清除指定玩家的网络输入
+static func clear_network_input(index: int) -> void:
+	_network_inputs.erase(index)
 
 static func _init_dicts() -> void:
 	if _pending_actions.is_empty():

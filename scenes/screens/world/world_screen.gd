@@ -19,12 +19,28 @@ func _ready() -> void:
 	#setup_area_generator()
 	game_over_timer.timeout.connect(on_transition.bind())
 	GameEvents.game_over.connect(on_game_over.bind())
+	if GameManager.is_online():
+		# 联机模式：等待 SyncManager 所有客户端加载完成后再开始
+		SyncManager.match_started.connect(_on_online_match_started, CONNECT_ONE_SHOT)
+		# 通知服务器本地场景已加载完毕
+		SyncManager.notify_scene_loaded()
+	else:
+		GameManager.start_game()
+
+
+func _on_online_match_started() -> void:
+	print("[WorldScreen] online match started, calling GameManager.start_game()")
 	GameManager.start_game()
 
 func on_game_over(_winning: String) -> void:
 	game_over_timer.start()
 
 func on_transition() -> void:
+	if GameManager.is_online():
+		SyncManager.reset_state()
+		GameManager.game_mode = GameManager.GameMode.LOCAL
+		transition_screen(SoccerGame.ScreenType.ONLINE_LOBBY)
+		return
 	if screen_data.tournament != null and GameManager.current_match.winner == GameManager.player_setup[0]:
 		screen_data.tournament.advance()
 		transition_screen(SoccerGame.ScreenType.TOURNAMENT, screen_data)

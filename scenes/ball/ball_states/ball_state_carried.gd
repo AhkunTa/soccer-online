@@ -8,10 +8,24 @@ var DRIBBLEe_INTENSITY: float = 3.0
 
 var dribble_time := 0.0
 func _enter_tree() -> void:
-	assert(carrier != null)
+	# 联机客户端：carrier 可能为 null（由服务端管理），跳过 assert 和信号
+	if carrier == null:
+		return
 	GameEvents.ball_possessed.emit(carrier.fullname)
 
 func _process(delta: float) -> void:
+	# 联机客户端：球位置由快照插值驱动，仅播放动画
+	if GameManager.is_online() and not ball.multiplayer.is_server():
+		if carrier != null and carrier.velocity != Vector2.ZERO:
+			if carrier.heading.x >= 0:
+				animation_player.play("roll")
+			else:
+				animation_player.play_backwards("roll")
+			animation_player.advance(0)
+		else:
+			animation_player.play("idle")
+		return
+
 	var vx: float = 0.0
 	dribble_time += delta
 	if carrier.velocity != Vector2.ZERO:

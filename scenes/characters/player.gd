@@ -6,7 +6,9 @@ signal swap_requested(player: Player)
 const CONTROL_SCENE_MAP: Dictionary = {
 	ControlScheme.CPU: preload("res://assets/art/props/cpu.png"),
 	ControlScheme.P1: preload("res://assets/art/props/1p.png"),
-	ControlScheme.P2: preload("res://assets/art/props/2p.png")
+	ControlScheme.P2: preload("res://assets/art/props/2p.png"),
+	ControlScheme.ONLINE_LOCAL: preload("res://assets/art/props/1p.png"),
+	ControlScheme.ONLINE_REMOTE: preload("res://assets/art/props/2p.png"),
 }
 const BALL_CONTROL_HEIGHT_MAX := 10.0
 
@@ -42,7 +44,7 @@ const MAX_JUMPS := 2
 @onready var run_particles: GPUParticles2D = %RunParticles
 
 
-enum ControlScheme {CPU, P1, P2}
+enum ControlScheme {CPU, P1, P2, ONLINE_LOCAL, ONLINE_REMOTE}
 enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING, RESETTING}
 
 
@@ -71,6 +73,10 @@ var healing_active: bool = false
 var healing_rate: float = 0.0
 # 球伤害无敌状态
 var is_invincible_to_ball_damage: bool = false
+# 网络同步属性
+var network_index: int = -1
+var owner_peer_id: int = -1
+var current_state_enum: int = -1  # 当前状态枚举值，用于网络同步
 
 func _ready() -> void:
 	set_ai_behavior()
@@ -110,6 +116,11 @@ func _process(delta: float) -> void:
 	set_sprite_visiable()
 	process_gravity(delta)
 	# update_temporary_effects(delta)
+	# 联机客户端的远程玩家：位置由快照插值直接设置，跳过 move_and_slide 避免冲突
+	if control_scheme == ControlScheme.ONLINE_REMOTE and not multiplayer.is_server():
+		return
+	if control_scheme == ControlScheme.CPU and GameManager.is_online() and not multiplayer.is_server():
+		return
 	move_and_slide()
 
 func initialize(context_position: Vector2, context_kickoff_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:
@@ -130,6 +141,7 @@ func initialize(context_position: Vector2, context_kickoff_position: Vector2, co
 	country = context_country
 	
 func switch_state(state: State, state_data: PlayerStateData = PlayerStateData.new()) -> void:
+	current_state_enum = state
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)

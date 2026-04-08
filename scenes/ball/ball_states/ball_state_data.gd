@@ -34,3 +34,21 @@ func set_shot_normal_data(height: float, power: float = 150.0, type: Ball.PowerS
 func set_last_hit_player(player: Player) -> BallStateData:
 	last_hit_player = player
 	return self
+
+## 序列化为 Dictionary（用于网络传输，不含 last_hit_player 引用）
+func to_dict() -> Dictionary:
+	return {
+		"lock_duration": lock_duration,
+		"shot_height": shot_height,
+		"shot_power": shot_power,
+		"power_shot_type": int(power_shot_type),
+	}
+
+## 从 Dictionary 反序列化
+static func from_dict(d: Dictionary) -> BallStateData:
+	var data := BallStateData.new()
+	data.lock_duration = d.get("lock_duration", 0)
+	data.shot_height = d.get("shot_height", -1.0)
+	data.shot_power = d.get("shot_power", 150.0)
+	data.power_shot_type = d.get("power_shot_type", 0) as Ball.PowerShotType
+	return data

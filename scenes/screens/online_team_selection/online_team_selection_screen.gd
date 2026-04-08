@@ -434,6 +434,7 @@ func _on_match_config_received(config: Dictionary) -> void:
 		else:
 			entry["position"] = Vector2.ZERO
 	GameManager.apply_online_match_config(config, my_peer_id)
+	SyncManager.prepare_match(config, my_peer_id)
 	transition_screen(SoccerGame.ScreenType.IN_GAME)
 
 

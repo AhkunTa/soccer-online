@@ -5,11 +5,15 @@ const DURATION_CELEBRATION := 3000
 var time_since_celebration := Time.get_ticks_msec()
 
 func _enter_tree() -> void:
-	# FIXME  country_scored_on might be null
-	manager.increase_score(state_data.country_scored_on)
+	# 联机模式：比分已由服务端通过 SyncManager 广播，客户端不重复加分
+	if not (GameManager.is_online() and not multiplayer.is_server()):
+		manager.increase_score(state_data.country_scored_on)
 	time_since_celebration = Time.get_ticks_msec()
 
 func _process(_delta: float) -> void:
+	# 联机模式：仅服务端驱动状态转换
+	if GameManager.is_online() and not multiplayer.is_server():
+		return
 	if Time.get_ticks_msec() - time_since_celebration > DURATION_CELEBRATION:
 		transition_state(GameManager.State.RESET)
 		

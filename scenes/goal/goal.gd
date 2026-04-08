@@ -19,16 +19,19 @@ func initialize(context_country) -> void:
 	country = context_country
 
 func on_ball_enter_back_net(ball: Ball) -> void:
+	# 联机模式：仅服务端处理球网碰撞
+	if GameManager.is_online() and not multiplayer.is_server():
+		return
 	if ball.current_state.state_data.shot_power > BACK_NET_AREA_STRENGTH:
-		# TODO 破网音效 & 破网动画
-		# AudioPlayer.play(AudioPlayer.Sound.NET_HIT_BROKEN)
-		# ball.switch_state(Ball.State.FREEFORM)
 		pass
 	else:
 		ball.switch_state(Ball.State.FREEFORM)
 		ball.stop()
 
 func on_ball_enter_scoring_area(_ball: Ball) -> void:
+	# 联机模式：仅服务端触发进球判定
+	if GameManager.is_online() and not multiplayer.is_server():
+		return
 	AudioPlayer.play(AudioPlayer.Sound.WHISTLE)
 	GameEvents.team_scored.emit(country)
 

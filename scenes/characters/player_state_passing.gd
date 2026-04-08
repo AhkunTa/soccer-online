@@ -13,6 +13,10 @@ func on_animation_complete() -> void:
 	var pass_target := state_data.pass_target
 	if pass_target == null:
 		pass_target = find_teammate_in_view()
+	# 联机模式：客户端不执行 ball.pass_to()，由服务器通过快照驱动球
+	if GameManager.is_online() and not multiplayer.is_server():
+		transition_state(Player.State.MOVING)
+		return
 	if pass_target != null:
 		ball.pass_to(pass_target.position + pass_target.velocity)
 	else:

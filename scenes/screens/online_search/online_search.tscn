@@ -332,6 +332,7 @@ text = "Confirm"
 
 [node name="ConnectPanel" type="Panel" parent="Background" unique_id=100000023]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -345,7 +346,6 @@ offset_bottom = 38.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("3_ldric")
-visible = false
 
 [node name="ConnectTitle" type="Label" parent="Background/ConnectPanel" unique_id=100000024]
 layout_mode = 1

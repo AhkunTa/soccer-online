@@ -79,6 +79,14 @@ func _process(_delta: float) -> void:
 	scoring_ratcast.rotation = velocity.angle()
 
 func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) -> void:
+	_do_switch_state(state, data)
+	# 联机模式：服务端广播球状态切换给客户端
+	if GameManager.is_online() and multiplayer.is_server():
+		SyncManager.server_sync_ball_state(state, data)
+
+
+## 内部状态切换（客户端收到广播后也走这里）
+func _do_switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) -> void:
 	if current_state != null:
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
@@ -89,9 +97,8 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 	
 func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NULL) -> void:
 	velocity = shot_velocity
-	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else carrier.power_shot_type
+	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else (carrier.power_shot_type if carrier != null else PowerShotType.NORMAL)
 	print("力量 %s 使用 %s" % [power, player_power_shot_type])
-	# FIXME 添加 player 添加 
 	if carrier != null:
 		carrier.is_invincible_to_ball_damage = true
 	if carrier != null and power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal() and position.distance_to(carrier.target_goal.position) >= MIN_POWER_SHOT_DISTANCE:
@@ -162,10 +169,16 @@ func get_proximity_teammates_count(country: String) -> int:
 	return players.filter(func(p: Player): return p.country == country).size()
 
 func on_team_reset() -> void:
+	# 联机客户端：球重置由服务端驱动，客户端通过快照同步
+	if GameManager.is_online() and not multiplayer.is_server():
+		return
 	position = spawn_position
 	velocity = Vector2.ZERO
 	height = 0
 	switch_state(State.FREEFORM)
 	
 func on_kickoff_started() -> void:
+	# 联机客户端：开球由服务端驱动
+	if GameManager.is_online() and not multiplayer.is_server():
+		return
 	pass_to(spawn_position + Vector2.DOWN * KICKOFF_PASS_DISTANCE, 0)
