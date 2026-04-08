@@ -14,6 +14,13 @@ const JUMP_GRAVITY := 100.0
 var target_position := Vector2.ZERO # 球门目标位置
 
 func _enter_tree() -> void:
+	# 设置动画和特效
+	play_animation()
+	shot_particles.emitting = true
+	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
+	if is_online_client():
+		return
+
 	# 获取球门目标位置
 	target_position = carrier.target_goal.get_random_target_position()
 
@@ -27,10 +34,6 @@ func _enter_tree() -> void:
 	# 立即施加第一次跳跃
 	ball.height_velocity = JUMP_HEIGHT_VELOCITY
 
-	# 设置动画和特效
-	play_animation()
-	shot_particles.emitting = true
-	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
 	print("绝招激活：跳跃射门！目标位置：%s 第一次跳跃！" % target_position)
 
 func play_animation() -> void:

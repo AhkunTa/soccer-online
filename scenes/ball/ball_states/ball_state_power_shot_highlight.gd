@@ -13,6 +13,8 @@ func _enter_tree() -> void:
 	set_ball_roll_animation_from_velocity()
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
 	shot_particles.emitting = true
+	if is_online_client():
+		return
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
 
 	var bounce_target := carrier.target_goal.get_bounce_target_position()

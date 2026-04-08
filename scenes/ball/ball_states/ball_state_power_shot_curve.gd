@@ -26,6 +26,8 @@ func _enter_tree() -> void:
 	# 确保球可见
 	sprite.modulate.a = 1.0
 	sprite.visible = true
+	if is_online_client():
+		return
 
 	# 获取球门目标位置
 	target_position = carrier.target_goal.get_random_target_position()

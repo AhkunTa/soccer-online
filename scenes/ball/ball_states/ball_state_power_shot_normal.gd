@@ -7,6 +7,8 @@ const POWER_SHOT_HEIGHT := 5.0
 func _enter_tree() -> void:
 	play_animation()
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
+	if is_online_client():
+		return
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
 	if ball.height <= 10:
 			shot_particles.emitting = true

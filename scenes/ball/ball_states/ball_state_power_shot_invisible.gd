@@ -25,6 +25,8 @@ func _enter_tree() -> void:
 	set_ball_roll_animation_from_velocity()
 	# TODO 修改音频
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
+	if is_online_client():
+		return
 
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
 

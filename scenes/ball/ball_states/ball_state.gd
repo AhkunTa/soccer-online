@@ -24,6 +24,10 @@ func setup(context_ball: Ball, context_state_data: BallStateData, context_player
 	sprite = context_sprite
 	shot_particles = context_shot_particles
 
+## 联机客户端是否应跳过物理/逻辑初始化（仅播放动画音效）
+func is_online_client() -> bool:
+	return GameManager.is_online() and not ball.multiplayer.is_server()
+
 func transition_state(new_state: BallState, data: BallStateData = BallStateData.new()) -> void:
 	state_transition_requested.emit(new_state, data)
 
