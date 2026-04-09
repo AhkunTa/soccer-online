@@ -24,10 +24,10 @@ func is_height_light_effect() -> bool:
 	return false
 
 func _process(_delta: float) -> void:
-	# 检查是否击中玩家造成伤害
 	if is_height_light_effect():
 		add_highlight_effect()
-
+	if is_online_client():
+		return
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		move_and_bounce(_delta)

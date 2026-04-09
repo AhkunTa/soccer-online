@@ -63,8 +63,9 @@ func _enter_tree() -> void:
 	print("绝招激活：弧线射门！类型：%s " % [curve_name])
 
 func _process(delta: float) -> void:
-	# 弧线射门增加高亮效果
 	add_highlight_effect()
+	if is_online_client():
+		return
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		apply_curve_effect(delta)

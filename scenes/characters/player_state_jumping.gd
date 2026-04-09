@@ -13,7 +13,11 @@ func _enter_tree() -> void:
 
 func _process(_delta: float) -> void:
 	if player.control_scheme == Player.ControlScheme.ONLINE_REMOTE:
-		_handle_online_remote()
+		if multiplayer.is_server():
+			_handle_online_remote()
+		else:
+			# 客户端：跳跃动画已在 _enter_tree 播放，等 SyncManager 切换状态
+			pass
 	elif player.control_scheme == Player.ControlScheme.CPU:
 		# CPU 跳跃后直接等落地
 		if player.height <= 0:

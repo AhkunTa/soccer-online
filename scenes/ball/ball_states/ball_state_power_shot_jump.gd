@@ -39,6 +39,8 @@ func _enter_tree() -> void:
 func play_animation() -> void:
 	set_ball_roll_animation_from_velocity()
 func _process(delta: float) -> void:
+	if is_online_client():
+		return
 	# 检查是否击中玩家造成伤害
 	var ball_caught := check_player_damage()
 	if not ball_caught:

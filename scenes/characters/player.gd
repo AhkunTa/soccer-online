@@ -112,15 +112,18 @@ func set_ai_behavior() -> void:
 	add_child(current_ai_behavior)
 
 func _process(delta: float) -> void:
+	# 联机客户端的远程/CPU 玩家：所有状态由 SyncManager 快照驱动
+	var is_remote_on_client := GameManager.is_online() and not multiplayer.is_server() and (control_scheme == ControlScheme.ONLINE_REMOTE or control_scheme == ControlScheme.CPU)
+	if is_remote_on_client:
+		# 仅更新精灵显示（位置、速度、朝向、高度由 SyncManager 设置）
+		flip_sprites()
+		set_sprite_visiable()
+		player_sprite.position = Vector2.UP * height
+		return
 	flip_sprites()
 	set_sprite_visiable()
 	process_gravity(delta)
 	# update_temporary_effects(delta)
-	# 联机客户端的远程玩家：位置由快照插值直接设置，跳过 move_and_slide 避免冲突
-	if control_scheme == ControlScheme.ONLINE_REMOTE and not multiplayer.is_server():
-		return
-	if control_scheme == ControlScheme.CPU and GameManager.is_online() and not multiplayer.is_server():
-		return
 	move_and_slide()
 
 func initialize(context_position: Vector2, context_kickoff_position: Vector2, context_ball: Ball, context_own_goal: Goal, context_target_goal: Goal, context_player_data: PlayerResource, context_country: String) -> void:

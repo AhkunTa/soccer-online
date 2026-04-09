@@ -43,6 +43,8 @@ func _enter_tree() -> void:
 	print("绝招激活：隐身射门！")
 
 func _process(_delta: float) -> void:
+	if is_online_client():
+		return
 	# 更新透明度
 	update_visibility()
 

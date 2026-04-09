@@ -57,6 +57,8 @@ func _enter_tree() -> void:
 	print("  目标位置=%s, 当前位置=%s" % [bounce_target, ball.position])
 func _process(_delta: float) -> void:
 	add_highlight_effect()
+	if is_online_client():
+		return
 	process_gravity(_delta, 0.9, 1.0)
 	var ball_caught := check_player_damage()
 	if not ball_caught:

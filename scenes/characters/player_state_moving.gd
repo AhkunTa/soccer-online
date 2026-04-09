@@ -7,16 +7,21 @@ func _process(_delta: float) -> void:
 			# 联机模式：CPU 全部静止，方便 debug 联机交互
 			if GameManager.is_online():
 				player.velocity = Vector2.ZERO
-				pass
 			else:
 				ai_behavior.process_ai()
+			player.set_movement_animation()
+			player.set_heading()
 		Player.ControlScheme.ONLINE_REMOTE:
-			_handle_online_remote()
+			if multiplayer.is_server():
+				_handle_online_remote()
+				player.set_movement_animation()
+				player.set_heading()
+			# 客户端：动画和朝向完全由 SyncManager 驱动，这里不做任何事
 		_:
 			# P1, P2, ONLINE_LOCAL 都走本地输入
 			handle_human_movement()
-	player.set_movement_animation()
-	player.set_heading()
+			player.set_movement_animation()
+			player.set_heading()
 
 
 func handle_human_movement() -> void:
@@ -60,9 +65,6 @@ func handle_human_movement() -> void:
 
 ## 联机模式：服务端处理远程玩家的网络输入
 func _handle_online_remote() -> void:
-	if not multiplayer.is_server():
-		# 客户端的远程玩家由快照插值驱动，不执行输入逻辑
-		return
 	# 服务端：从 KeyUtils 网络输入缓冲读取
 	var idx := player.network_index
 	var direction := KeyUtils.get_network_input_vector(idx)
