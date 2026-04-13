@@ -32,6 +32,8 @@ func server_process(delta: float) -> void:
 
 func _exit_tree() -> void:
 	shot_particles.emitting = false
+	if is_height_light_effect():
+		remove_highlight_effect()
 
 func can_air_interact() -> bool:
 	return true
