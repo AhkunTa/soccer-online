@@ -24,12 +24,44 @@ func setup(context_ball: Ball, context_state_data: BallStateData, context_player
 	sprite = context_sprite
 	shot_particles = context_shot_particles
 
-## 联机客户端是否应跳过物理/逻辑初始化（仅播放动画音效）
-func is_online_client() -> bool:
-	return GameManager.is_online() and not ball.multiplayer.is_server()
-
 func transition_state(new_state: BallState, data: BallStateData = BallStateData.new()) -> void:
 	state_transition_requested.emit(new_state, data)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 生命周期模板方法 — 子类重写 on_enter_visual / on_enter_logic / visual_process / server_process
+# ══════════════════════════════════════════════════════════════════════════════
+
+## 基类统一处理 _enter_tree，子类不要重写 _enter_tree，改写 on_enter_visual / on_enter_logic
+func _enter_tree() -> void:
+	on_enter_visual()
+	if not SyncManager.is_client():
+		on_enter_logic()
+
+## 所有端都执行：动画、音效、特效
+func on_enter_visual() -> void:
+	pass
+
+## 仅服务端/单机执行：物理初始化、速度设置、方向计算
+func on_enter_logic() -> void:
+	pass
+
+## 基类统一处理 _process，子类不要重写 _process，改写 visual_process / server_process
+func _process(delta: float) -> void:
+	visual_process(delta)
+	if not SyncManager.is_client():
+		server_process(delta)
+
+## 所有端都执行：动画更新、视觉特效
+func visual_process(_delta: float) -> void:
+	pass
+
+## 仅服务端/单机执行：物理计算、碰撞检测、状态转换
+func server_process(_delta: float) -> void:
+	pass
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 工具方法（动画、物理、伤害检测）
+# ══════════════════════════════════════════════════════════════════════════════
 
 func set_ball_animation_from_velocity(animation_name) -> void:
 	if ball.velocity.x >= 0:
@@ -50,9 +82,6 @@ func set_ball_roll_animation_from_velocity() -> void:
 		animation_player.advance(0)
 
 func process_gravity(delta: float, height_velocity_decay: float = 0.0, velocity_decay: float = 0.0) -> void:
-	# 联机模式：客户端不执行物理
-	if GameManager.is_online() and not ball.multiplayer.is_server():
-		return
 	if ball.height > 0 or ball.height_velocity > 0:
 		ball.height_velocity -= GRAVITY * delta
 		ball.height += ball.height_velocity
@@ -63,89 +92,51 @@ func process_gravity(delta: float, height_velocity_decay: float = 0.0, velocity_
 				ball.velocity *= velocity_decay
 
 func move_and_bounce(delta: float) -> void:
-	# 联机模式：客户端不执行物理
-	if GameManager.is_online() and not ball.multiplayer.is_server():
-		return
 	var collision := ball.move_and_collide(ball.velocity * delta)
 	if collision != null:
 		ball.velocity = ball.velocity.bounce(collision.get_normal()) * BOUNCINESS
 		AudioPlayer.play(AudioPlayer.Sound.BOUNCE)
 		ball.switch_state(Ball.State.FREEFORM)
 
-# 处理球与玩家碰撞造成伤害的逻辑
 func check_player_damage() -> bool:
-	# 联机模式：仅服务端处理伤害判定
-	if GameManager.is_online() and not ball.multiplayer.is_server():
-		return false
-	# 获取所有与球碰撞的玩家
 	var overlapping_players := player_detection_area.get_overlapping_bodies()
-
 	for body in overlapping_players:
 		if body is Player:
 			var hit_player: Player = body as Player
-			# 跳过已经击中过的玩家（避免重复伤害）
 			if state_data.last_hit_player == hit_player:
 				continue
-
-			# 跳过处于球伤害无敌状态的玩家（射击者刚射击后）
 			if hit_player.is_invincible_to_ball_damage:
 				continue
 			var damage := state_data.shot_power
 			var player_hp := hit_player.current_hp
-			print("球击中玩家: %s, 当前power: %.1f, 玩家HP: %.1f" % [hit_player.fullname, damage, player_hp])
-
 			if damage >= player_hp:
 				if damage / 2 >= player_hp:
-					# 伤害足以击飞玩家
 					hit_player.get_knocked_flying(ball.position.direction_to(hit_player.position))
 				else:
-					# 仅击倒玩家
 					hit_player.get_hurt(ball.position.direction_to(hit_player.position))
 				state_data.set_shot_power(damage - player_hp)
 				state_data.set_last_hit_player(hit_player)
-
-				print("剩余power: %.1f" % state_data.shot_power)
-
-				# 如果power耗尽，球转换为自由状态
 				if state_data.shot_power <= 0:
-					ball.velocity = ball.velocity * 0.3 # 减速
+					ball.velocity = ball.velocity * 0.3
 					state_transition_requested.emit(Ball.State.FREEFORM)
 					return true
 			else:
-				# 伤害小于HP，玩家接住球
-				print("玩家 %s 接住了球！" % hit_player.fullname)
 				hit_player.current_hp -= damage
-
-				# 球被接住，转换为carried状态
 				ball.carrier = hit_player
 				hit_player.control_ball()
 				state_transition_requested.emit(Ball.State.CARRIED)
 				return true
 	return false
 
-
 func add_highlight_effect() -> void:
 	var time = Time.get_ticks_msec() / 1000.0
-	
-	# 使用 sin 波形实现脉冲
-	var pulse = (sin(time * 10.0) + 1.0) / 2.0 # 0.0 ~ 1.0
-	
-	# 在白色和红色之间插值
-	var white = Color(2, 2, 2, 1) # 高亮白
-	var red = Color(3, 0.3, 0.3, 1) # 高亮红
+	var pulse = (sin(time * 10.0) + 1.0) / 2.0
+	var white = Color(2, 2, 2, 1)
+	var red = Color(3, 0.3, 0.3, 1)
 	sprite.modulate = white.lerp(red, pulse)
 
 func remove_highlight_effect() -> void:
 	sprite.modulate = Color(1, 1, 1, 1)
 
-
 func can_air_interact() -> bool:
 	return false
-
-# func get_state() -> Ball.State:
-# 	if ball.carrier != null:
-# 		return Ball.State.CARRIED
-# 	elif ball.velocity == Vector2.ZERO and ball.height == 0:
-# 		return Ball.State.FREEFORM
-# 	else:
-# 		return Ball.State.SHOT

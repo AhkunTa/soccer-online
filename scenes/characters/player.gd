@@ -113,7 +113,7 @@ func set_ai_behavior() -> void:
 
 func _process(delta: float) -> void:
 	# 联机客户端的远程/CPU 玩家：所有状态由 SyncManager 快照驱动
-	var is_remote_on_client := GameManager.is_online() and not multiplayer.is_server() and (control_scheme == ControlScheme.ONLINE_REMOTE or control_scheme == ControlScheme.CPU)
+	var is_remote_on_client := SyncManager.is_client() and (control_scheme == ControlScheme.ONLINE_REMOTE or control_scheme == ControlScheme.CPU)
 	if is_remote_on_client:
 		# 仅更新精灵显示（位置、速度、朝向、高度由 SyncManager 设置）
 		flip_sprites()
@@ -144,6 +144,7 @@ func initialize(context_position: Vector2, context_kickoff_position: Vector2, co
 	country = context_country
 	
 func switch_state(state: State, state_data: PlayerStateData = PlayerStateData.new()) -> void:
+	var old_state := current_state_enum
 	current_state_enum = state
 	if current_state != null:
 		current_state.queue_free()
@@ -152,6 +153,9 @@ func switch_state(state: State, state_data: PlayerStateData = PlayerStateData.ne
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "PlayerStateMachine: " + str(state)
 	call_deferred("add_child", current_state)
+	# 联机服务端：状态变化时立即广播给客户端
+	if SyncManager.is_server() and network_index >= 0 and old_state != state:
+		SyncManager.server_sync_player_state(network_index, state)
 
 func set_tackling_animation() -> void:
 	animation_player.play("tackle")

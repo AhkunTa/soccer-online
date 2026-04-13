@@ -6,7 +6,7 @@ var valid_control_schemes := []
 
 func _enter_tree() -> void:
 	# 联机模式：仅服务端处理开球逻辑
-	if GameManager.is_online() and not multiplayer.is_server():
+	if SyncManager.is_client():
 		return
 
 	var country_starting := state_data.country_scored_on

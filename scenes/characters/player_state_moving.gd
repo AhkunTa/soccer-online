@@ -1,116 +1,94 @@
 class_name PlayerStateMoving
 extends PlayerState
 
+## Moving 比较特殊：有本地输入/网络输入/AI 三条路径，直接重写 _process
 func _process(_delta: float) -> void:
 	match player.control_scheme:
 		Player.ControlScheme.CPU:
-			# 联机模式：CPU 全部静止，方便 debug 联机交互
 			if GameManager.is_online():
-				player.velocity = Vector2.ZERO
+				player.velocity = Vector2.ZERO  # debug: 联机模式 CPU 静止
 			else:
 				ai_behavior.process_ai()
 			player.set_movement_animation()
 			player.set_heading()
 		Player.ControlScheme.ONLINE_REMOTE:
-			if multiplayer.is_server():
-				_handle_online_remote()
+			if SyncManager.is_server():
+				_handle_network_input()
 				player.set_movement_animation()
 				player.set_heading()
-			# 客户端：动画和朝向完全由 SyncManager 驱动，这里不做任何事
+			# 客户端：动画由 SyncManager 驱动
 		_:
-			# P1, P2, ONLINE_LOCAL 都走本地输入
-			handle_human_movement()
+			# P1, P2, ONLINE_LOCAL
+			_handle_local_input()
 			player.set_movement_animation()
 			player.set_heading()
 
 
-func handle_human_movement() -> void:
+func _handle_local_input() -> void:
 	var direction := KeyUtils.get_input_vector(player.control_scheme)
 	player.velocity = direction * player.speed
-
 	if player.velocity != Vector2.ZERO:
 		teammate_detection_area.rotation = player.velocity.angle()
-
-	# 优先检查组合键（跳跃）
+	# 组合键：跳跃
 	if KeyUtils.check_combo_triggered(player.control_scheme, [KeyUtils.Action.PASS, KeyUtils.Action.SHOOT]):
-		print('组合键触发：跳跃')
 		transition_state(Player.State.JUMPING)
 		return
-
-	# 检查单键：传球
+	# 传球
 	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.PASS):
 		if player.has_ball():
 			transition_state(Player.State.PASSING)
-		elif can_teammate_pass_ball():
+		elif _can_teammate_pass_ball():
 			ball.carrier.get_pass_request(player)
 		else:
 			player.swap_requested.emit(player)
 		return
-
-	# 检查单键：射门
+	# 射门
 	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.SHOOT):
-		if player.has_ball():
-			transition_state(Player.State.PREPPING_SHOT)
-		elif ball.can_air_interact():
-			if player.velocity == Vector2.ZERO:
-				if player.is_facing_target_goal():
-					transition_state(Player.State.VOLLEY_KICK)
-				else:
-					transition_state(Player.State.BICYCLE_KICK)
-			else:
-				transition_state(Player.State.HEADER)
-		elif player.velocity != Vector2.ZERO:
-			state_transition_requested.emit(Player.State.TACKLING)
+		_handle_shoot_action()
 
 
-## 联机模式：服务端处理远程玩家的网络输入
-func _handle_online_remote() -> void:
-	# 服务端：从 KeyUtils 网络输入缓冲读取
+func _handle_network_input() -> void:
 	var idx := player.network_index
 	var direction := KeyUtils.get_network_input_vector(idx)
 	player.velocity = direction * player.speed
-
 	if player.velocity != Vector2.ZERO:
 		teammate_detection_area.rotation = player.velocity.angle()
-
-	# 跳跃
 	if KeyUtils.is_network_jump_pressed(idx):
 		transition_state(Player.State.JUMPING)
 		return
-
-	# 传球
 	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.PASS):
 		if player.has_ball():
 			transition_state(Player.State.PASSING)
-		elif can_teammate_pass_ball():
+		elif _can_teammate_pass_ball():
 			ball.carrier.get_pass_request(player)
 		return
-
-	# 射门
 	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.SHOOT):
-		if player.has_ball():
-			transition_state(Player.State.PREPPING_SHOT)
-		elif ball.can_air_interact():
-			if player.velocity == Vector2.ZERO:
-				if player.is_facing_target_goal():
-					transition_state(Player.State.VOLLEY_KICK)
-				else:
-					transition_state(Player.State.BICYCLE_KICK)
+		_handle_shoot_action()
+
+
+func _handle_shoot_action() -> void:
+	if player.has_ball():
+		transition_state(Player.State.PREPPING_SHOT)
+	elif ball.can_air_interact():
+		if player.velocity == Vector2.ZERO:
+			if player.is_facing_target_goal():
+				transition_state(Player.State.VOLLEY_KICK)
 			else:
-				transition_state(Player.State.HEADER)
-		elif player.velocity != Vector2.ZERO:
-			state_transition_requested.emit(Player.State.TACKLING)
+				transition_state(Player.State.BICYCLE_KICK)
+		else:
+			transition_state(Player.State.HEADER)
+	elif player.velocity != Vector2.ZERO:
+		state_transition_requested.emit(Player.State.TACKLING)
 
 
 func can_carry_ball() -> bool:
 	return player.role != Player.Role.GOALIE
 
-func can_teammate_pass_ball() -> bool:
+func _can_teammate_pass_ball() -> bool:
 	if ball.carrier == null or ball.carrier.country != player.country:
 		return false
-	# 联机模式：ONLINE_REMOTE 队友也可以被请求传球
-	var carrier_scheme := ball.carrier.control_scheme
-	return carrier_scheme == Player.ControlScheme.CPU or carrier_scheme == Player.ControlScheme.ONLINE_REMOTE
+	var s := ball.carrier.control_scheme
+	return s == Player.ControlScheme.CPU or s == Player.ControlScheme.ONLINE_REMOTE
 
 func can_pass() -> bool:
 	return true

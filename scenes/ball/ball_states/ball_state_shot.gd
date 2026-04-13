@@ -1,5 +1,4 @@
 class_name BallStateShot
-
 extends BallState
 
 const DURATION_SHOT := 1000
@@ -7,27 +6,23 @@ const SHOT_SPRITE_SCALE := 0.9
 const DEFAULT_SHOT_HEIGHT := 10.0
 var time_since_shot := Time.get_ticks_msec()
 
-func _enter_tree() -> void:
+func on_enter_visual() -> void:
 	set_ball_roll_animation_from_velocity()
 	sprite.scale.y = SHOT_SPRITE_SCALE
+	shot_particles.emitting = true
+	GameEvents.impact_received.emit(ball.position, true)
 
+func on_enter_logic() -> void:
 	if state_data.shot_height >= 0:
 		ball.height = state_data.shot_height
 	else:
 		ball.height = DEFAULT_SHOT_HEIGHT
-
 	time_since_shot = Time.get_ticks_msec()
-	shot_particles.emitting = true
-	# 全局暂停特效
-	GameEvents.impact_received.emit(ball.position, true)
 
-func _process(delta: float) -> void:
+func server_process(delta: float) -> void:
 	if Time.get_ticks_msec() - time_since_shot >= DURATION_SHOT:
-		# 联机模式：仅服务端触发状态转换
-		if not (GameManager.is_online() and not multiplayer.is_server()):
-			state_transition_requested.emit(Ball.State.FREEFORM)
+		state_transition_requested.emit(Ball.State.FREEFORM)
 	else:
-		# 检查是否击中玩家造成伤害（联机客户端在 base class 中被跳过）
 		var ball_caught := check_player_damage()
 		if not ball_caught:
 			move_and_bounce(delta)

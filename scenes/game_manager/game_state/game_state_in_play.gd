@@ -6,7 +6,7 @@ func _enter_tree() -> void:
 
 func _process(delta: float) -> void:
 	# 联机模式：仅服务器递减时间（客户端由快照同步 time_left）
-	if GameManager.is_online() and not multiplayer.is_server():
+	if SyncManager.is_client():
 		return
 	manager.time_left -= delta
 	if manager.is_time_over():

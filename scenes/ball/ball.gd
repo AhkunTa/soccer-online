@@ -81,7 +81,7 @@ func _process(_delta: float) -> void:
 func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) -> void:
 	_do_switch_state(state, data)
 	# 联机模式：服务端广播球状态切换给客户端
-	if GameManager.is_online() and multiplayer.is_server():
+	if SyncManager.is_server():
 		SyncManager.server_sync_ball_state(state, data)
 
 
@@ -170,7 +170,7 @@ func get_proximity_teammates_count(country: String) -> int:
 
 func on_team_reset() -> void:
 	# 联机客户端：球重置由服务端驱动，客户端通过快照同步
-	if GameManager.is_online() and not multiplayer.is_server():
+	if SyncManager.is_client():
 		return
 	position = spawn_position
 	velocity = Vector2.ZERO
@@ -179,6 +179,6 @@ func on_team_reset() -> void:
 	
 func on_kickoff_started() -> void:
 	# 联机客户端：开球由服务端驱动
-	if GameManager.is_online() and not multiplayer.is_server():
+	if SyncManager.is_client():
 		return
 	pass_to(spawn_position + Vector2.DOWN * KICKOFF_PASS_DISTANCE, 0)

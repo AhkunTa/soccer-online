@@ -5,38 +5,37 @@ const HEIGHT_START := 0.1
 const HEIGHT_VELOCITY := 2.0
 const DOUBLE_JUMP_VELOCITY := 2.5
 
-func _enter_tree() -> void:
+func on_enter_visual() -> void:
 	animation_player.play("jumping")
+
+func on_enter_logic() -> void:
 	player.height_velocity = HEIGHT_VELOCITY
 	player.height = HEIGHT_START
 	player.jump_count += 1
 
+## Jumping 有本地/网络/CPU 三条路径，直接重写 _process
 func _process(_delta: float) -> void:
-	if player.control_scheme == Player.ControlScheme.ONLINE_REMOTE:
-		if multiplayer.is_server():
-			_handle_online_remote()
-		else:
-			# 客户端：跳跃动画已在 _enter_tree 播放，等 SyncManager 切换状态
-			pass
-	elif player.control_scheme == Player.ControlScheme.CPU:
-		# CPU 跳跃后直接等落地
-		if player.height <= 0:
-			transition_state(Player.State.RECOVERING)
-	else:
-		_handle_local_input()
+	if _is_remote_on_client():
+		return  # 客户端远程：动画已播放，等 SyncManager 切换状态
+	match player.control_scheme:
+		Player.ControlScheme.CPU:
+			if player.height <= 0:
+				transition_state(Player.State.RECOVERING)
+		Player.ControlScheme.ONLINE_REMOTE:
+			_handle_network_input()
+		_:
+			_handle_local_input()
+
 
 func _handle_local_input() -> void:
-	# double jump 检测
 	if KeyUtils.check_combo_triggered(player.control_scheme, [KeyUtils.Action.PASS, KeyUtils.Action.SHOOT]) and player.jump_count < player.MAX_JUMPS:
 		player.height_velocity = DOUBLE_JUMP_VELOCITY
 		player.jump_count += 1
 		return
-	# 检查单键：传球
 	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.PASS):
 		if player.has_ball():
 			transition_state(Player.State.PASSING)
 		return
-	# 检查单键：射门
 	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.SHOOT):
 		if player.has_ball():
 			transition_state(Player.State.JUMPING_SHOT)
@@ -46,25 +45,20 @@ func _handle_local_input() -> void:
 			else:
 				transition_state(Player.State.BICYCLE_KICK)
 		return
-	# 落地后转换到 RECOVERING 状态
 	if player.height <= 0:
 		transition_state(Player.State.RECOVERING)
 
-func _handle_online_remote() -> void:
-	if not multiplayer.is_server():
-		return
+
+func _handle_network_input() -> void:
 	var idx := player.network_index
-	# double jump
 	if KeyUtils.is_network_jump_pressed(idx) and player.jump_count < player.MAX_JUMPS:
 		player.height_velocity = DOUBLE_JUMP_VELOCITY
 		player.jump_count += 1
 		return
-	# 传球
 	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.PASS):
 		if player.has_ball():
 			transition_state(Player.State.PASSING)
 		return
-	# 射门
 	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.SHOOT):
 		if player.has_ball():
 			transition_state(Player.State.JUMPING_SHOT)
@@ -74,9 +68,9 @@ func _handle_online_remote() -> void:
 			else:
 				transition_state(Player.State.BICYCLE_KICK)
 		return
-	# 落地
 	if player.height <= 0:
 		transition_state(Player.State.RECOVERING)
+
 
 func _exit_tree() -> void:
 	player.jump_count = 0

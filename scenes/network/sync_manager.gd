@@ -323,10 +323,6 @@ func _client_interpolate_remote_entities(delta: float) -> void:
 		# 直接在这里更新动画和朝向（不依赖 PlayerState 的执行顺序）
 		player.set_movement_animation()
 		player.flip_sprites()
-		# 同步状态切换
-		var remote_state: int = p_next["st"]
-		if remote_state != player.current_state_enum:
-			_apply_remote_player_state(player, remote_state)
 
 	# 插值球
 	if ball != null:
@@ -572,7 +568,29 @@ func _rpc_notify_jump(player_idx: int) -> void:
 		return
 	all_players[player_idx].switch_state(Player.State.JUMPING)
 
-# ── 球状态同步 ────────────────────────────────────────────────────────────────
+# ── 玩家状态同步（即时 reliable）─────────────────────────────────────────────
+
+## 服务端广播玩家状态切换（由 Player.switch_state 调用）
+func server_sync_player_state(player_idx: int, state: Player.State) -> void:
+	if not multiplayer.is_server():
+		return
+	_rpc_sync_player_state.rpc(player_idx, int(state))
+
+
+@rpc("authority", "reliable")
+func _rpc_sync_player_state(player_idx: int, state_value: int) -> void:
+	if multiplayer.is_server():
+		return
+	if player_idx < 0 or player_idx >= all_players.size():
+		return
+	var player := all_players[player_idx]
+	var state: Player.State = state_value as Player.State
+	# 避免重复切换（可能快照也触发了）
+	if player.current_state_enum == state:
+		return
+	_apply_remote_player_state(player, state)
+
+# ── 球状态同步（即时 reliable）────────────────────────────────────────────────
 
 ## 服务端广播球状态切换（由 Ball.switch_state 调用）
 func server_sync_ball_state(state: Ball.State, data: BallStateData) -> void:
@@ -741,3 +759,11 @@ func reset_state() -> void:
 ## 判断当前是否为联机模式且比赛正在进行
 func is_match_running() -> bool:
 	return is_online_match and _match_running
+
+## 便捷判断：当前是否为联机服务端
+func is_server() -> bool:
+	return is_online_match and multiplayer.is_server()
+
+## 便捷判断：当前是否为联机客户端
+func is_client() -> bool:
+	return is_online_match and not multiplayer.is_server()
