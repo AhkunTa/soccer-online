@@ -320,17 +320,25 @@ func _client_interpolate_remote_entities(delta: float) -> void:
 		player.heading = p_next["hdg"]
 		player.height = lerpf(p_prev["hgt"], p_next["hgt"], t)
 		player.current_hp = p_next["hp"]
-		# 直接在这里更新动画和朝向（不依赖 PlayerState 的执行顺序）
-		player.set_movement_animation()
+		# 仅 MOVING 状态时更新移动动画，避免覆盖跳跃/铲球/射门等动画
+		if player.current_state_enum == Player.State.MOVING:
+			player.set_movement_animation()
 		player.flip_sprites()
 
-	# 插值球
+	# 球：本地物理运算，服务端快照只做偏差和解
 	if ball != null:
-		var b_prev: Dictionary = prev["ball"]
 		var b_next: Dictionary = next["ball"]
-		ball.position = (b_prev["pos"] as Vector2).lerp(b_next["pos"] as Vector2, t)
-		ball.velocity = b_next["vel"]
-		ball.height = lerpf(b_prev["hgt"], b_next["hgt"], t)
+		var server_pos: Vector2 = b_next["pos"]
+		var server_vel: Vector2 = b_next["vel"]
+		var pos_error := ball.position.distance_to(server_pos)
+		var vel_error := ball.velocity.distance_to(server_vel)
+		# 位置偏差超过阈值时平滑校正
+		if pos_error > 8.0:
+			ball.position = ball.position.lerp(server_pos, 0.3)
+		if vel_error > 20.0:
+			ball.velocity = ball.velocity.lerp(server_vel, 0.3)
+		# height 直接同步（不影响动画）
+		ball.height = lerpf(ball.height, b_next["hgt"], 0.3)
 		ball.height_velocity = b_next["hv"]
 
 	# 同步剩余时间
@@ -574,6 +582,7 @@ func _rpc_notify_jump(player_idx: int) -> void:
 func server_sync_player_state(player_idx: int, state: Player.State) -> void:
 	if not multiplayer.is_server():
 		return
+	print("[SyncManager] Server broadcasting player state: idx=%d state=%d" % [player_idx, int(state)])
 	_rpc_sync_player_state.rpc(player_idx, int(state))
 
 
@@ -585,7 +594,7 @@ func _rpc_sync_player_state(player_idx: int, state_value: int) -> void:
 		return
 	var player := all_players[player_idx]
 	var state: Player.State = state_value as Player.State
-	# 避免重复切换（可能快照也触发了）
+	print("[SyncManager] Client received player state: idx=%d state=%d current=%d" % [player_idx, state_value, player.current_state_enum])
 	if player.current_state_enum == state:
 		return
 	_apply_remote_player_state(player, state)
@@ -596,17 +605,29 @@ func _rpc_sync_player_state(player_idx: int, state_value: int) -> void:
 func server_sync_ball_state(state: Ball.State, data: BallStateData) -> void:
 	if not multiplayer.is_server():
 		return
-	_rpc_sync_ball_state.rpc(int(state), data.to_dict())
+	print("[SyncManager] Server broadcasting ball state: %d" % int(state))
+	# 附带当前球的速度和高度，客户端用于初始化本地物理
+	var extra := {
+		"vel": ball.velocity if ball != null else Vector2.ZERO,
+		"hgt": ball.height if ball != null else 0.0,
+		"hv": ball.height_velocity if ball != null else 0.0,
+	}
+	_rpc_sync_ball_state.rpc(int(state), data.to_dict(), extra)
 
 
 @rpc("authority", "reliable")
-func _rpc_sync_ball_state(state_value: int, data_dict: Dictionary) -> void:
+func _rpc_sync_ball_state(state_value: int, data_dict: Dictionary, extra: Dictionary) -> void:
 	if multiplayer.is_server():
 		return
 	if ball == null:
 		return
 	var state: Ball.State = state_value as Ball.State
 	var data := BallStateData.from_dict(data_dict)
+	print("[SyncManager] Client applying ball state: %d" % state_value)
+	# 先设置速度/高度，确保本地物理有正确的初始值
+	ball.velocity = extra.get("vel", Vector2.ZERO)
+	ball.height = extra.get("hgt", 0.0)
+	ball.height_velocity = extra.get("hv", 0.0)
 	ball._do_switch_state(state, data)
 
 

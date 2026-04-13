@@ -34,29 +34,37 @@ func transition_state(new_state: BallState, data: BallStateData = BallStateData.
 ## 基类统一处理 _enter_tree，子类不要重写 _enter_tree，改写 on_enter_visual / on_enter_logic
 func _enter_tree() -> void:
 	on_enter_visual()
-	if not SyncManager.is_client():
+	# 所有端都执行 on_enter_logic（客户端 carrier 为 null 时用快照速度作为初始值）
+	if carrier != null or not _logic_needs_carrier():
 		on_enter_logic()
+	else:
+		# carrier 为 null（联机客户端）：velocity 由 RPC 附带的 extra 已设置，只初始化高度
+		if state_data.shot_height >= 0:
+			ball.height = state_data.shot_height
+
+## 子类重写：on_enter_logic 是否依赖 carrier
+func _logic_needs_carrier() -> bool:
+	return false
 
 ## 所有端都执行：动画、音效、特效
 func on_enter_visual() -> void:
 	pass
 
-## 仅服务端/单机执行：物理初始化、速度设置、方向计算
+## 所有端都执行：物理初始化（carrier 为 null 时跳过，由 _enter_tree 处理）
 func on_enter_logic() -> void:
 	pass
 
-## 基类统一处理 _process，子类不要重写 _process，改写 visual_process / server_process
+## 基类统一处理 _process — 所有端都跑物理
 func _process(delta: float) -> void:
 	visual_process(delta)
-	if not SyncManager.is_client():
-		server_process(delta)
+	physics_process(delta)
 
 ## 所有端都执行：动画更新、视觉特效
 func visual_process(_delta: float) -> void:
 	pass
 
-## 仅服务端/单机执行：物理计算、碰撞检测、状态转换
-func server_process(_delta: float) -> void:
+## 所有端都执行：物理计算、碰撞检测、状态转换
+func physics_process(_delta: float) -> void:
 	pass
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -72,8 +80,13 @@ func set_ball_animation_from_velocity(animation_name) -> void:
 		animation_player.advance(0)
 
 func set_ball_roll_animation_from_velocity() -> void:
+	# 联机客户端：velocity 可能还没被快照更新，默认播放 roll
 	if ball.velocity == Vector2.ZERO:
-		animation_player.play("idle")
+		if SyncManager.is_client():
+			animation_player.play("roll")
+			animation_player.advance(0)
+		else:
+			animation_player.play("idle")
 	elif ball.velocity.x >= 0:
 		animation_player.play("roll")
 		animation_player.advance(0)
@@ -99,6 +112,9 @@ func move_and_bounce(delta: float) -> void:
 		ball.switch_state(Ball.State.FREEFORM)
 
 func check_player_damage() -> bool:
+	# 伤害判定仍然只在服务端执行（避免客户端独立触发玩家状态切换）
+	if SyncManager.is_client():
+		return false
 	var overlapping_players := player_detection_area.get_overlapping_bodies()
 	for body in overlapping_players:
 		if body is Player:

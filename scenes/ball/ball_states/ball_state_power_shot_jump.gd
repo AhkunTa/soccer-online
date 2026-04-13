@@ -22,7 +22,7 @@ func on_enter_logic() -> void:
 func play_animation() -> void:
 	set_ball_roll_animation_from_velocity()
 
-func server_process(delta: float) -> void:
+func physics_process(delta: float) -> void:
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		_apply_jump_gravity(delta)

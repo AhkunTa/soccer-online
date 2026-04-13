@@ -35,7 +35,7 @@ func on_enter_logic() -> void:
 func visual_process(_delta: float) -> void:
 	add_highlight_effect()
 
-func server_process(delta: float) -> void:
+func physics_process(delta: float) -> void:
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		_apply_curve_effect(delta)

@@ -20,7 +20,7 @@ func on_enter_logic() -> void:
 	current_phase = Phase.RISING
 	time_since_start = Time.get_ticks_msec()
 
-func server_process(delta: float) -> void:
+func physics_process(delta: float) -> void:
 	match current_phase:
 		Phase.RISING:
 			_process_rising(delta)

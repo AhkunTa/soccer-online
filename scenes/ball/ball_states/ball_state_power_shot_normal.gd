@@ -7,11 +7,10 @@ const POWER_SHOT_HEIGHT := 5.0
 func on_enter_visual() -> void:
 	play_animation()
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
+	shot_particles.emitting = true
 
 func on_enter_logic() -> void:
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
-	if ball.height <= 10:
-		shot_particles.emitting = true
 	var short_direction := carrier.get_direction_to_opponent_goal()
 	ball.velocity = short_direction * POWER_SHOT_STRENGTH
 
@@ -25,7 +24,7 @@ func visual_process(_delta: float) -> void:
 	if is_height_light_effect():
 		add_highlight_effect()
 
-func server_process(delta: float) -> void:
+func physics_process(delta: float) -> void:
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		move_and_bounce(delta)

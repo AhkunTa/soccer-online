@@ -19,8 +19,9 @@ func on_enter_logic() -> void:
 		ball.height = DEFAULT_SHOT_HEIGHT
 	time_since_shot = Time.get_ticks_msec()
 
-func server_process(delta: float) -> void:
+func physics_process(delta: float) -> void:
 	if Time.get_ticks_msec() - time_since_shot >= DURATION_SHOT:
+		if SyncManager.is_client(): return
 		state_transition_requested.emit(Ball.State.FREEFORM)
 	else:
 		var ball_caught := check_player_damage()

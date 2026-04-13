@@ -24,11 +24,11 @@ func on_enter_logic() -> void:
 	current_phase = Phase.FADING_OUT
 	time_since_shot = Time.get_ticks_msec()
 
-func server_process(_delta: float) -> void:
+func physics_process(delta: float) -> void:
 	_update_visibility()
 	var ball_caught := check_player_damage()
 	if not ball_caught:
-		move_and_bounce(_delta)
+		move_and_bounce(delta)
 
 func _update_visibility() -> void:
 	if target_goal == null:

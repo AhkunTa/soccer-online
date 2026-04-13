@@ -25,7 +25,7 @@ func visual_process(_delta: float) -> void:
 	else:
 		animation_player.play("idle")
 
-func server_process(delta: float) -> void:
+func physics_process(delta: float) -> void:
 	if carrier == null:
 		return
 	var vx: float = 0.0
