@@ -29,6 +29,7 @@ InputManager="*res://utils/input_manager.gd"
 MusicPlayer="*res://scenes/audio/music_player.gd"
 RoomManager="*res://scenes/network/room_manager.gd"
 SyncManager="*res://scenes/network/sync_manager.gd"
+DebugQuickMatch="*res://scenes/network/debug_quick_match.gd"
 
 [debug]
 
