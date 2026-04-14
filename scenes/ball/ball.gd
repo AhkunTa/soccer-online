@@ -50,6 +50,7 @@ const POWER_SHOT_STRENGTH := 300.0
 var state_factory := BallStateFactory.new()
 var velocity := Vector2.ZERO
 var current_state: BallState = null
+var current_state_enum: int = -1
 var carrier: Player = null
 var height := 0.0
 var height_velocity := 0.0
@@ -81,19 +82,26 @@ func _process(_delta: float) -> void:
 func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) -> void:
 	_do_switch_state(state, data)
 	# 联机模式：服务端广播球状态切换给客户端
+	# _do_switch_state 现在同步执行 on_enter_logic，velocity/height 已是正确初始值
 	if SyncManager.is_server():
 		SyncManager.server_sync_ball_state(state, data)
 
 
 ## 内部状态切换（客户端收到广播后也走这里）
 func _do_switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) -> void:
+	current_state_enum = int(state)
 	if current_state != null:
+		# 先断开信号，防止旧状态在 queue_free 前的最后一帧再触发切换
+		if current_state.state_transition_requested.is_connected(switch_state):
+			current_state.state_transition_requested.disconnect(switch_state)
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self , data, player_detection_area, carrier, animation_player, ball_sprite, shot_particles)
+	current_state.setup(self, data, player_detection_area, carrier, animation_player, ball_sprite, shot_particles)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "BallStateMachine"
-	call_deferred('add_child', current_state)
+	# 直接 add_child（非 deferred），确保 _enter_tree → on_enter_logic 在同一帧执行
+	# 这样 velocity/height 在广播前就已经是正确的初始值
+	add_child(current_state)
 	
 func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NULL) -> void:
 	velocity = shot_velocity

@@ -18,6 +18,15 @@ func on_enter_visual() -> void:
 	shot_particles.emitting = true
 
 func on_enter_logic() -> void:
+	if carrier == null:
+		# 客户端：velocity 已由 RPC extra 设置，从速度方向推算 target_position
+		if ball.height <= 0:
+			ball.height = DEFAULT_SHOT_HEIGHT
+		# 用速度方向推算一个远处的目标点，保证弧线方向正确
+		target_position = ball.position + ball.velocity.normalized() * 1000.0
+		initial_direction = ball.velocity.normalized()
+		curve_type = CurveType.LEFT if randf() > 0.5 else CurveType.RIGHT
+		return
 	target_position = carrier.target_goal.get_random_target_position()
 	curve_type = CurveType.LEFT if randf() > 0.5 else CurveType.RIGHT
 	var to_goal := ball.position.direction_to(target_position)

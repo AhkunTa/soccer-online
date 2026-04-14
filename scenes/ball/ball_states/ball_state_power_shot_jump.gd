@@ -13,6 +13,11 @@ func on_enter_visual() -> void:
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
 
 func on_enter_logic() -> void:
+	if carrier == null:
+		# 客户端：velocity/height_velocity 已由 RPC extra 设置
+		if ball.height_velocity == 0.0:
+			ball.height_velocity = JUMP_HEIGHT_VELOCITY
+		return
 	target_position = carrier.target_goal.get_random_target_position()
 	var shot_direction := ball.position.direction_to(target_position)
 	ball.velocity = shot_direction * POWER_SHOT_STRENGTH

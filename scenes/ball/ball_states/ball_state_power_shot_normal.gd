@@ -10,6 +10,10 @@ func on_enter_visual() -> void:
 	shot_particles.emitting = true
 
 func on_enter_logic() -> void:
+	if carrier == null:
+		if ball.height <= 0:
+			ball.height = POWER_SHOT_HEIGHT
+		return
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
 	var short_direction := carrier.get_direction_to_opponent_goal()
 	ball.velocity = short_direction * POWER_SHOT_STRENGTH

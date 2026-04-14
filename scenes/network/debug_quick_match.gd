@@ -21,7 +21,7 @@ const ENABLED := true
 const SERVER_IP := "127.0.0.1"
 
 ## 默认国家
-const HOME_COUNTRY := "FRANCE"
+const HOME_COUNTRY := "ARGENTINA"
 const AWAY_COUNTRY := "USA"
 
 ## 服务端玩家 slot（0-5，对应球队中的第几个球员）

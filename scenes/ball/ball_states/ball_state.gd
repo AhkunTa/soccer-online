@@ -54,10 +54,11 @@ func on_enter_visual() -> void:
 func on_enter_logic() -> void:
 	pass
 
-## 基类统一处理 _process — 所有端都跑物理
+## 基类统一处理 _process
 func _process(delta: float) -> void:
 	visual_process(delta)
-	physics_process(delta)
+	if not SyncManager.is_client():
+		physics_process(delta)
 
 ## 所有端都执行：动画更新、视觉特效
 func visual_process(_delta: float) -> void:
@@ -72,6 +73,9 @@ func physics_process(_delta: float) -> void:
 # ══════════════════════════════════════════════════════════════════════════════
 
 func set_ball_animation_from_velocity(animation_name) -> void:
+	# 联机客户端：动画在 on_enter_visual 时已一次性设置，不每帧重新判断
+	if SyncManager.is_client():
+		return
 	if ball.velocity.x >= 0:
 		animation_player.play(animation_name)
 		animation_player.advance(0)
@@ -80,13 +84,11 @@ func set_ball_animation_from_velocity(animation_name) -> void:
 		animation_player.advance(0)
 
 func set_ball_roll_animation_from_velocity() -> void:
-	# 联机客户端：velocity 可能还没被快照更新，默认播放 roll
+	# 联机客户端：动画在 on_enter_visual 时已一次性设置，不每帧重新判断
+	if SyncManager.is_client():
+		return
 	if ball.velocity == Vector2.ZERO:
-		if SyncManager.is_client():
-			animation_player.play("roll")
-			animation_player.advance(0)
-		else:
-			animation_player.play("idle")
+		animation_player.play("idle")
 	elif ball.velocity.x >= 0:
 		animation_player.play("roll")
 		animation_player.advance(0)

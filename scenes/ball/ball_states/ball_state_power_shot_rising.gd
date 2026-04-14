@@ -5,7 +5,7 @@ const DURATION_RISING := 500
 const RISING_TARGET_HEIGHT := 30.0
 const RISING_SPEED := 0.08
 
-enum Phase { RISING, SHOOTING }
+enum Phase {RISING, SHOOTING}
 
 var current_phase: Phase = Phase.RISING
 var time_since_start := 0

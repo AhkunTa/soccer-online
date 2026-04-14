@@ -25,8 +25,6 @@ signal return_to_lobby_requested
 
 ## 服务器每隔多少物理帧广播一次世界快照 (60Hz / 3 = 20Hz)
 const SNAPSHOT_INTERVAL := 3
-## 客户端快照缓冲区大小（用于插值）
-const SNAPSHOT_BUFFER_SIZE := 3
 ## 客户端插值系数
 const INTERPOLATION_FACTOR := 0.4
 ## 服务器和解位置偏差阈值（像素）
@@ -68,12 +66,10 @@ var _pending_inputs: Dictionary = {}
 
 # ── 客户端：快照缓冲 ─────────────────────────────────────────────────────────
 
-## 最近收到的世界快照（用于插值）
+## 最近收到的世界快照（带时间戳，用于固定延迟插值）
 var _snapshot_buffer: Array[Dictionary] = []
-## 客户端插值时间累加器（秒）
-var _interpolation_time: float = 0.0
-## 快照间隔时间（秒），SNAPSHOT_INTERVAL 帧 / 60fps
-var _snapshot_interval_sec: float = float(SNAPSHOT_INTERVAL) / 60.0
+## 固定渲染延迟（毫秒）
+const RENDER_DELAY_MS := 50
 
 # ── 生命周期 ──────────────────────────────────────────────────────────────────
 
@@ -169,7 +165,6 @@ func _do_start_match() -> void:
 	server_tick = 0
 	_snapshot_buffer.clear()
 	_pending_inputs.clear()
-	_interpolation_time = 0.0
 	set_physics_process(true)
 	print("[SyncManager] match started (is_server=%s)" % str(multiplayer.is_server()))
 	match_started.emit()
@@ -229,6 +224,7 @@ func _collect_world_snapshot() -> Dictionary:
 
 	return {
 		"tick": server_tick,
+		"ts": Time.get_ticks_msec(),
 		"tl": GameManager.time_left,
 		"ball": {
 			"pos": ball.position,
@@ -236,6 +232,7 @@ func _collect_world_snapshot() -> Dictionary:
 			"hgt": ball.height,
 			"hv": ball.height_velocity,
 			"ci": carrier_index,
+			"st": int(ball.current_state_enum) if ball.current_state != null else -1,
 		},
 		"players": players_data,
 	}
@@ -265,16 +262,22 @@ func _client_send_input() -> void:
 
 
 func _collect_local_input() -> Dictionary:
-	# 只读取原始按键状态，不消费组合键状态
-	# 组合键检测由 PlayerStateMoving.handle_human_movement() 在 _process 中处理
+	# 根据本地玩家的实际控制方案采集输入
 	var scheme := Player.ControlScheme.P1
-	KeyUtils._init_dicts()
+	for player in all_players:
+		if player.owner_peer_id == local_peer_id:
+			scheme = player.control_scheme
+			break
 
+	KeyUtils._init_dicts()
 	var direction := KeyUtils.get_input_vector(scheme)
+
+	# 根据控制方案选择正确的 action 名称前缀
+	var prefix := "p1" if scheme == Player.ControlScheme.P1 or scheme == Player.ControlScheme.ONLINE_LOCAL else "p2"
 	var shoot_pressed := KeyUtils.is_action_pressed(scheme, KeyUtils.Action.SHOOT)
-	var shoot_just_pressed := Input.is_action_just_pressed("p1_shoot")
-	var shoot_just_released := Input.is_action_just_released("p1_shoot")
-	var pass_just_pressed := Input.is_action_just_pressed("p1_pass")
+	var shoot_just_pressed := Input.is_action_just_pressed(prefix + "_shoot")
+	var shoot_just_released := Input.is_action_just_released(prefix + "_shoot")
+	var pass_just_pressed := Input.is_action_just_pressed(prefix + "_pass")
 	var jump_pressed := shoot_pressed and KeyUtils.is_action_pressed(scheme, KeyUtils.Action.PASS)
 
 	return {
@@ -289,60 +292,112 @@ func _collect_local_input() -> Dictionary:
 	}
 
 
-## 对远程实体执行快照插值（基于时间）
-func _client_interpolate_remote_entities(delta: float) -> void:
+## 固定延迟缓冲插值：渲染时间 = 当前时间 - RENDER_DELAY_MS
+## 在缓冲区里找到渲染时间点前后的两个快照做插值
+func _client_interpolate_remote_entities(_delta: float) -> void:
 	if _snapshot_buffer.size() < 2:
 		return
 
-	# 累加时间，用于在两个快照之间平滑插值
-	_interpolation_time += delta
+	var render_time := Time.get_ticks_msec() - RENDER_DELAY_MS
 
-	var prev: Dictionary = _snapshot_buffer[-2]
-	var next: Dictionary = _snapshot_buffer[-1]
+	# 在缓冲区里找 render_time 前后的快照
+	var prev: Dictionary = {}
+	var next: Dictionary = {}
+	for snap in _snapshot_buffer:
+		var ts: int = snap.get("ts", 0)
+		if ts <= render_time:
+			prev = snap
+		elif next.is_empty():
+			next = snap
+			break
 
-	# t 从 0→1 随时间推进，到达 1.0 时等待下一个快照
-	var t := clampf(_interpolation_time / _snapshot_interval_sec, 0.0, 1.0)
+	if prev.is_empty() or next.is_empty():
+		# 缓冲区还没积累足够数据，用最新快照直接应用
+		var latest: Dictionary = _snapshot_buffer[-1]
+		_apply_snapshot_direct(latest)
+		return
+
+	var prev_ts: int = prev.get("ts", 0)
+	var next_ts: int = next.get("ts", 0)
+	var span := next_ts - prev_ts
+	var t := 0.0
+	if span > 0:
+		t = clampf(float(render_time - prev_ts) / float(span), 0.0, 1.0)
 
 	# 插值远程玩家
 	var prev_players: Array = prev["players"]
 	var next_players: Array = next["players"]
 	for i in range(mini(all_players.size(), mini(prev_players.size(), next_players.size()))):
 		var player := all_players[i]
-		# 跳过本地控制的玩家（由本地预测驱动）
+		var p_next: Dictionary = next_players[i]
 		if player.owner_peer_id == local_peer_id:
-			_reconcile_local_player(player, next_players[i])
+			_reconcile_local_player(player, p_next)
 			continue
 		# 远程玩家：插值位置
 		var p_prev: Dictionary = prev_players[i]
-		var p_next: Dictionary = next_players[i]
 		player.position = (p_prev["pos"] as Vector2).lerp(p_next["pos"] as Vector2, t)
 		player.velocity = p_next["vel"]
 		player.heading = p_next["hdg"]
 		player.height = lerpf(p_prev["hgt"], p_next["hgt"], t)
 		player.current_hp = p_next["hp"]
-		# 仅 MOVING 状态时更新移动动画，避免覆盖跳跃/铲球/射门等动画
 		if player.current_state_enum == Player.State.MOVING:
 			player.set_movement_animation()
 		player.flip_sprites()
 
-	# 球：本地物理运算，服务端快照只做偏差和解
+	# 球：完全由快照驱动（客户端不跑物理）
 	if ball != null:
+		var b_prev: Dictionary = prev["ball"]
 		var b_next: Dictionary = next["ball"]
-		var server_pos: Vector2 = b_next["pos"]
-		var server_vel: Vector2 = b_next["vel"]
-		var pos_error := ball.position.distance_to(server_pos)
-		var vel_error := ball.velocity.distance_to(server_vel)
-		# 位置偏差超过阈值时平滑校正
-		if pos_error > 8.0:
-			ball.position = ball.position.lerp(server_pos, 0.3)
-		if vel_error > 20.0:
-			ball.velocity = ball.velocity.lerp(server_vel, 0.3)
-		# height 直接同步（不影响动画）
-		ball.height = lerpf(ball.height, b_next["hgt"], 0.3)
-		ball.height_velocity = b_next["hv"]
+		var server_ball_state: int = b_next.get("st", -1)
+
+		if server_ball_state != -1 and server_ball_state != int(ball.current_state_enum):
+			# 状态不一致（reliable RPC 还在途中）：只轻微平滑位置，等 RPC 到达后再正常插值
+			ball.position = ball.position.lerp(b_next["pos"] as Vector2, 0.1)
+		else:
+			ball.position = (b_prev["pos"] as Vector2).lerp(b_next["pos"] as Vector2, t)
+			ball.velocity = b_next["vel"]
+			ball.height = lerpf(b_prev["hgt"], b_next["hgt"], t)
+			ball.height_velocity = b_next["hv"]
+
+		# carrier 同步
+		var ci: int = b_next.get("ci", -1)
+		if ci >= 0 and ci < all_players.size():
+			ball.carrier = all_players[ci]
+		elif ci == -1:
+			ball.carrier = null
 
 	# 同步剩余时间
 	GameManager.time_left = next["tl"]
+
+
+## 直接应用快照（缓冲不足时的降级处理）
+func _apply_snapshot_direct(snap: Dictionary) -> void:
+	var snap_players: Array = snap["players"]
+	for i in range(mini(all_players.size(), snap_players.size())):
+		var player := all_players[i]
+		var p: Dictionary = snap_players[i]
+		if player.owner_peer_id == local_peer_id:
+			_reconcile_local_player(player, p)
+			continue
+		player.position = p["pos"]
+		player.velocity = p["vel"]
+		player.heading = p["hdg"]
+		player.height = p["hgt"]
+		player.current_hp = p["hp"]
+		if player.current_state_enum == Player.State.MOVING:
+			player.set_movement_animation()
+		player.flip_sprites()
+
+	if ball != null:
+		var b: Dictionary = snap["ball"]
+		ball.position = b["pos"]
+		ball.velocity = b["vel"]
+		ball.height = b["hgt"]
+		ball.height_velocity = b["hv"]
+		var ci: int = b.get("ci", -1)
+		ball.carrier = all_players[ci] if ci >= 0 and ci < all_players.size() else null
+
+	GameManager.time_left = snap["tl"]
 
 
 ## 本地玩家和解：比较服务器位置与预测位置
@@ -355,45 +410,18 @@ func _reconcile_local_player(player: Player, server_data: Dictionary) -> void:
 
 ## 客户端：根据快照中的状态枚举同步远程玩家的状态
 func _apply_remote_player_state(player: Player, remote_state: int) -> void:
-	match remote_state:
-		Player.State.MOVING:
-			player.switch_state(Player.State.MOVING)
-		Player.State.JUMPING:
-			player.switch_state(Player.State.JUMPING)
-		Player.State.TACKLING:
-			player.switch_state(Player.State.TACKLING)
-		Player.State.RECOVERING:
-			player.switch_state(Player.State.RECOVERING)
-		Player.State.PREPPING_SHOT:
-			player.switch_state(Player.State.PREPPING_SHOT)
+	var state := remote_state as Player.State
+	if player.current_state_enum == state:
+		return
+	match state:
 		Player.State.SHOOTING:
-			player.switch_state(Player.State.SHOOTING, PlayerStateData.build().set_shot_direction(player.heading))
-		Player.State.PASSING:
-			player.switch_state(Player.State.PASSING)
-		Player.State.HEADER:
-			player.switch_state(Player.State.HEADER)
-		Player.State.VOLLEY_KICK:
-			player.switch_state(Player.State.VOLLEY_KICK)
-		Player.State.BICYCLE_KICK:
-			player.switch_state(Player.State.BICYCLE_KICK)
-		Player.State.CHEST_CONTROL:
-			player.switch_state(Player.State.CHEST_CONTROL)
+			player.switch_state(state, PlayerStateData.build().set_shot_direction(player.heading))
 		Player.State.HURT:
-			player.switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(Vector2.ZERO))
-		Player.State.DIVING:
-			player.switch_state(Player.State.DIVING)
-		Player.State.CELEBRATING:
-			player.switch_state(Player.State.CELEBRATING)
-		Player.State.MOURNING:
-			player.switch_state(Player.State.MOURNING)
+			player.switch_state(state, PlayerStateData.build().set_hurt_direction(Vector2.ZERO))
 		Player.State.RESETTING:
-			player.switch_state(Player.State.RESETTING, PlayerStateData.build().set_reset_position(player.spawn_position))
-		Player.State.JUMPING_SHOT:
-			player.switch_state(Player.State.JUMPING_SHOT)
-		Player.State.MOVING:
-			# 从其他状态回到 MOVING 时切换
-			if player.current_state_enum != Player.State.MOVING:
-				player.switch_state(Player.State.MOVING)
+			player.switch_state(state, PlayerStateData.build().set_reset_position(player.spawn_position))
+		_:
+			player.switch_state(state)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -419,10 +447,9 @@ func _rpc_receive_snapshot(snapshot: Dictionary) -> void:
 	if multiplayer.is_server():
 		return
 	_snapshot_buffer.append(snapshot)
-	# 收到新快照时重置插值计时器
-	_interpolation_time = 0.0
-	# 保持缓冲区大小
-	while _snapshot_buffer.size() > SNAPSHOT_BUFFER_SIZE:
+	# 保持缓冲区大小（保留足够覆盖 RENDER_DELAY_MS 的快照）
+	# 20Hz 快照 = 50ms/帧，100ms 延迟需要约 4 个快照，保留 8 个作为余量
+	while _snapshot_buffer.size() > 8:
 		_snapshot_buffer.pop_front()
 
 
@@ -582,7 +609,7 @@ func _rpc_notify_jump(player_idx: int) -> void:
 func server_sync_player_state(player_idx: int, state: Player.State) -> void:
 	if not multiplayer.is_server():
 		return
-	print("[SyncManager] Server broadcasting player state: idx=%d state=%d" % [player_idx, int(state)])
+	print("[SyncManager] 广播玩家状态: idx=%d state=%d" % [player_idx, int(state)])
 	_rpc_sync_player_state.rpc(player_idx, int(state))
 
 
@@ -594,7 +621,7 @@ func _rpc_sync_player_state(player_idx: int, state_value: int) -> void:
 		return
 	var player := all_players[player_idx]
 	var state: Player.State = state_value as Player.State
-	print("[SyncManager] Client received player state: idx=%d state=%d current=%d" % [player_idx, state_value, player.current_state_enum])
+	print("[SyncManager] 接受玩家状态: idx=%d state=%d current=%d" % [player_idx, state_value, player.current_state_enum])
 	if player.current_state_enum == state:
 		return
 	_apply_remote_player_state(player, state)
@@ -605,7 +632,7 @@ func _rpc_sync_player_state(player_idx: int, state_value: int) -> void:
 func server_sync_ball_state(state: Ball.State, data: BallStateData) -> void:
 	if not multiplayer.is_server():
 		return
-	print("[SyncManager] Server broadcasting ball state: %d" % int(state))
+	print("[SyncManager] 广播足球状态: %d" % int(state))
 	# 附带当前球的速度和高度，客户端用于初始化本地物理
 	var extra := {
 		"vel": ball.velocity if ball != null else Vector2.ZERO,
@@ -623,7 +650,7 @@ func _rpc_sync_ball_state(state_value: int, data_dict: Dictionary, extra: Dictio
 		return
 	var state: Ball.State = state_value as Ball.State
 	var data := BallStateData.from_dict(data_dict)
-	print("[SyncManager] Client applying ball state: %d" % state_value)
+	print("[SyncManager] 接受足球状态： %d" % state_value)
 	# 先设置速度/高度，确保本地物理有正确的初始值
 	ball.velocity = extra.get("vel", Vector2.ZERO)
 	ball.height = extra.get("hgt", 0.0)
@@ -768,7 +795,6 @@ func reset_state() -> void:
 	local_team = -1
 	local_slot = -1
 	server_tick = 0
-	_interpolation_time = 0.0
 	_peers_loaded.clear()
 	_pending_inputs.clear()
 	_snapshot_buffer.clear()

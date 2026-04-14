@@ -12,6 +12,11 @@ func on_enter_visual() -> void:
 	shot_particles.emitting = true
 
 func on_enter_logic() -> void:
+	if carrier == null:
+		# 客户端：velocity/height 已由 RPC extra 设置，只补 height_velocity
+		if ball.height_velocity == 0.0:
+			ball.height_velocity = INITIAL_HEIGHT_VELOCITY * SPEED_MULTIPLIER
+		return
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
 	var bounce_target := carrier.target_goal.get_bounce_target_position()
 	var horizontal_offset := bounce_target - ball.position

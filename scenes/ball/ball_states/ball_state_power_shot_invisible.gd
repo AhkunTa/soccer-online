@@ -17,6 +17,13 @@ func on_enter_visual() -> void:
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT_STRONG)
 
 func on_enter_logic() -> void:
+	if carrier == null:
+		# 客户端：velocity 已由 RPC extra 设置，target_goal 从快照位置推断方向
+		if ball.height <= 0:
+			ball.height = POWER_SHOT_HEIGHT
+		current_phase = Phase.FADING_OUT
+		time_since_shot = Time.get_ticks_msec()
+		return
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
 	target_goal = carrier.target_goal
 	var shot_direction := carrier.get_direction_to_opponent_goal()
