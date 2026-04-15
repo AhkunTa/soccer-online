@@ -69,7 +69,7 @@ var _pending_inputs: Dictionary = {}
 ## 最近收到的世界快照（带时间戳，用于固定延迟插值）
 var _snapshot_buffer: Array[Dictionary] = []
 ## 固定渲染延迟（毫秒）
-const RENDER_DELAY_MS := 50
+const RENDER_DELAY_MS := 100
 
 # ── 生命周期 ──────────────────────────────────────────────────────────────────
 

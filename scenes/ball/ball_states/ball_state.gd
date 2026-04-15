@@ -73,9 +73,6 @@ func physics_process(_delta: float) -> void:
 # ══════════════════════════════════════════════════════════════════════════════
 
 func set_ball_animation_from_velocity(animation_name) -> void:
-	# 联机客户端：动画在 on_enter_visual 时已一次性设置，不每帧重新判断
-	if SyncManager.is_client():
-		return
 	if ball.velocity.x >= 0:
 		animation_player.play(animation_name)
 		animation_player.advance(0)
@@ -84,9 +81,6 @@ func set_ball_animation_from_velocity(animation_name) -> void:
 		animation_player.advance(0)
 
 func set_ball_roll_animation_from_velocity() -> void:
-	# 联机客户端：动画在 on_enter_visual 时已一次性设置，不每帧重新判断
-	if SyncManager.is_client():
-		return
 	if ball.velocity == Vector2.ZERO:
 		animation_player.play("idle")
 	elif ball.velocity.x >= 0:

@@ -89,6 +89,8 @@ func switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) 
 
 ## 内部状态切换（客户端收到广播后也走这里）
 func _do_switch_state(state: Ball.State, data: BallStateData = BallStateData.new()) -> void:
+	# var role := "服务端" if SyncManager.is_server() else ("客户端" if SyncManager.is_client() else "本地")
+	# print("[Ball][%s] 切换状态: %d → %d" % [role, current_state_enum, int(state)])
 	current_state_enum = int(state)
 	if current_state != null:
 		# 先断开信号，防止旧状态在 queue_free 前的最后一帧再触发切换
@@ -96,7 +98,7 @@ func _do_switch_state(state: Ball.State, data: BallStateData = BallStateData.new
 			current_state.state_transition_requested.disconnect(switch_state)
 		current_state.queue_free()
 	current_state = state_factory.get_fresh_state(state)
-	current_state.setup(self, data, player_detection_area, carrier, animation_player, ball_sprite, shot_particles)
+	current_state.setup(self , data, player_detection_area, carrier, animation_player, ball_sprite, shot_particles)
 	current_state.state_transition_requested.connect(switch_state.bind())
 	current_state.name = "BallStateMachine"
 	# 直接 add_child（非 deferred），确保 _enter_tree → on_enter_logic 在同一帧执行
@@ -104,6 +106,9 @@ func _do_switch_state(state: Ball.State, data: BallStateData = BallStateData.new
 	add_child(current_state)
 	
 func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NULL) -> void:
+	# 联机客户端：射门由服务端执行，客户端不直接操作球
+	if SyncManager.is_client():
+		return
 	velocity = shot_velocity
 	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else (carrier.power_shot_type if carrier != null else PowerShotType.NORMAL)
 	print("力量 %s 使用 %s" % [power, player_power_shot_type])
@@ -138,12 +143,18 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 	carrier = null
 
 func tumble(shot_velocity: Vector2) -> void:
+	# 联机客户端：由服务端驱动
+	if SyncManager.is_client():
+		return
 	velocity = shot_velocity
 	height_velocity = TUMBLE_HEIGHT_VELOCITY
 	carrier = null
 	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(DURATION_TUMBLE_LOCK))
 
 func pass_to(destination: Vector2, lock_duration: int = DURATION_PASS_LOCK) -> void:
+	# 联机客户端：传球由服务端执行
+	if SyncManager.is_client():
+		return
 	var direction := position.direction_to(destination)
 	var distance := position.distance_to(destination)
 	#	TODO 微积分方程  https://youtu.be/-4pGf5bW4-M?t=457
