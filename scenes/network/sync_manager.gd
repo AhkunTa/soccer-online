@@ -70,6 +70,8 @@ var _pending_inputs: Dictionary = {}
 var _snapshot_buffer: Array[Dictionary] = []
 ## 固定渲染延迟（毫秒）
 const RENDER_DELAY_MS := 100
+## 快照短暂中断时允许的最大外推时长（毫秒）
+const MAX_EXTRAPOLATION_MS := 100
 
 # ── 生命周期 ──────────────────────────────────────────────────────────────────
 
@@ -186,13 +188,25 @@ func _server_tick() -> void:
 ## 将 pending inputs 应用到对应的 Player
 func _server_consume_inputs() -> void:
 	for peer_id: int in _pending_inputs:
-		var snapshot: Dictionary = _pending_inputs[peer_id]
+		var snapshot: Dictionary = (_pending_inputs[peer_id] as Dictionary).duplicate()
 		var player := _find_player_by_peer(peer_id)
 		if player == null:
 			continue
 		# 注入输入到 KeyUtils 供 PlayerStateMoving 消费
 		KeyUtils.inject_network_input(player.network_index, snapshot)
-	# 不清空——保留最新输入直到下一帧覆盖（应对丢包）
+		_clear_consumed_input_edges(peer_id)
+	# 不清空方向/按住态——保留最新输入直到下一帧覆盖（应对丢包）
+
+
+func _clear_consumed_input_edges(peer_id: int) -> void:
+	if not _pending_inputs.has(peer_id):
+		return
+	var snapshot: Dictionary = _pending_inputs[peer_id]
+	snapshot["sh_jp"] = false
+	snapshot["sh_jr"] = false
+	snapshot["pa_jp"] = false
+	snapshot["jmp"] = false
+	_pending_inputs[peer_id] = snapshot
 
 
 ## 收集世界快照并广播给所有客户端
@@ -232,7 +246,6 @@ func _collect_world_snapshot() -> Dictionary:
 			"hgt": ball.height,
 			"hv": ball.height_velocity,
 			"ci": carrier_index,
-			"st": int(ball.current_state_enum) if ball.current_state != null else -1,
 		},
 		"players": players_data,
 	}
@@ -243,9 +256,8 @@ func _collect_world_snapshot() -> Dictionary:
 # ══════════════════════════════════════════════════════════════════════════════
 
 func _client_tick() -> void:
-	# 采集并上报本地输入（每 SNAPSHOT_INTERVAL 帧，与快照频率匹配，减少带宽）
-	if server_tick % SNAPSHOT_INTERVAL == 0:
-		_client_send_input()
+	# 输入比快照更吃响应，尤其是松开方向键和 just_pressed/just_released 边沿。
+	_client_send_input()
 
 
 ## 客户端插值在 _process 中执行（更平滑，不受物理帧率限制）
@@ -295,7 +307,10 @@ func _collect_local_input() -> Dictionary:
 ## 固定延迟缓冲插值：渲染时间 = 当前时间 - RENDER_DELAY_MS
 ## 在缓冲区里找到渲染时间点前后的两个快照做插值
 func _client_interpolate_remote_entities(_delta: float) -> void:
+	if _snapshot_buffer.is_empty():
+		return
 	if _snapshot_buffer.size() < 2:
+		_apply_snapshot_direct(_snapshot_buffer[-1])
 		return
 
 	var render_time := Time.get_ticks_msec() - RENDER_DELAY_MS
@@ -303,6 +318,7 @@ func _client_interpolate_remote_entities(_delta: float) -> void:
 	# 在缓冲区里找 render_time 前后的快照
 	var prev: Dictionary = {}
 	var next: Dictionary = {}
+	var is_extrapolating := false
 	for snap in _snapshot_buffer:
 		var ts: int = snap.get("ts", 0)
 		if ts <= render_time:
@@ -311,18 +327,23 @@ func _client_interpolate_remote_entities(_delta: float) -> void:
 			next = snap
 			break
 
-	if prev.is_empty() or next.is_empty():
-		# 缓冲区还没积累足够数据，用最新快照直接应用
-		var latest: Dictionary = _snapshot_buffer[-1]
-		_apply_snapshot_direct(latest)
-		return
+	if prev.is_empty():
+		prev = _snapshot_buffer[0]
+		next = _snapshot_buffer[1]
+	elif next.is_empty():
+		prev = _snapshot_buffer[-2]
+		next = _snapshot_buffer[-1]
+		is_extrapolating = true
 
 	var prev_ts: int = prev.get("ts", 0)
 	var next_ts: int = next.get("ts", 0)
 	var span := next_ts - prev_ts
 	var t := 0.0
 	if span > 0:
-		t = clampf(float(render_time - prev_ts) / float(span), 0.0, 1.0)
+		var max_t := 1.0
+		if is_extrapolating:
+			max_t += float(MAX_EXTRAPOLATION_MS) / float(span)
+		t = clampf(float(render_time - prev_ts) / float(span), 0.0, max_t)
 
 	# 插值远程玩家
 	var prev_players: Array = prev["players"]
@@ -348,16 +369,10 @@ func _client_interpolate_remote_entities(_delta: float) -> void:
 	if ball != null:
 		var b_prev: Dictionary = prev["ball"]
 		var b_next: Dictionary = next["ball"]
-		var server_ball_state: int = b_next.get("st", -1)
-
-		if server_ball_state != -1 and server_ball_state != int(ball.current_state_enum):
-			# 状态不一致（reliable RPC 还在途中）：只轻微平滑位置，等 RPC 到达后再正常插值
-			ball.position = ball.position.lerp(b_next["pos"] as Vector2, 0.1)
-		else:
-			ball.position = (b_prev["pos"] as Vector2).lerp(b_next["pos"] as Vector2, t)
-			ball.velocity = b_next["vel"]
-			ball.height = lerpf(b_prev["hgt"], b_next["hgt"], t)
-			ball.height_velocity = b_next["hv"]
+		ball.position = (b_prev["pos"] as Vector2).lerp(b_next["pos"] as Vector2, t)
+		ball.velocity = b_next["vel"]
+		ball.height = lerpf(b_prev["hgt"], b_next["hgt"], t)
+		ball.height_velocity = b_next["hv"]
 
 		# carrier 同步
 		var ci: int = b_next.get("ci", -1)
@@ -390,9 +405,9 @@ func _apply_snapshot_direct(snap: Dictionary) -> void:
 
 	if ball != null:
 		var b: Dictionary = snap["ball"]
-		ball.position = b["pos"]
+		ball.position = ball.position.lerp(b["pos"] as Vector2, INTERPOLATION_FACTOR)
 		ball.velocity = b["vel"]
-		ball.height = b["hgt"]
+		ball.height = lerpf(ball.height, b["hgt"], INTERPOLATION_FACTOR)
 		ball.height_velocity = b["hv"]
 		var ci: int = b.get("ci", -1)
 		ball.carrier = all_players[ci] if ci >= 0 and ci < all_players.size() else null

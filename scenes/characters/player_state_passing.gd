@@ -1,15 +1,36 @@
 class_name PlayerStatePassing
 extends PlayerState
 
+const DURATION_PASS_FALLBACK := 350
+
+var time_start_passing := Time.get_ticks_msec()
+var did_finish := false
+
 func on_enter_visual() -> void:
 	animation_player.play("kick")
 	player.velocity = Vector2.ZERO
 	AudioPlayer.play(AudioPlayer.Sound.PASS)
 
+func on_enter_logic() -> void:
+	time_start_passing = Time.get_ticks_msec()
+	did_finish = false
+
+func server_process(_delta: float) -> void:
+	if SyncManager.is_client():
+		return
+	if Time.get_ticks_msec() - time_start_passing > DURATION_PASS_FALLBACK:
+		_finish_passing()
+
 func on_animation_complete() -> void:
 	if SyncManager.is_client():
 		transition_state(Player.State.MOVING)
 		return
+	_finish_passing()
+
+func _finish_passing() -> void:
+	if did_finish:
+		return
+	did_finish = true
 	var pass_target := state_data.pass_target
 	if pass_target == null:
 		pass_target = _find_teammate_in_view()

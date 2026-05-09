@@ -27,7 +27,7 @@ func _ready() -> void:
 	GameEvents.impact_received.connect(on_impact_received.bind())
 
 func _process(_delta: float) -> void:
-	if get_tree().paused and Time.get_ticks_msec() - time_since_pause > DURATION_GAME_SEC:
+	if get_tree().paused and Time.get_ticks_msec() - time_since_pause > DURATION_IMPACT_PAUSE:
 		get_tree().paused = false
 
 func start_game() -> void:
@@ -105,6 +105,8 @@ func increase_score(country_scored_on: String) -> void:
 	GameEvents.score_changed.emit()
 
 func on_impact_received(_impact_position: Vector2, is_high_impact: bool) -> void:
+	if SyncManager.is_client():
+		return
 	if is_high_impact:
 		time_since_pause = Time.get_ticks_msec()
 		get_tree().paused = true

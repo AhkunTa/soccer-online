@@ -10,12 +10,12 @@ func on_enter_visual() -> void:
 	time_scene_freeform = Time.get_ticks_msec()
 
 func on_player_enter(body: Player) -> void:
+	if SyncManager.is_client():
+		return
 	if body.can_carry_ball() and ball.height < MAX_CAPTURE_HEIGHT:
 		ball.carrier = body
 		body.control_ball()
-		# 联机客户端：本地更新 carrier 用于物理，但状态切换由服务端 RPC 驱动
-		if not SyncManager.is_client():
-			state_transition_requested.emit(Ball.State.CARRIED)
+		state_transition_requested.emit(Ball.State.CARRIED)
 
 func visual_process(_delta: float) -> void:
 	player_detection_area.monitoring = (Time.get_ticks_msec() - time_scene_freeform > state_data.lock_duration)
