@@ -71,8 +71,6 @@ var power_shot_type := Ball.PowerShotType.STRONG
 var active_boosts: Dictionary = {}
 var healing_active: bool = false
 var healing_rate: float = 0.0
-# 球伤害无敌状态
-var is_invincible_to_ball_damage: bool = false
 # 网络同步属性
 var network_index: int = -1
 var owner_peer_id: int = -1

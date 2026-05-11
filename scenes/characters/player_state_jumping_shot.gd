@@ -27,14 +27,14 @@ func _on_ball_entered(contact_ball: Ball) -> void:
 		var direction := ball.position.direction_to(destination)
 		var bonus_power := PARRY_BONUS * player.power
 		AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
-		contact_ball.shoot(direction * bonus_power, player.height, bonus_power, player.power_shot_type)
+		contact_ball.shoot(direction * bonus_power, player.height, bonus_power, player.power_shot_type, player)
 
 func _perform_jump_shot() -> void:
 	var destination := target_goal.get_random_target_position()
 	var direction := ball.position.direction_to(destination)
 	var bonus_power := JUMP_BONUS * player.power if player.jump_count == 1 else DOUBLE_JUMP_BONUS * player.power
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
-	ball.shoot(direction * bonus_power, player.height, bonus_power, player.power_shot_type)
+	ball.shoot(direction * bonus_power, player.height, bonus_power, player.power_shot_type, player)
 
 func can_pass() -> bool:
 	return true

@@ -117,7 +117,7 @@ func check_player_damage() -> bool:
 			var hit_player: Player = body as Player
 			if state_data.last_hit_player == hit_player:
 				continue
-			if hit_player.is_invincible_to_ball_damage:
+			if ball.is_player_protected_from_own_shot(hit_player):
 				continue
 			var damage := state_data.shot_power
 			var player_hp := hit_player.current_hp

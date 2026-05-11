@@ -10,7 +10,6 @@ func on_enter_visual() -> void:
 func on_enter_logic() -> void:
 	time_start_recovery = Time.get_ticks_msec()
 	player.velocity = Vector2.ZERO
-	player.is_invincible_to_ball_damage = false
 
 func server_process(_delta: float) -> void:
 	if Time.get_ticks_msec() - time_start_recovery > DURATION_RECOVER:

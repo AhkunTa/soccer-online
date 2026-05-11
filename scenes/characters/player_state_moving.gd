@@ -5,10 +5,10 @@ extends PlayerState
 func _process(_delta: float) -> void:
 	match player.control_scheme:
 		Player.ControlScheme.CPU:
-			if GameManager.is_online():
-				player.velocity = Vector2.ZERO  # debug: 联机模式 CPU 静止
-			else:
-				ai_behavior.process_ai()
+			# if GameManager.is_online():
+			# 	player.velocity = Vector2.ZERO  # debug: 联机模式 CPU 静止
+			# else:
+			ai_behavior.process_ai()
 			if player.current_state != self:
 				return
 			player.set_movement_animation()

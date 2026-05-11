@@ -40,6 +40,7 @@ const TUMBLE_HEIGHT_VELOCITY := 3.0
 
 const DURATION_TUMBLE_LOCK := 200
 const DURATION_PASS_LOCK := 500
+const SHOOTER_DAMAGE_GRACE_MS := 500
 
 const KICKOFF_PASS_DISTANCE := 50.0
 # 绝招最短释放距离
@@ -52,6 +53,8 @@ var velocity := Vector2.ZERO
 var current_state: BallState = null
 var current_state_enum: int = -1
 var carrier: Player = null
+var last_shooter: Player = null
+var last_shooter_damage_grace_until := 0
 var height := 0.0
 var height_velocity := 0.0
 var spawn_position := Vector2.ZERO
@@ -105,15 +108,17 @@ func _do_switch_state(state: Ball.State, data: BallStateData = BallStateData.new
 	# 这样 velocity/height 在广播前就已经是正确的初始值
 	add_child(current_state)
 	
-func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NULL) -> void:
+func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 150, power_shot_type: PowerShotType = PowerShotType.NULL, shooter: Player = null) -> void:
 	# 联机客户端：射门由服务端执行，客户端不直接操作球
 	if SyncManager.is_client():
 		return
 	velocity = shot_velocity
-	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else (carrier.power_shot_type if carrier != null else PowerShotType.NORMAL)
+	var shot_player := shooter if shooter != null else carrier
+	clear_last_shooter_damage_grace()
+	last_shooter = shot_player
+	last_shooter_damage_grace_until = Time.get_ticks_msec() + SHOOTER_DAMAGE_GRACE_MS
+	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else (shot_player.power_shot_type if shot_player != null else PowerShotType.NORMAL)
 	print("力量 %s 使用 %s" % [power, player_power_shot_type])
-	if carrier != null:
-		carrier.is_invincible_to_ball_damage = true
 	if carrier != null and power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal() and position.distance_to(carrier.target_goal.position) >= MIN_POWER_SHOT_DISTANCE:
 		# 根据绝招类型选择不同的状态
 		match player_power_shot_type:
@@ -149,6 +154,7 @@ func tumble(shot_velocity: Vector2) -> void:
 	velocity = shot_velocity
 	height_velocity = TUMBLE_HEIGHT_VELOCITY
 	carrier = null
+	clear_last_shooter_damage_grace()
 	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(DURATION_TUMBLE_LOCK))
 
 func pass_to(destination: Vector2, lock_duration: int = DURATION_PASS_LOCK) -> void:
@@ -164,6 +170,7 @@ func pass_to(destination: Vector2, lock_duration: int = DURATION_PASS_LOCK) -> v
 	if distance > DISTANCE_HIGH_PASS:
 		height_velocity = BallState.GRAVITY * distance / (1.8 * intensity)
 	carrier = null
+	clear_last_shooter_damage_grace()
 	switch_state(Ball.State.FREEFORM, BallStateData.build().set_lock_duration(lock_duration))
 
 func stop() -> void:
@@ -177,6 +184,18 @@ func can_air_connect(air_connect_min_height: float, air_connect_max_height: floa
 
 func is_freeform() -> bool:
 	return current_state != null and current_state is BallStateFreeForm
+
+func is_player_protected_from_own_shot(player: Player) -> bool:
+	if player == null or player != last_shooter:
+		return false
+	if Time.get_ticks_msec() <= last_shooter_damage_grace_until:
+		return true
+	clear_last_shooter_damage_grace()
+	return false
+
+func clear_last_shooter_damage_grace() -> void:
+	last_shooter = null
+	last_shooter_damage_grace_until = 0
 
 func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
 	if not scoring_ratcast.is_colliding():
@@ -194,6 +213,7 @@ func on_team_reset() -> void:
 	position = spawn_position
 	velocity = Vector2.ZERO
 	height = 0
+	clear_last_shooter_damage_grace()
 	switch_state(State.FREEFORM)
 	
 func on_kickoff_started() -> void:

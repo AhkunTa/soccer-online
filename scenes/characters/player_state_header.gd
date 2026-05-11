@@ -19,7 +19,7 @@ func _on_ball_entered(contact_ball: Ball) -> void:
 	if contact_ball.can_air_connect(BALL_HEIGHT_MIN, BALL_HEIGHT_MAX):
 		AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
 		contact_ball.current_state.state_data.set_last_hit_player(player)
-		contact_ball.shoot(player.velocity.normalized() * player.power * BONUS_POWER, -1.0, player.power * BONUS_POWER, Ball.PowerShotType.HEIGHT_LIGHT)
+		contact_ball.shoot(player.velocity.normalized() * player.power * BONUS_POWER, -1.0, player.power * BONUS_POWER, Ball.PowerShotType.HEIGHT_LIGHT, player)
 
 func server_process(_delta: float) -> void:
 	if player.height == 0:

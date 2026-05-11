@@ -15,7 +15,7 @@ extends Node
 # ══════════════════════════════════════════════════════════════════════════════
 
 ## 是否启用 debug 快速联机
-const ENABLED := true
+const ENABLED := false
 
 ## 客户端连接的服务端 IP
 const SERVER_IP := "127.0.0.1"

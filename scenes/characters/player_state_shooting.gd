@@ -36,4 +36,4 @@ func _shoot_ball() -> void:
 	AudioPlayer.play(AudioPlayer.Sound.POWERSHOT)
 	if SyncManager.is_client():
 		return
-	ball.shoot(state_data.shot_direction * state_data.shot_power, -1.0, state_data.shot_power)
+	ball.shoot(state_data.shot_direction * state_data.shot_power, -1.0, state_data.shot_power, Ball.PowerShotType.NULL, player)
