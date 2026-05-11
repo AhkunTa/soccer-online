@@ -4,6 +4,7 @@ enum Action {LEFT, RIGHT, UP, DOWN, SHOOT, PASS, JUMP}
 
 # 组合键容错窗口
 const COMBO_TOLERANCE_WINDOW = 50
+const NETWORK_RELEASE_LATCH_MS = 250
 
 const COMBO_KEYS: Array[Array] = [
 	[Action.PASS, Action.SHOOT], # 跳跃组合键
@@ -50,10 +51,16 @@ static var _triggered_combos: Dictionary = {}
 # ── 网络输入注入（服务端用）──────────────────────────────────────────────────
 # network_index → InputSnapshot
 static var _network_inputs: Dictionary = {}
+# network_index → 是否有尚未被蓄力状态消费的射门释放边沿
+static var _network_shoot_release_latches: Dictionary = {}
 
 ## 服务端注入远程客户端的输入快照
 static func inject_network_input(index: int, snapshot: Dictionary) -> void:
 	_network_inputs[index] = snapshot
+	if snapshot.get("sh_jp", false):
+		_network_shoot_release_latches[index] = 0
+	if snapshot.get("sh_jr", false):
+		_network_shoot_release_latches[index] = Time.get_ticks_msec()
 
 ## 获取网络注入的移动方向
 static func get_network_input_vector(index: int) -> Vector2:
@@ -83,9 +90,23 @@ static func is_network_action_just_pressed(index: int, action: Action) -> bool:
 
 ## 检查网络注入的射门键是否刚释放
 static func is_network_shoot_just_released(index: int) -> bool:
-	if not _network_inputs.has(index):
+	return _has_network_shoot_release_latch(index)
+
+## 消费网络注入的射门释放边沿，用于蓄力射击进入状态后仍能吃到释放键
+static func consume_network_shoot_just_released(index: int) -> bool:
+	if not _has_network_shoot_release_latch(index):
 		return false
-	return _network_inputs[index].get("sh_jr", false)
+	_network_shoot_release_latches[index] = 0
+	return true
+
+static func _has_network_shoot_release_latch(index: int) -> bool:
+	var timestamp: int = _network_shoot_release_latches.get(index, 0)
+	if timestamp <= 0:
+		return false
+	if Time.get_ticks_msec() - timestamp > NETWORK_RELEASE_LATCH_MS:
+		_network_shoot_release_latches[index] = 0
+		return false
+	return true
 
 ## 检查网络注入的跳跃是否触发
 static func is_network_jump_pressed(index: int) -> bool:
@@ -93,9 +114,16 @@ static func is_network_jump_pressed(index: int) -> bool:
 		return false
 	return _network_inputs[index].get("jmp", false)
 
+## 检查网络注入的跳跃组合键是否正在按住
+static func is_network_jump_held(index: int) -> bool:
+	if not _network_inputs.has(index):
+		return false
+	return _network_inputs[index].get("jmp_h", false)
+
 ## 清除指定玩家的网络输入
 static func clear_network_input(index: int) -> void:
 	_network_inputs.erase(index)
+	_network_shoot_release_latches.erase(index)
 
 static func _init_dicts() -> void:
 	if _pending_actions.is_empty():
@@ -156,8 +184,10 @@ static func check_single_action_triggered(scheme: Player.ControlScheme, action: 
 
 	# 按键释放时清除待定状态
 	if is_action_just_released(scheme, action):
+		var was_pending = _pending_actions[scheme].get(action, 0) > 0
 		_pending_actions[scheme][action] = 0
-		return false
+		# 组合键候选被短按释放时，按单键处理，避免铲球/射门短按在客户端被吞掉。
+		return was_pending and _is_part_of_combo(action)
 
 	# 按键刚按下
 	if is_action_just_pressed(scheme, action):

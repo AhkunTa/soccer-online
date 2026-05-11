@@ -32,6 +32,12 @@ func _handle_local_input() -> void:
 		player.height_velocity = DOUBLE_JUMP_VELOCITY
 		player.jump_count += 1
 		return
+	if player.jump_count >= player.MAX_JUMPS \
+		and KeyUtils.is_action_pressed(player.control_scheme, KeyUtils.Action.SHOOT) \
+		and KeyUtils.is_action_pressed(player.control_scheme, KeyUtils.Action.PASS) \
+		and player.has_ball():
+		transition_state(Player.State.JUMPING_SHOT)
+		return
 	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.PASS):
 		if player.has_ball():
 			transition_state(Player.State.PASSING)
@@ -54,6 +60,10 @@ func _handle_network_input() -> void:
 	if KeyUtils.is_network_jump_pressed(idx) and player.jump_count < player.MAX_JUMPS:
 		player.height_velocity = DOUBLE_JUMP_VELOCITY
 		player.jump_count += 1
+		return
+	if KeyUtils.is_network_jump_held(idx):
+		if player.jump_count >= player.MAX_JUMPS and player.has_ball():
+			transition_state(Player.State.JUMPING_SHOT)
 		return
 	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.PASS):
 		if player.has_ball():

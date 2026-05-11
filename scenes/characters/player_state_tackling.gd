@@ -12,6 +12,8 @@ func on_enter_visual() -> void:
 	tackle_damage_emitter_area.monitoring = true
 
 func server_process(delta: float) -> void:
+	if SyncManager.is_client():
+		return
 	if not is_tackle_complete:
 		player.velocity = player.velocity.move_toward(Vector2.ZERO, delta * GROUND_FRICTION)
 		if player.velocity == Vector2.ZERO:

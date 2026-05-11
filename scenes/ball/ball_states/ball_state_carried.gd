@@ -13,7 +13,7 @@ func on_enter_visual() -> void:
 	GameEvents.ball_possessed.emit(carrier.fullname)
 
 func visual_process(_delta: float) -> void:
-	if SyncManager.is_client():
+	if carrier == null:
 		return
 	if carrier.velocity != Vector2.ZERO:
 		if carrier.heading.x >= 0:

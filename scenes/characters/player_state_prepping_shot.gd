@@ -39,7 +39,7 @@ func _handle_network_input(delta: float) -> void:
 	shot_direction += KeyUtils.get_network_input_vector(idx) * delta
 	if Time.get_ticks_msec() - time_start_shot >= DURATION_MAX_CHARGE:
 		transition_state(Player.State.HURT)
-	if KeyUtils.is_network_shoot_just_released(idx):
+	if KeyUtils.consume_network_shoot_just_released(idx):
 		_do_shoot()
 
 

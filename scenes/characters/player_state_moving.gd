@@ -9,17 +9,23 @@ func _process(_delta: float) -> void:
 				player.velocity = Vector2.ZERO  # debug: 联机模式 CPU 静止
 			else:
 				ai_behavior.process_ai()
+			if player.current_state != self:
+				return
 			player.set_movement_animation()
 			player.set_heading()
 		Player.ControlScheme.ONLINE_REMOTE:
 			if SyncManager.is_server():
 				_handle_network_input()
+				if player.current_state != self:
+					return
 				player.set_movement_animation()
 				player.set_heading()
 			# 客户端：动画由 SyncManager 驱动
 		_:
 			# P1, P2, ONLINE_LOCAL
 			_handle_local_input()
+			if player.current_state != self:
+				return
 			player.set_movement_animation()
 			player.set_heading()
 
@@ -55,6 +61,8 @@ func _handle_network_input() -> void:
 		teammate_detection_area.rotation = player.velocity.angle()
 	if KeyUtils.is_network_jump_pressed(idx):
 		transition_state(Player.State.JUMPING)
+		return
+	if KeyUtils.is_network_jump_held(idx):
 		return
 	if KeyUtils.is_network_action_just_pressed(idx, KeyUtils.Action.PASS):
 		if player.has_ball():
