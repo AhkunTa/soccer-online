@@ -15,6 +15,10 @@ const BALL_CONTROL_HEIGHT_MAX := 10.0
 const GRAVITY := 8.0
 const WALK_ANIM_THRESHOLD := 0.6
 const MAX_JUMPS := 2
+const BASE_GROUND_ACCELERATION := 760.0
+const BASE_STOP_FRICTION := 860.0
+const SLIP_MIN_SPEED := 35.0
+const SLIP_COOLDOWN := 0.8
 
 @export var speed: float = 80.0
 @export var power: float = 150.0
@@ -25,6 +29,7 @@ const MAX_JUMPS := 2
 @export var ball: Ball
 @export var own_goal: Goal
 @export var target_goal: Goal
+var field_condition: FieldCondition = FieldCondition.grass()
 # max hp 后续为 临时效果系统预留
 @export var max_hp: float = 100.0
 @export var current_hp: float = 100.0
@@ -75,6 +80,7 @@ var healing_rate: float = 0.0
 var network_index: int = -1
 var owner_peer_id: int = -1
 var current_state_enum: int = -1  # 当前状态枚举值，用于网络同步
+var slip_cooldown_left := 0.0
 
 func _ready() -> void:
 	set_ai_behavior()
@@ -206,7 +212,7 @@ func flip_sprites() -> void:
 
 func set_sprite_visiable() -> void:
 	control_sprite.visible = has_ball() or not control_scheme == ControlScheme.CPU
-	run_particles.emitting = velocity.length() == speed
+	run_particles.emitting = velocity.length() >= speed * field_condition.player_speed_multiplier * WALK_ANIM_THRESHOLD
 
 func has_ball() -> bool:
 	return ball.carrier == self
@@ -220,6 +226,42 @@ func get_hurt(hurt_origin: Vector2) -> void:
 # TODO 击飞状态 倒地状态 倒地后站立恢复状态 ...
 func get_knocked_flying(hurt_origin: Vector2) -> void:
 	switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(hurt_origin))
+
+func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
+	var direction := input_direction.limit_length(1.0)
+	var target_velocity := Vector2.ZERO
+	if direction != Vector2.ZERO:
+		target_velocity = direction * speed * field_condition.player_speed_multiplier
+	target_velocity += field_condition.get_wind_vector() * field_condition.wind_player_force
+	var acceleration := BASE_GROUND_ACCELERATION * field_condition.acceleration_multiplier
+	if direction == Vector2.ZERO:
+		acceleration = BASE_STOP_FRICTION * field_condition.stopping_friction_multiplier
+	velocity = velocity.move_toward(target_velocity, acceleration * delta)
+	_try_slip(direction, delta)
+
+func apply_field_modifiers_to_velocity(delta: float) -> void:
+	var desired_direction := velocity.normalized() if velocity != Vector2.ZERO else Vector2.ZERO
+	var target_velocity := velocity * field_condition.player_speed_multiplier
+	target_velocity += field_condition.get_wind_vector() * field_condition.wind_player_force
+	var acceleration := BASE_GROUND_ACCELERATION * field_condition.acceleration_multiplier
+	velocity = velocity.move_toward(target_velocity, acceleration * delta)
+	_try_slip(desired_direction, delta)
+
+func _try_slip(direction: Vector2, delta: float) -> void:
+	slip_cooldown_left = maxf(0.0, slip_cooldown_left - delta)
+	if height > 0 or field_condition.slip_chance_per_second <= 0.0 or slip_cooldown_left > 0.0:
+		return
+	if velocity.length() < SLIP_MIN_SPEED:
+		return
+	var stopping_hard := direction == Vector2.ZERO
+	var turning_hard := direction != Vector2.ZERO and velocity.normalized().dot(direction) < -0.25
+	if not stopping_hard and not turning_hard:
+		return
+	var chance := field_condition.slip_chance_per_second * delta
+	if randf() <= chance:
+		slip_cooldown_left = SLIP_COOLDOWN
+		var slip_direction := velocity.normalized()
+		switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(slip_direction))
 
 func set_control_texture() -> void:
 	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]

@@ -2,7 +2,7 @@ class_name PlayerStateMoving
 extends PlayerState
 
 ## Moving 比较特殊：有本地输入/网络输入/AI 三条路径，直接重写 _process
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	match player.control_scheme:
 		Player.ControlScheme.CPU:
 			# if GameManager.is_online():
@@ -11,11 +11,12 @@ func _process(_delta: float) -> void:
 			ai_behavior.process_ai()
 			if player.current_state != self:
 				return
+			player.apply_field_modifiers_to_velocity(delta)
 			player.set_movement_animation()
 			player.set_heading()
 		Player.ControlScheme.ONLINE_REMOTE:
 			if SyncManager.is_server():
-				_handle_network_input()
+				_handle_network_input(delta)
 				if player.current_state != self:
 					return
 				player.set_movement_animation()
@@ -23,16 +24,16 @@ func _process(_delta: float) -> void:
 			# 客户端：动画由 SyncManager 驱动
 		_:
 			# P1, P2, ONLINE_LOCAL
-			_handle_local_input()
+			_handle_local_input(delta)
 			if player.current_state != self:
 				return
 			player.set_movement_animation()
 			player.set_heading()
 
 
-func _handle_local_input() -> void:
+func _handle_local_input(delta: float) -> void:
 	var direction := KeyUtils.get_input_vector(player.control_scheme)
-	player.velocity = direction * player.speed
+	player.apply_ground_movement(direction, delta)
 	if player.velocity != Vector2.ZERO:
 		teammate_detection_area.rotation = player.velocity.angle()
 	# 组合键：跳跃
@@ -53,10 +54,10 @@ func _handle_local_input() -> void:
 		_handle_shoot_action()
 
 
-func _handle_network_input() -> void:
+func _handle_network_input(delta: float) -> void:
 	var idx := player.network_index
 	var direction := KeyUtils.get_network_input_vector(idx)
-	player.velocity = direction * player.speed
+	player.apply_ground_movement(direction, delta)
 	if player.velocity != Vector2.ZERO:
 		teammate_detection_area.rotation = player.velocity.angle()
 	if KeyUtils.is_network_jump_pressed(idx):

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="FieldCondition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/field_condition.gd" id="1_field"]
+
+[resource]
+script = ExtResource("1_field")
+surface = 1
+weather = 3
+grass_color = Color(0.3, 0.48, 0.25, 1)
+pattern_color = Color(0.18, 0.34, 0.18, 1)
+line_color = Color(0.78, 0.84, 0.86, 1)
+player_speed_multiplier = 0.88
+acceleration_multiplier = 0.72
+stopping_friction_multiplier = 0.45
+slip_chance_per_second = 0.12
+ball_ground_friction_multiplier = 1.35
+ball_air_friction_multiplier = 1.05
+wind_direction = 2
+wind_player_force = 12.0
+wind_ball_force = 26.0

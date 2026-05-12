@@ -3,20 +3,27 @@ extends Screen
 
 # 图层管理
 @onready var background_layer: Node2D = $Backgrounds
-@onready var actors_layer: Node2D = $ActorsContainer
+@onready var actors_layer: ActorsContainer = $ActorsContainer
 @onready var effects_layer: Node2D = $EffectsContainer
 @onready var ui_layer: CanvasLayer = %UI
+@onready var grass: Sprite2D = $Backgrounds/Grass
+@onready var pattern: Sprite2D = $Backgrounds/Pattern
+@onready var lines: Sprite2D = $Backgrounds/Lines
 
 # Timer
 @onready var game_over_timer: Timer = %GameOverTimer
 
+@export var field_condition: FieldCondition
+
 # 区域生成器
 var area_generator: Node2D
+var weather_system: WeatherSystem
 
 func _ready() -> void:
 	# TODO 地图管理器
 	#setup_layers()
 	#setup_area_generator()
+	_apply_field_condition()
 	game_over_timer.timeout.connect(on_transition.bind())
 	GameEvents.game_over.connect(on_game_over.bind())
 	if GameManager.is_online():
@@ -142,6 +149,22 @@ func add_to_effects(node: Node2D) -> void:
 
 func add_to_ui(node: Control) -> void:
 	ui_layer.add_child(node)
+
+func _apply_field_condition() -> void:
+	if field_condition == null:
+		field_condition = GameManager.field_condition
+	_apply_field_visuals(field_condition)
+	actors_layer.apply_field_condition(field_condition)
+	weather_system = WeatherSystem.new()
+	weather_system.name = "WeatherSystem"
+	weather_system.z_index = 20
+	effects_layer.add_child(weather_system)
+	weather_system.setup(field_condition)
+
+func _apply_field_visuals(condition: FieldCondition) -> void:
+	grass.modulate = condition.grass_color
+	pattern.modulate = condition.pattern_color
+	lines.modulate = condition.line_color
 
 # 切换区域可见性
 func toggle_areas_visibility(show_areas: bool) -> void:

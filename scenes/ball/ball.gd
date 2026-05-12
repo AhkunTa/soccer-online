@@ -64,6 +64,9 @@ var spawn_position := Vector2.ZERO
 #摩擦力 地面
 @export var friction_ground := 250.0
 #TODO 不同地面 
+var field_condition: FieldCondition = FieldCondition.grass()
+var base_friction_air := 25.0
+var base_friction_ground := 250.0
 
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_detection_area: Area2D = $PlayerDetection
@@ -72,6 +75,9 @@ var spawn_position := Vector2.ZERO
 @onready var shot_particles: GPUParticles2D = %shot_particles
 @onready var player_proximity_area: Area2D = %PlayerProximityArea
 func _ready() -> void:
+	base_friction_air = friction_air
+	base_friction_ground = friction_ground
+	apply_field_condition(field_condition)
 	player_detection_area.monitoring = true
 	switch_state(State.FREEFORM)
 	spawn_position = position
@@ -196,6 +202,11 @@ func is_player_protected_from_own_shot(player: Player) -> bool:
 func clear_last_shooter_damage_grace() -> void:
 	last_shooter = null
 	last_shooter_damage_grace_until = 0
+
+func apply_field_condition(condition: FieldCondition) -> void:
+	field_condition = condition
+	friction_air = base_friction_air * field_condition.ball_air_friction_multiplier
+	friction_ground = base_friction_ground * field_condition.ball_ground_friction_multiplier
 
 func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
 	if not scoring_ratcast.is_colliding():

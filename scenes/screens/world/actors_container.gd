@@ -9,6 +9,7 @@ const DURATION_WEIGHT_CACHE := 200
 @export var ball: Ball
 @export var goal_home: Goal
 @export var goal_away: Goal
+var field_condition: FieldCondition = FieldCondition.grass()
 
 @onready var kickoffs: Node2D = %KickOffs
 @onready var spawns: Node2D = %Spawns
@@ -29,6 +30,7 @@ func _init() -> void:
 	GameEvents.impact_received.connect(on_impact_received.bind())
 
 func _ready() -> void:
+	ball.apply_field_condition(field_condition)
 	squad_home = spawn_players(GameManager.current_match.country_home, goal_home)
 	goal_home.initialize(GameManager.current_match.country_home)
 	spawns.scale.x = -1
@@ -39,9 +41,11 @@ func _ready() -> void:
 	all_players.clear()
 	for i in squad_home.size():
 		squad_home[i].network_index = i
+		squad_home[i].field_condition = field_condition
 		all_players.append(squad_home[i])
 	for i in squad_away.size():
 		squad_away[i].network_index = squad_home.size() + i
+		squad_away[i].field_condition = field_condition
 		all_players.append(squad_away[i])
 	# 根据模式设置控制方案
 	if GameManager.is_online():
@@ -71,6 +75,7 @@ func spawn_players(country: String, own_goal: Goal) -> Array[Player]:
 		if i > 3:
 			kickoff_position = kickoffs.get_child(i - 4).global_position as Vector2
 		var player := spawn_player(player_position, kickoff_position, ball, own_goal, target_goal, player_data, country)
+		player.field_condition = field_condition
 		player_nodes.append(player)
 		add_child(player)
 	return player_nodes
@@ -152,6 +157,13 @@ func reset_control_schemes() -> void:
 	for squad in [squad_home, squad_away]:
 		for player in squad:
 			player.set_control_scheme(Player.ControlScheme.CPU)
+
+func apply_field_condition(condition: FieldCondition) -> void:
+	field_condition = condition
+	if ball != null:
+		ball.apply_field_condition(field_condition)
+	for player in all_players:
+		player.field_condition = field_condition
 
 ## 联机模式：根据 match_config 中的 assignments 分配控制方案
 func setup_online_control_schemes() -> void:

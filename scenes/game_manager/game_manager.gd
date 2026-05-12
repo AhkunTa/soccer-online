@@ -15,6 +15,7 @@ var current_state: GameState = null
 var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 var game_mode: GameMode = GameMode.LOCAL
+var field_condition: FieldCondition = FieldCondition.windy()
 # 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
 var online_slot_assignments: Dictionary = {}
 # 联机模式中所有玩家的分配信息（完整 assignments 数组）
@@ -92,6 +93,12 @@ func apply_online_match_config(config: Dictionary, local_peer_id: int) -> void:
 
 func is_online() -> bool:
 	return game_mode == GameMode.ONLINE
+
+func set_field_condition(condition: FieldCondition) -> void:
+	field_condition = condition
+
+func set_field_condition_key(condition_key: String) -> void:
+	field_condition = FieldCondition.from_key(condition_key)
 
 func is_time_over() -> bool:
 	return time_left <= 0
