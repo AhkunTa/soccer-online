@@ -16,6 +16,7 @@ var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 var game_mode: GameMode = GameMode.LOCAL
 var field_condition: FieldCondition
+var field_seed := 0
 # 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
 var online_slot_assignments: Dictionary = {}
 # 联机模式中所有玩家的分配信息（完整 assignments 数组）
@@ -26,6 +27,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	GameEvents.impact_received.connect(on_impact_received.bind())
+	field_seed = randi()
 	random_field_condition()
 
 func random_field_condition() -> void:

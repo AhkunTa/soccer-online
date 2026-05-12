@@ -30,6 +30,7 @@ const SLIP_COOLDOWN := 0.8
 @export var own_goal: Goal
 @export var target_goal: Goal
 var field_condition: FieldCondition = FieldCondition.grass()
+var field_patch_map: FieldPatchMap = null
 # max hp 后续为 临时效果系统预留
 @export var max_hp: float = 100.0
 @export var current_hp: float = 100.0
@@ -212,7 +213,7 @@ func flip_sprites() -> void:
 
 func set_sprite_visiable() -> void:
 	control_sprite.visible = has_ball() or not control_scheme == ControlScheme.CPU
-	run_particles.emitting = velocity.length() >= speed * field_condition.player_speed_multiplier * WALK_ANIM_THRESHOLD
+	run_particles.emitting = velocity.length() >= speed * _get_player_speed_multiplier() * WALK_ANIM_THRESHOLD
 
 func has_ball() -> bool:
 	return ball.carrier == self
@@ -230,26 +231,28 @@ func get_knocked_flying(hurt_origin: Vector2) -> void:
 func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
 	var direction := input_direction.limit_length(1.0)
 	var target_velocity := Vector2.ZERO
+	var speed_multiplier := _get_player_speed_multiplier()
 	if direction != Vector2.ZERO:
-		target_velocity = direction * speed * field_condition.player_speed_multiplier
+		target_velocity = direction * speed * speed_multiplier
 	target_velocity += field_condition.get_wind_vector() * field_condition.wind_player_force
-	var acceleration := BASE_GROUND_ACCELERATION * field_condition.acceleration_multiplier
+	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
 	if direction == Vector2.ZERO:
-		acceleration = BASE_STOP_FRICTION * field_condition.stopping_friction_multiplier
+		acceleration = BASE_STOP_FRICTION * _get_stopping_friction_multiplier()
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
 	_try_slip(direction, delta)
 
 func apply_field_modifiers_to_velocity(delta: float) -> void:
 	var desired_direction := velocity.normalized() if velocity != Vector2.ZERO else Vector2.ZERO
-	var target_velocity := velocity * field_condition.player_speed_multiplier
+	var target_velocity := velocity * _get_player_speed_multiplier()
 	target_velocity += field_condition.get_wind_vector() * field_condition.wind_player_force
-	var acceleration := BASE_GROUND_ACCELERATION * field_condition.acceleration_multiplier
+	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
 	_try_slip(desired_direction, delta)
 
 func _try_slip(direction: Vector2, delta: float) -> void:
 	slip_cooldown_left = maxf(0.0, slip_cooldown_left - delta)
-	if height > 0 or field_condition.slip_chance_per_second <= 0.0 or slip_cooldown_left > 0.0:
+	var slip_chance_per_second := _get_slip_chance_per_second()
+	if height > 0 or slip_chance_per_second <= 0.0 or slip_cooldown_left > 0.0:
 		return
 	if velocity.length() < SLIP_MIN_SPEED:
 		return
@@ -257,11 +260,27 @@ func _try_slip(direction: Vector2, delta: float) -> void:
 	var turning_hard := direction != Vector2.ZERO and velocity.normalized().dot(direction) < -0.25
 	if not stopping_hard and not turning_hard:
 		return
-	var chance := field_condition.slip_chance_per_second * delta
+	var chance := slip_chance_per_second * delta
 	if randf() <= chance:
 		slip_cooldown_left = SLIP_COOLDOWN
 		var slip_direction := velocity.normalized()
 		switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(slip_direction))
+
+func _get_player_speed_multiplier() -> float:
+	var patch_multiplier := field_patch_map.get_player_speed_multiplier(position) if field_patch_map != null else 1.0
+	return field_condition.player_speed_multiplier * patch_multiplier
+
+func _get_acceleration_multiplier() -> float:
+	var patch_multiplier := field_patch_map.get_acceleration_multiplier(position) if field_patch_map != null else 1.0
+	return field_condition.acceleration_multiplier * patch_multiplier
+
+func _get_stopping_friction_multiplier() -> float:
+	var patch_multiplier := field_patch_map.get_stopping_friction_multiplier(position) if field_patch_map != null else 1.0
+	return field_condition.stopping_friction_multiplier * patch_multiplier
+
+func _get_slip_chance_per_second() -> float:
+	var patch_bonus := field_patch_map.get_slip_chance_bonus(position) if field_patch_map != null else 0.0
+	return field_condition.slip_chance_per_second + patch_bonus
 
 func set_control_texture() -> void:
 	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]

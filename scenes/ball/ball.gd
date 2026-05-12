@@ -65,6 +65,7 @@ var spawn_position := Vector2.ZERO
 @export var friction_ground := 250.0
 #TODO 不同地面 
 var field_condition: FieldCondition = FieldCondition.grass()
+var field_patch_map: FieldPatchMap = null
 var base_friction_air := 25.0
 var base_friction_ground := 250.0
 
@@ -170,7 +171,7 @@ func pass_to(destination: Vector2, lock_duration: int = DURATION_PASS_LOCK) -> v
 	var direction := position.direction_to(destination)
 	var distance := position.distance_to(destination)
 	#	TODO 微积分方程  https://youtu.be/-4pGf5bW4-M?t=457
-	var intensity := sqrt(2 * distance * friction_ground)
+	var intensity := sqrt(2 * distance * get_ground_friction_at_current_patch())
 	#	TODO 高度加速度方程 https://youtu.be/FHnebIUSXHk?t=345
 	velocity = intensity * direction
 	if distance > DISTANCE_HIGH_PASS:
@@ -203,10 +204,15 @@ func clear_last_shooter_damage_grace() -> void:
 	last_shooter = null
 	last_shooter_damage_grace_until = 0
 
-func apply_field_condition(condition: FieldCondition) -> void:
+func apply_field_condition(condition: FieldCondition, patch_map: FieldPatchMap = null) -> void:
 	field_condition = condition
+	field_patch_map = patch_map
 	friction_air = base_friction_air * field_condition.ball_air_friction_multiplier
 	friction_ground = base_friction_ground * field_condition.ball_ground_friction_multiplier
+
+func get_ground_friction_at_current_patch() -> float:
+	var patch_multiplier := field_patch_map.get_ball_ground_friction_multiplier(position) if field_patch_map != null else 1.0
+	return friction_ground * patch_multiplier
 
 func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
 	if not scoring_ratcast.is_colliding():
