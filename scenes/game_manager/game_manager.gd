@@ -15,7 +15,7 @@ var current_state: GameState = null
 var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 var game_mode: GameMode = GameMode.LOCAL
-var field_condition: FieldCondition = FieldCondition.windy()
+var field_condition: FieldCondition
 # 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
 var online_slot_assignments: Dictionary = {}
 # 联机模式中所有玩家的分配信息（完整 assignments 数组）
@@ -26,6 +26,18 @@ func _init() -> void:
 
 func _ready() -> void:
 	GameEvents.impact_received.connect(on_impact_received.bind())
+	random_field_condition()
+
+func random_field_condition() -> void:
+	var conditions = [
+		FieldCondition.grass(),
+		FieldCondition.rain(),
+		FieldCondition.snow(),
+		FieldCondition.sand(),
+		FieldCondition.thunder(),
+		FieldCondition.windy()
+	]
+	set_field_condition(conditions[randi() % conditions.size()])
 
 func _process(_delta: float) -> void:
 	if get_tree().paused and Time.get_ticks_msec() - time_since_pause > DURATION_IMPACT_PAUSE:
