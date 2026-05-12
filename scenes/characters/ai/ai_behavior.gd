@@ -1,19 +1,21 @@
 class_name AIBehavior
 extends Node
 
-## AI更新频率（毫秒）
-const DURATION_AI_TICK_FREQUENCY := 200
+## AI决策更新频率
+const DURATION_AI_DECISION_TICK_MS := 200
+const STEERING_DEADZONE := 4.0
 
 var ball: Ball = null
 var player: Player = null
 var time_since_last_ai_tick := Time.get_ticks_msec()
 var opponent_detection_area: Area2D = null
 var teammate_detection_area: Area2D = null
+var desired_movement_direction := Vector2.ZERO
 ## 初始化AI行为
 ## 参考: https://www.youtube.com/watch?v=4_J_rYPteXg&t=1301s
 func _ready() -> void:
 	# 随机化初始AI更新时间，避免所有AI同时更新
-	time_since_last_ai_tick = Time.get_ticks_msec() + randi_range(0, DURATION_AI_TICK_FREQUENCY)
+	time_since_last_ai_tick = Time.get_ticks_msec() + randi_range(0, DURATION_AI_DECISION_TICK_MS)
 
 
 ## 设置AI上下文
@@ -26,10 +28,9 @@ func setup(context_player: Player, context_ball: Ball, context_opponent_detectio
 	teammate_detection_area = context_teammate_detection_area
 
 
-## 处理AI逻辑（每帧调用）
-## 根据设定的频率执行AI移动和决策
+## 处理AI逻辑
 func process_ai() -> void:
-	if Time.get_ticks_msec() - time_since_last_ai_tick > DURATION_AI_TICK_FREQUENCY:
+	if Time.get_ticks_msec() - time_since_last_ai_tick > DURATION_AI_DECISION_TICK_MS:
 		time_since_last_ai_tick = Time.get_ticks_msec()
 		perform_ai_movement()
 		perform_ai_decisions()
@@ -38,6 +39,14 @@ func perform_ai_movement() -> void:
 	pass
 func perform_ai_decisions() -> void:
 	pass
+
+func set_desired_movement(direction: Vector2) -> void:
+	desired_movement_direction = direction.limit_length(1.0)
+
+func get_direction_to(destination: Vector2, deadzone: float = STEERING_DEADZONE) -> Vector2:
+	if player.position.distance_to(destination) <= deadzone:
+		return Vector2.ZERO
+	return player.position.direction_to(destination)
 
 ## 计算双圆权重系统
 ## 根据位置到目标中心的距离，在内外两个圆之间进行权重插值

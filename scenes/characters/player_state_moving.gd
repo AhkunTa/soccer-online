@@ -11,7 +11,7 @@ func _process(delta: float) -> void:
 			ai_behavior.process_ai()
 			if player.current_state != self:
 				return
-			player.apply_field_modifiers_to_velocity(delta)
+			player.apply_ground_movement(ai_behavior.desired_movement_direction, delta)
 			player.set_movement_animation()
 			player.set_heading()
 		Player.ControlScheme.ONLINE_REMOTE:

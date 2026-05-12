@@ -35,7 +35,7 @@ func perform_ai_movement() -> void:
 				total_steering_force += get_density_around_ball_steering_force()
 	# 限制转向力的最大值为1.0
 	total_steering_force = total_steering_force.limit_length(1.0)
-	player.velocity = total_steering_force * player.speed
+	set_desired_movement(total_steering_force)
 
 ## 执行AI决策逻辑
 func perform_ai_decisions() -> void:
@@ -67,7 +67,7 @@ func get_onduty_steering_force() -> Vector2:
 ## @return 指向目标球门的转向力向量，根据距离调整权重
 func get_carrier_steering_force() -> Vector2:
 	var target := player.target_goal.get_center_target_position()
-	var direction := player.position.direction_to(target)
+	var direction := get_direction_to(target)
 	# 使用双圆权重：内圆半径100权重0，外圆半径150权重1
 	var weight := get_bicircular_weight(player.position, target, 100, 0, 150, 1);
 	return weight * direction
@@ -80,7 +80,7 @@ func get_assist_formation_steering_force() -> Vector2:
 	var spawn_difference := ball.carrier.spawn_position - player.spawn_position
 	# 根据持球队友位置和分散系数计算助攻目标位置
 	var assist_destination := ball.carrier.position - spawn_difference * SPREAD_ASSIST_FACTOR
-	var direction := player.position.direction_to(assist_destination)
+	var direction := get_direction_to(assist_destination)
 	# 使用双圆权重：内圆半径30权重0.2，外圆半径50权重1
 	var weight := get_bicircular_weight(player.position, assist_destination, 30, 0.2, 50, 1)
 	return weight * direction
@@ -92,7 +92,7 @@ func get_ball_proximity_steering_force() -> Vector2:
 
 func get_spawn_steering_force() -> Vector2:
 	var weight := get_bicircular_weight(player.position, player.spawn_position, 30, 0, 100, 1)
-	var direction := player.position.direction_to(player.spawn_position);
+	var direction := get_direction_to(player.spawn_position);
 	return weight * direction
 
 func get_density_around_ball_steering_force() -> Vector2:
