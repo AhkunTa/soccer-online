@@ -84,7 +84,6 @@ const PATCH_COLORS := {
 var noise := FastNoiseLite.new()
 var field_condition: FieldCondition
 var terrain_grid: Array[Array] = []
-var hazards: Array[Dictionary] = []
 var columns := 0
 var rows := 0
 
@@ -105,7 +104,6 @@ func generate(condition: FieldCondition, seed_value: int) -> void:
 			var sample := noise.get_noise_2d(float(x), float(y))
 			row.append(_pick_patch(sample))
 		terrain_grid.append(row)
-	_generate_hazards(seed_value + 9371)
 	queue_redraw()
 
 func get_patch_at(world_position: Vector2) -> int:
@@ -130,9 +128,6 @@ func get_slip_chance_bonus(world_position: Vector2) -> float:
 
 func get_ball_ground_friction_multiplier(world_position: Vector2) -> float:
 	return _get_modifier_value(world_position, "ball_ground_friction")
-
-func get_hazards() -> Array[Dictionary]:
-	return hazards.duplicate(true)
 
 func _pick_patch(sample: float) -> int:
 	match field_condition.get_patch_set():
@@ -163,35 +158,6 @@ func _pick_patch(sample: float) -> int:
 			pass
 	return PatchType.NORMAL
 
-func _generate_hazards(seed_value: int) -> void:
-	hazards.clear()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value
-	if field_condition.weather == FieldCondition.Weather.THUNDER:
-		_generate_hazards_for_type(rng, FieldCondition.HazardType.LIGHTNING)
-	if field_condition.weather == FieldCondition.Weather.WIND:
-		_generate_hazards_for_type(rng, FieldCondition.HazardType.TORNADO)
-
-func _generate_hazards_for_type(rng: RandomNumberGenerator, hazard_type: int) -> void:
-	var max_count := field_condition.get_max_hazard_count(hazard_type)
-	var threshold := field_condition.get_hazard_threshold(hazard_type)
-	var attempts := columns * rows
-	for i in range(attempts):
-		if _get_hazard_count(hazard_type) >= max_count:
-			return
-		if rng.randf() <= threshold:
-			continue
-		var cell := Vector2i(rng.randi_range(0, columns - 1), rng.randi_range(0, rows - 1))
-		var position := FIELD_RECT.position + Vector2(cell) * TILE_SIZE + TILE_SIZE * 0.5
-		hazards.append({"type": hazard_type, "position": position})
-
-func _get_hazard_count(hazard_type: int) -> int:
-	var count := 0
-	for hazard in hazards:
-		if hazard["type"] == hazard_type:
-			count += 1
-	return count
-
 func _get_modifier_value(world_position: Vector2, key: String) -> float:
 	var patch := get_patch_at(world_position)
 	var modifier: Dictionary = PATCH_MODIFIERS.get(patch, NORMAL_MODIFIER)
@@ -208,14 +174,3 @@ func _draw() -> void:
 			var color: Color = PATCH_COLORS.get(patch, Color.TRANSPARENT)
 			var rect := Rect2(FIELD_RECT.position + Vector2(x, y) * TILE_SIZE, TILE_SIZE)
 			draw_rect(rect, color, true)
-	for hazard in hazards:
-		var hazard_position: Vector2 = hazard["position"]
-		match hazard["type"]:
-			FieldCondition.HazardType.LIGHTNING:
-				draw_line(hazard_position + Vector2(0, -11), hazard_position + Vector2(-4, 0), Color(1.0, 0.95, 0.25, 0.85), 2.0)
-				draw_line(hazard_position + Vector2(-4, 0), hazard_position + Vector2(3, 0), Color(1.0, 0.95, 0.25, 0.85), 2.0)
-				draw_line(hazard_position + Vector2(3, 0), hazard_position + Vector2(-1, 11), Color(1.0, 0.95, 0.25, 0.85), 2.0)
-			FieldCondition.HazardType.TORNADO:
-				draw_arc(hazard_position + Vector2(0, -5), 8.0, 0.2, TAU * 0.85, 16, Color(0.82, 0.82, 0.72, 0.78), 2.0)
-				draw_arc(hazard_position + Vector2(0, 3), 5.5, 0.5, TAU * 0.9, 16, Color(0.82, 0.82, 0.72, 0.70), 2.0)
-				draw_arc(hazard_position + Vector2(0, 9), 3.0, 0.8, TAU * 0.8, 12, Color(0.82, 0.82, 0.72, 0.62), 2.0)

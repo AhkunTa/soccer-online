@@ -9,6 +9,7 @@ extends Screen
 @onready var grass: Sprite2D = $Backgrounds/Grass
 @onready var pattern: Sprite2D = $Backgrounds/Pattern
 @onready var lines: Sprite2D = $Backgrounds/Lines
+@onready var game_camera: Camera2D = $Camera
 
 # Timer
 @onready var game_over_timer: Timer = %GameOverTimer
@@ -16,6 +17,7 @@ extends Screen
 @export var field_condition: FieldCondition
 
 var weather_system: WeatherSystem
+var weather_hazard_system: WeatherHazardSystem
 var field_patch_map: FieldPatchMap
 
 func _ready() -> void:
@@ -112,6 +114,11 @@ func _apply_field_condition() -> void:
 	weather_system.z_index = 10
 	effects_layer.add_child(weather_system)
 	weather_system.setup(field_condition)
+	weather_hazard_system = WeatherHazardSystem.new()
+	weather_hazard_system.name = "WeatherHazardSystem"
+	weather_hazard_system.z_index = 20
+	effects_layer.add_child(weather_hazard_system)
+	weather_hazard_system.setup(field_condition, game_camera, actors_layer)
 
 func _apply_field_visuals(condition: FieldCondition) -> void:
 	grass.modulate = condition.grass_color
