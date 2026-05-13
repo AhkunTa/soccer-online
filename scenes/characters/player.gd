@@ -234,7 +234,7 @@ func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
 	var speed_multiplier := _get_player_speed_multiplier()
 	if direction != Vector2.ZERO:
 		target_velocity = direction * speed * speed_multiplier
-	target_velocity += field_condition.get_wind_vector() * field_condition.wind_player_force
+	target_velocity += field_condition.get_wind_vector() * field_condition.get_wind_player_force()
 	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
 	if direction == Vector2.ZERO:
 		acceleration = BASE_STOP_FRICTION * _get_stopping_friction_multiplier()
@@ -244,7 +244,7 @@ func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
 func apply_field_modifiers_to_velocity(delta: float) -> void:
 	var desired_direction := velocity.normalized() if velocity != Vector2.ZERO else Vector2.ZERO
 	var target_velocity := velocity * _get_player_speed_multiplier()
-	target_velocity += field_condition.get_wind_vector() * field_condition.wind_player_force
+	target_velocity += field_condition.get_wind_vector() * field_condition.get_wind_player_force()
 	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
 	_try_slip(desired_direction, delta)
@@ -268,19 +268,19 @@ func _try_slip(direction: Vector2, delta: float) -> void:
 
 func _get_player_speed_multiplier() -> float:
 	var patch_multiplier := field_patch_map.get_player_speed_multiplier(position) if field_patch_map != null else 1.0
-	return field_condition.player_speed_multiplier * patch_multiplier
+	return field_condition.get_player_speed_multiplier() * patch_multiplier
 
 func _get_acceleration_multiplier() -> float:
 	var patch_multiplier := field_patch_map.get_acceleration_multiplier(position) if field_patch_map != null else 1.0
-	return field_condition.acceleration_multiplier * patch_multiplier
+	return field_condition.get_acceleration_multiplier() * patch_multiplier
 
 func _get_stopping_friction_multiplier() -> float:
 	var patch_multiplier := field_patch_map.get_stopping_friction_multiplier(position) if field_patch_map != null else 1.0
-	return field_condition.stopping_friction_multiplier * patch_multiplier
+	return field_condition.get_stopping_friction_multiplier() * patch_multiplier
 
 func _get_slip_chance_per_second() -> float:
 	var patch_bonus := field_patch_map.get_slip_chance_bonus(position) if field_patch_map != null else 0.0
-	return field_condition.slip_chance_per_second + patch_bonus
+	return field_condition.get_slip_chance_per_second() + patch_bonus
 
 func set_control_texture() -> void:
 	control_sprite.texture = CONTROL_SCENE_MAP[control_scheme]

@@ -15,7 +15,7 @@ var current_state: GameState = null
 var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 var game_mode: GameMode = GameMode.LOCAL
-var field_condition: FieldCondition
+var field_condition: FieldCondition = FieldCondition.compose(FieldCondition.Surface.GRASS, FieldCondition.Weather.RAIN)
 var field_seed := 0
 # 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
 var online_slot_assignments: Dictionary = {}
@@ -28,18 +28,15 @@ func _init() -> void:
 func _ready() -> void:
 	GameEvents.impact_received.connect(on_impact_received.bind())
 	field_seed = randi()
-	random_field_condition()
+	# DEBUG 随机场景
+	# random_field_condition()
 
 func random_field_condition() -> void:
-	var conditions = [
-		FieldCondition.grass(),
-		FieldCondition.rain(),
-		FieldCondition.snow(),
-		FieldCondition.sand(),
-		FieldCondition.thunder(),
-		FieldCondition.windy()
-	]
-	set_field_condition(conditions[randi() % conditions.size()])
+	var surfaces := FieldCondition.Surface.values()
+	var weathers := FieldCondition.Weather.values()
+	var surface: int = surfaces[randi() % surfaces.size()]
+	var weather: int = weathers[randi() % weathers.size()]
+	set_field_condition(FieldCondition.compose(surface, weather))
 
 func _process(_delta: float) -> void:
 	if get_tree().paused and Time.get_ticks_msec() - time_since_pause > DURATION_IMPACT_PAUSE:

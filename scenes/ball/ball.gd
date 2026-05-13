@@ -207,8 +207,8 @@ func clear_last_shooter_damage_grace() -> void:
 func apply_field_condition(condition: FieldCondition, patch_map: FieldPatchMap = null) -> void:
 	field_condition = condition
 	field_patch_map = patch_map
-	friction_air = base_friction_air * field_condition.ball_air_friction_multiplier
-	friction_ground = base_friction_ground * field_condition.ball_ground_friction_multiplier
+	friction_air = base_friction_air * field_condition.get_ball_air_friction_multiplier()
+	friction_ground = base_friction_ground * field_condition.get_ball_ground_friction_multiplier()
 
 func get_ground_friction_at_current_patch() -> float:
 	var patch_multiplier := field_patch_map.get_ball_ground_friction_multiplier(position) if field_patch_map != null else 1.0

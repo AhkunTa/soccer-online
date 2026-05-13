@@ -23,7 +23,7 @@ func visual_process(_delta: float) -> void:
 
 func physics_process(delta: float) -> void:
 	var friction := ball.friction_air if ball.height > 0 else ball.get_ground_friction_at_current_patch()
-	ball.velocity += ball.field_condition.get_wind_vector() * ball.field_condition.wind_ball_force * delta
+	ball.velocity += ball.field_condition.get_wind_vector() * ball.field_condition.get_wind_ball_force() * delta
 	ball.velocity = ball.velocity.move_toward(Vector2.ZERO, friction * delta)
 	process_gravity(delta, BOUNCINESS, BOUNCINESS)
 	move_and_bounce(delta)

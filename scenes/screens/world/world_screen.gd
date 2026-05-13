@@ -32,7 +32,6 @@ func _ready() -> void:
 
 
 func _on_online_match_started() -> void:
-	print("[WorldScreen] online match started, calling GameManager.start_game()")
 	GameManager.start_game()
 
 func on_game_over(_winning: String) -> void:
@@ -110,7 +109,7 @@ func _apply_field_condition() -> void:
 	actors_layer.apply_field_condition(field_condition, field_patch_map)
 	weather_system = WeatherSystem.new()
 	weather_system.name = "WeatherSystem"
-	weather_system.z_index = 20
+	weather_system.z_index = 10
 	effects_layer.add_child(weather_system)
 	weather_system.setup(field_condition)
 
@@ -118,12 +117,10 @@ func _apply_field_visuals(condition: FieldCondition) -> void:
 	grass.modulate = condition.grass_color
 	pattern.modulate = condition.pattern_color
 	lines.modulate = condition.line_color
-	lines.z_index = 10
 
 func _create_field_patch_map(condition: FieldCondition) -> void:
 	field_patch_map = FieldPatchMap.new()
 	field_patch_map.name = "FieldPatchMap"
-	field_patch_map.z_index = 5
 	background_layer.add_child(field_patch_map)
 	field_patch_map.generate(condition, GameManager.field_seed)
 
