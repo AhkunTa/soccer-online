@@ -7,14 +7,17 @@
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_x86lq"]
 particle_flag_disable_z = true
 emission_shape = 3
-emission_box_extents = Vector3(450, 20, 1)
+emission_box_extents = Vector3(485, 180, 1)
 direction = Vector3(0, 10, 0)
 spread = 6.0
 initial_velocity_min = 320.0
 initial_velocity_max = 520.0
 gravity = Vector3(0, 100, 0)
+collision_mode = 2
 scale_min = 0.8
 scale_max = 1.2
+sub_emitter_mode = 3
+sub_emitter_amount_at_collision = 1
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_splash"]
 particle_flag_disable_z = true
@@ -29,7 +32,7 @@ scale_min = 0.45
 scale_max = 0.85
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_xlmuh"]
-polygon = PackedVector2Array(0, 332, 850, 332, 850, 360, 0, 360)
+polygon = PackedVector2Array(130, 150, 240, 150, 240, 184, 130, 184)
 
 [node name="Rain" type="Node2D" unique_id=755123919]
 script = ExtResource("1_y0bq6")
@@ -38,8 +41,9 @@ wind_direction = 2
 
 [node name="Raindrop" type="GPUParticles2D" parent="." unique_id=891481149]
 unique_name_in_owner = true
-position = Vector2(425, -20)
+position = Vector2(425, 160)
 amount = 90
+sub_emitter = NodePath("../SplashParticles")
 texture = ExtResource("2_1egj2")
 preprocess = 0.65
 visibility_rect = Rect2(-500, -80, 1850, 520)
@@ -55,4 +59,7 @@ visibility_rect = Rect2(-500, -120, 1850, 560)
 process_material = SubResource("ParticleProcessMaterial_splash")
 
 [node name="GroundOccluder" type="LightOccluder2D" parent="." unique_id=932476411]
+sdf_collision = true
 occluder = SubResource("OccluderPolygon2D_xlmuh")
+
+[node name="PuddleOccluders" type="Node2D" parent="." unique_id=1917494284]

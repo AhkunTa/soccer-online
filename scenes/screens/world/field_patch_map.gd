@@ -81,28 +81,24 @@ const PATCH_COLORS := {
 	PatchType.DUST_DRIFT: Color(0.80, 0.67, 0.38, 0.36)
 }
 
-var noise := FastNoiseLite.new()
 var field_condition: FieldCondition
+var environment_map: EnvironmentMap
 var terrain_grid: Array[Array] = []
 var columns := 0
 var rows := 0
 
-func generate(condition: FieldCondition, seed_value: int) -> void:
+func generate(condition: FieldCondition, seed_value: int, source_environment_map: EnvironmentMap = null) -> void:
 	field_condition = condition
+	environment_map = source_environment_map
 	columns = int(ceil(FIELD_RECT.size.x / TILE_SIZE.x))
 	rows = int(ceil(FIELD_RECT.size.y / TILE_SIZE.y))
-	noise.seed = seed_value
-	noise.frequency = 0.12
-	noise.fractal_octaves = 3
-	noise.fractal_lacunarity = 2.0
-	noise.fractal_gain = 0.5
 
 	terrain_grid.clear()
 	for y in rows:
 		var row: Array = []
 		for x in columns:
-			var sample := noise.get_noise_2d(float(x), float(y))
-			row.append(_pick_patch(sample))
+			var rect := Rect2(FIELD_RECT.position + Vector2(x, y) * TILE_SIZE, TILE_SIZE)
+			row.append(_pick_patch_at(rect.get_center(), seed_value))
 		terrain_grid.append(row)
 	queue_redraw()
 
@@ -113,6 +109,19 @@ func get_patch_at(world_position: Vector2) -> int:
 	var x := clampi(int(local_position.x / TILE_SIZE.x), 0, columns - 1)
 	var y := clampi(int(local_position.y / TILE_SIZE.y), 0, rows - 1)
 	return terrain_grid[y][x]
+
+func get_patch_rects(target_patch_types: Array) -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	if terrain_grid.is_empty():
+		return rects
+
+	for y in rows:
+		for x in columns:
+			var patch: int = terrain_grid[y][x]
+			if not target_patch_types.has(patch):
+				continue
+			rects.append(Rect2(FIELD_RECT.position + Vector2(x, y) * TILE_SIZE, TILE_SIZE))
+	return rects
 
 func get_player_speed_multiplier(world_position: Vector2) -> float:
 	return _get_modifier_value(world_position, "player_speed")
@@ -129,7 +138,8 @@ func get_slip_chance_bonus(world_position: Vector2) -> float:
 func get_ball_ground_friction_multiplier(world_position: Vector2) -> float:
 	return _get_modifier_value(world_position, "ball_ground_friction")
 
-func _pick_patch(sample: float) -> int:
+func _pick_patch_at(world_position: Vector2, seed_value: int) -> int:
+	var sample := _get_environment_sample(world_position, seed_value)
 	match field_condition.get_patch_set():
 		FieldCondition.PatchSet.WET:
 			if sample > 0.2:
@@ -157,6 +167,20 @@ func _pick_patch(sample: float) -> int:
 		_:
 			pass
 	return PatchType.NORMAL
+
+func _get_environment_sample(world_position: Vector2, seed_value: int) -> float:
+	if environment_map != null:
+		return environment_map.get_noise_value(world_position)
+
+	# Fallback keeps FieldPatchMap usable in tests or scenes without EnvironmentMap.
+	var fallback_noise := FastNoiseLite.new()
+	fallback_noise.seed = seed_value
+	fallback_noise.frequency = 0.12
+	fallback_noise.fractal_octaves = 3
+	fallback_noise.fractal_lacunarity = 2.0
+	fallback_noise.fractal_gain = 0.5
+	var local_position := world_position - FIELD_RECT.position
+	return fallback_noise.get_noise_2d(local_position.x / TILE_SIZE.x, local_position.y / TILE_SIZE.y)
 
 func _get_modifier_value(world_position: Vector2, key: String) -> float:
 	var patch := get_patch_at(world_position)

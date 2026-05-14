@@ -62,29 +62,45 @@ var is_raining := false
 		down_direction = value
 		_apply_wind_settings()
 
+@export_range(1.0, 850.0, 1.0) var rain_width := 970.0:
+	set(value):
+		rain_width = value
+		_apply_rain_emission_area()
+
+@export_range(1.0, 500.0, 1.0) var rain_height := 360.0:
+	set(value):
+		rain_height = value
+		_apply_rain_emission_area()
+
 @export var splash_enabled := true:
 	set(value):
 		splash_enabled = value
 		_apply_sub_emitter_settings()
 
-@export_range(0.0, 850.0, 1.0) var ground_y := 332.0:
+@export var puddle_rects: Array[Rect2] = [
+	Rect2(130.0, 150.0, 110.0, 34.0),
+	Rect2(365.0, 238.0, 140.0, 42.0),
+	Rect2(610.0, 120.0, 120.0, 36.0),
+]:
 	set(value):
-		ground_y = value
-		_apply_ground_collision()
-
-@export_range(1.0, 1000.0, 1.0) var ground_width := 850.0:
-	set(value):
-		ground_width = value
+		puddle_rects = value
 		_apply_ground_collision()
 
 @onready var rain_particles: GPUParticles2D = %Raindrop
 @onready var splash_particles: GPUParticles2D = $SplashParticles
 @onready var ground_occluder: LightOccluder2D = $GroundOccluder
+@onready var puddle_occluders: Node2D = $PuddleOccluders
+
+
+func set_puddle_rects(rects: Array[Rect2]) -> void:
+	puddle_rects = rects
+	_apply_ground_collision()
 
 
 func _ready() -> void:
 	_apply_rain_settings()
 	_apply_wind_settings()
+	_apply_rain_emission_area()
 	_apply_sub_emitter_settings()
 	_apply_ground_collision()
 	_apply_emitting()
@@ -96,6 +112,7 @@ func set_emitting(enabled: bool) -> void:
 	if particles != null:
 		particles.one_shot = false
 		particles.visibility_rect = Rect2(-500.0, -80.0, 1850.0, 520.0)
+		_apply_rain_emission_area()
 		particles.emitting = enabled
 		if enabled:
 			particles.restart()
@@ -122,13 +139,13 @@ func _apply_rain_settings() -> void:
 		return
 
 	var settings: Dictionary = RAIN_SETTINGS[rain_size]
-	var supports_sub_emitters := _supports_particle_sub_emitters()
 	particles.one_shot = false
 	particles.visibility_rect = Rect2(-500.0, -80.0, 1850.0, 520.0)
+	_apply_rain_emission_area()
 	particles.amount = settings["amount"]
 	rain_material.scale_min = settings["scale_min"]
 	rain_material.scale_max = settings["scale_max"]
-	rain_material.sub_emitter_amount_at_collision = settings["splash_amount_at_collision"] if splash_enabled and supports_sub_emitters else 0
+	rain_material.sub_emitter_amount_at_collision = settings["splash_amount_at_collision"] if splash_enabled else 0
 
 	var splash := _get_splash_particles()
 	var splash_material := _get_splash_process_material()
@@ -161,13 +178,23 @@ func _apply_wind_settings() -> void:
 		splash_material.direction = Vector3(x_direction * 0.15, -1.0, 0.0)
 
 
+func _apply_rain_emission_area() -> void:
+	var particles := _get_rain_particles()
+	var rain_material := _get_rain_process_material()
+	if particles == null or rain_material == null:
+		return
+
+	particles.position = Vector2(425.0, -20.0 + rain_height * 0.5)
+	rain_material.emission_box_extents = Vector3(rain_width * 0.5, rain_height * 0.5, 1.0)
+
+
 func _apply_sub_emitter_settings() -> void:
 	var particles := _get_rain_particles()
 	var rain_material := _get_rain_process_material()
 	if particles == null or rain_material == null:
 		return
 
-	var use_sub_emitters := splash_enabled and _supports_particle_sub_emitters()
+	var use_sub_emitters := splash_enabled
 	particles.sub_emitter = NodePath("../SplashParticles") if use_sub_emitters else NodePath("")
 	rain_material.collision_mode = ParticleProcessMaterial.COLLISION_HIDE_ON_CONTACT if use_sub_emitters else ParticleProcessMaterial.COLLISION_DISABLED
 	rain_material.sub_emitter_mode = ParticleProcessMaterial.SUB_EMITTER_AT_COLLISION if use_sub_emitters else ParticleProcessMaterial.SUB_EMITTER_DISABLED
@@ -179,8 +206,17 @@ func _apply_ground_collision() -> void:
 	if occluder == null:
 		return
 
+	var rects := _get_puddle_rects()
+	if rects.is_empty():
+		occluder.visible = false
+		_rebuild_extra_puddle_occluders()
+		return
+
+	occluder.visible = true
 	occluder.position = Vector2.ZERO
-	occluder.occluder = _build_ground_occluder_polygon()
+	occluder.sdf_collision = true
+	occluder.occluder = _build_rect_occluder_polygon(rects[0])
+	_rebuild_extra_puddle_occluders()
 
 
 func _apply_emitting() -> void:
@@ -211,6 +247,12 @@ func _get_ground_occluder() -> LightOccluder2D:
 	return get_node_or_null("GroundOccluder") as LightOccluder2D
 
 
+func _get_puddle_occluders_root() -> Node2D:
+	if is_instance_valid(puddle_occluders):
+		return puddle_occluders
+	return get_node_or_null("PuddleOccluders") as Node2D
+
+
 func _get_rain_process_material() -> ParticleProcessMaterial:
 	var particles := _get_rain_particles()
 	if particles == null:
@@ -225,16 +267,34 @@ func _get_splash_process_material() -> ParticleProcessMaterial:
 	return particles.process_material as ParticleProcessMaterial
 
 
-func _supports_particle_sub_emitters() -> bool:
-	return ProjectSettings.get_setting("rendering/renderer/rendering_method", "") != "gl_compatibility"
+func _get_puddle_rects() -> Array[Rect2]:
+	return puddle_rects
 
 
-func _build_ground_occluder_polygon() -> OccluderPolygon2D:
+func _rebuild_extra_puddle_occluders() -> void:
+	var root := _get_puddle_occluders_root()
+	if root == null:
+		return
+
+	for child in root.get_children():
+		root.remove_child(child)
+		child.queue_free()
+
+	var rects := _get_puddle_rects()
+	for i in range(1, rects.size()):
+		var occluder := LightOccluder2D.new()
+		occluder.name = "PuddleOccluder%d" % i
+		occluder.sdf_collision = true
+		occluder.occluder = _build_rect_occluder_polygon(rects[i])
+		root.add_child(occluder)
+
+
+func _build_rect_occluder_polygon(rect: Rect2) -> OccluderPolygon2D:
 	var polygon := OccluderPolygon2D.new()
 	polygon.polygon = PackedVector2Array([
-		Vector2(0.0, ground_y),
-		Vector2(ground_width, ground_y),
-		Vector2(ground_width, ground_y + 28.0),
-		Vector2(0.0, ground_y + 28.0),
+		rect.position,
+		Vector2(rect.position.x + rect.size.x, rect.position.y),
+		rect.position + rect.size,
+		Vector2(rect.position.x, rect.position.y + rect.size.y),
 	])
 	return polygon

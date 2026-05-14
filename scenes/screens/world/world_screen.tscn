@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://cgxnq0ua5krio" path="res://assets/art/backgrounds/pitch-pattern.png" id="4_ood3t"]
 [ext_resource type="Texture2D" uid="uid://dtsuvbw724ow8" path="res://assets/art/backgrounds/pitch-lines.png" id="5_1ll83"]
 [ext_resource type="Script" uid="uid://ck7v51phx16up" path="res://scenes/screens/world/actors_container.gd" id="6_j4vo4"]
+[ext_resource type="Script" uid="uid://i7m57t3a0o51" path="res://scenes/screens/world/environment_map.gd" id="7_1m0pg"]
+[ext_resource type="Shader" uid="uid://wi7dr02vl60k" path="res://shaders/environment_mask.gdshader" id="7_kb0p3"]
 [ext_resource type="PackedScene" uid="uid://cejl4f0uo4gw0" path="res://scenes/goal/goal.tscn" id="7_tsl3j"]
 [ext_resource type="PackedScene" uid="uid://cx5ccotiv0u0x" path="res://scenes/particle/rain/rain.tscn" id="7_v47v4"]
 [ext_resource type="Texture2D" uid="uid://d2k76lheeny0l" path="res://assets/art/backgrounds/top-wall.png" id="8_es6n2"]
@@ -15,6 +17,29 @@
 [ext_resource type="PackedScene" uid="uid://chexd4cj6rmh8" path="res://scenes/ui/UI.tscn" id="12_sgfi7"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_i7141"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wfsse"]
+frequency = 0.02
+fractal_octaves = 3
+fractal_lacunarity = 0.5
+fractal_gain = 0.3
+domain_warp_fractal_lacunarity = 2.0
+metadata/_preview_in_3d_space_ = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_g0bxh"]
+width = 426
+height = 180
+noise = SubResource("FastNoiseLite_wfsse")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_environment"]
+shader = ExtResource("7_kb0p3")
+shader_parameter/puddle_color = Color(0.18, 0.42, 0.64, 0.36)
+shader_parameter/swamp_color = Color(0.12, 0.22, 0.13, 0.42)
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_g0bxh")
+shader_parameter/puddle_threshold = 0.2
+shader_parameter/swamp_threshold = 0.35
+shader_parameter/blur_radius = 0.006
+shader_parameter/edge_softness = 0.025
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7r4gi"]
 size = Vector2(803.5, 8)
@@ -50,6 +75,15 @@ texture = ExtResource("4_ood3t")
 modulate = Color(0.941176, 0.941176, 0.941176, 1)
 position = Vector2(426, 181)
 texture = ExtResource("5_1ll83")
+
+[node name="Environment" type="TextureRect" parent="Backgrounds" unique_id=677608798]
+unique_name_in_owner = true
+visible = false
+material = SubResource("ShaderMaterial_environment")
+offset_right = 849.0
+offset_bottom = 359.0
+texture = SubResource("NoiseTexture2D_g0bxh")
+script = ExtResource("7_1m0pg")
 
 [node name="ActorsContainer" type="Node2D" parent="." unique_id=1335360116 node_paths=PackedStringArray("ball", "goal_home", "goal_away")]
 y_sort_enabled = true
@@ -154,11 +188,11 @@ polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 position = Vector2(425, 180)
 
 [node name="EffectsContainer" type="Node2D" parent="." unique_id=1372418196]
+z_index = -1
 y_sort_enabled = true
 
 [node name="Rain" parent="EffectsContainer" unique_id=874858961 instance=ExtResource("7_v47v4")]
-visible = false
-z_index = 10
+z_index = -1
 rain_size = 2
 wind_direction = 0
 
