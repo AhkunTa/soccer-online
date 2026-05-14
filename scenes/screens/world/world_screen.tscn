@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dtsuvbw724ow8" path="res://assets/art/backgrounds/pitch-lines.png" id="5_1ll83"]
 [ext_resource type="Script" uid="uid://ck7v51phx16up" path="res://scenes/screens/world/actors_container.gd" id="6_j4vo4"]
 [ext_resource type="PackedScene" uid="uid://cejl4f0uo4gw0" path="res://scenes/goal/goal.tscn" id="7_tsl3j"]
+[ext_resource type="PackedScene" uid="uid://cx5ccotiv0u0x" path="res://scenes/particle/rain/rain.tscn" id="7_v47v4"]
 [ext_resource type="Texture2D" uid="uid://d2k76lheeny0l" path="res://assets/art/backgrounds/top-wall.png" id="8_es6n2"]
 [ext_resource type="Texture2D" uid="uid://t44b8v1f4y23" path="res://assets/art/backgrounds/bottom-wall.png" id="9_e2o6b"]
 [ext_resource type="Texture2D" uid="uid://cja8yg7vi46in" path="res://assets/art/backgrounds/side-wall.png" id="10_awu2r"]
@@ -154,6 +155,12 @@ position = Vector2(425, 180)
 
 [node name="EffectsContainer" type="Node2D" parent="." unique_id=1372418196]
 y_sort_enabled = true
+
+[node name="Rain" parent="EffectsContainer" unique_id=874858961 instance=ExtResource("7_v47v4")]
+visible = false
+z_index = 10
+rain_size = 2
+wind_direction = 0
 
 [node name="UI" parent="." unique_id=63367791 instance=ExtResource("12_sgfi7")]
 unique_name_in_owner = true

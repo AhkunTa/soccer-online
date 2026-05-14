@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://crq2ax4tsrt4n"]
+[gd_scene format=3 uid="uid://crq2ax4tsrt4n"]
 
 [ext_resource type="Texture2D" uid="uid://dxcvjag6j3sti" path="res://assets/art/particles/spark.png" id="1_wmgb1"]
 
@@ -42,15 +42,13 @@ _data = {
 &"explode": SubResource("Animation_wmgb1")
 }
 
-[node name="Spark" type="Sprite2D"]
+[node name="Spark" type="Sprite2D" unique_id=2036681528]
 texture = ExtResource("1_wmgb1")
 centered = false
 offset = Vector2(-24, -36)
 hframes = 4
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1773103376]
 unique_name_in_owner = true
-libraries = {
-&"": SubResource("AnimationLibrary_pm3nu")
-}
-autoplay = "explode"
+libraries/ = SubResource("AnimationLibrary_pm3nu")
+autoplay = &"explode"

@@ -10,6 +10,7 @@ extends Screen
 @onready var pattern: Sprite2D = $Backgrounds/Pattern
 @onready var lines: Sprite2D = $Backgrounds/Lines
 @onready var game_camera: Camera2D = $Camera
+@onready var rain_effect: RainParticles = $EffectsContainer/Rain
 
 # Timer
 @onready var game_over_timer: Timer = %GameOverTimer
@@ -107,11 +108,13 @@ func _apply_field_condition() -> void:
 	if field_condition == null:
 		field_condition = FieldCondition.grass()
 	_apply_field_visuals(field_condition)
+	_apply_particle_rain(field_condition)
 	_create_field_patch_map(field_condition)
 	actors_layer.apply_field_condition(field_condition, field_patch_map)
 	weather_system = WeatherSystem.new()
 	weather_system.name = "WeatherSystem"
 	weather_system.z_index = 10
+	weather_system.show_weather_particles = not _uses_particle_rain(field_condition)
 	effects_layer.add_child(weather_system)
 	weather_system.setup(field_condition)
 	weather_hazard_system = WeatherHazardSystem.new()
@@ -124,6 +127,30 @@ func _apply_field_visuals(condition: FieldCondition) -> void:
 	grass.modulate = condition.grass_color
 	pattern.modulate = condition.pattern_color
 	lines.modulate = condition.line_color
+
+func _apply_particle_rain(condition: FieldCondition) -> void:
+	var enabled := _uses_particle_rain(condition)
+	rain_effect.visible = enabled
+	rain_effect.set_emitting(enabled)
+	if not enabled:
+		return
+
+	if condition.weather == FieldCondition.Weather.THUNDER:
+		rain_effect.rain_size = RainParticles.RainSize.HEAVY
+	else:
+		rain_effect.rain_size = RainParticles.RainSize.MEDIUM
+
+	var wind := condition.get_wind_vector()
+	if wind.x < -0.01:
+		rain_effect.wind_direction = RainParticles.WindDirection.LEFT
+	elif wind.x > 0.01:
+		rain_effect.wind_direction = RainParticles.WindDirection.RIGHT
+	else:
+		rain_effect.wind_direction = RainParticles.WindDirection.NONE
+
+
+func _uses_particle_rain(condition: FieldCondition) -> bool:
+	return condition.weather == FieldCondition.Weather.RAIN or condition.weather == FieldCondition.Weather.THUNDER
 
 func _create_field_patch_map(condition: FieldCondition) -> void:
 	field_patch_map = FieldPatchMap.new()

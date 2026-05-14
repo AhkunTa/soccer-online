@@ -2,7 +2,7 @@ class_name ActorsContainer
 extends Node2D
 
 const PLAYER_PREFAB := preload('res://scenes/characters/player.tscn')
-const SPARK_PREFAB := preload("res://scenes/spark/spark.tscn")
+const SPARK_PREFAB := preload("res://scenes/particle/spark/spark.tscn")
 
 const DURATION_WEIGHT_CACHE := 200
 
