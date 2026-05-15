@@ -188,13 +188,13 @@ polygon = PackedVector2Array(15, -3, 26, -2, 13, 113, 0, 114)
 position = Vector2(425, 180)
 
 [node name="EffectsContainer" type="Node2D" parent="." unique_id=1372418196]
-z_index = -1
+z_index = 1
 y_sort_enabled = true
 
 [node name="Rain" parent="EffectsContainer" unique_id=874858961 instance=ExtResource("7_v47v4")]
-z_index = -1
-rain_size = 2
+z_index = 0
 wind_direction = 0
+rain_height = 100.0
 
 [node name="UI" parent="." unique_id=63367791 instance=ExtResource("12_sgfi7")]
 unique_name_in_owner = true

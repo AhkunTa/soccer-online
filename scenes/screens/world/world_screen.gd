@@ -23,6 +23,7 @@ var weather_hazard_system: WeatherHazardSystem
 var field_patch_map: FieldPatchMap
 
 func _ready() -> void:
+	setup_layers()
 	_apply_field_condition()
 	game_over_timer.timeout.connect(on_transition.bind())
 	GameEvents.game_over.connect(on_game_over.bind())
@@ -63,7 +64,7 @@ func setup_layers() -> void:
 		add_child(effects_layer)
 	
 	# 创建UI图层（如果不存在）
-	if not has_node("UILayer"):
+	if ui_layer == null:
 		ui_layer = CanvasLayer.new()
 		ui_layer.name = "UILayer"
 		ui_layer.layer = 10 # 确保UI在最上层
@@ -75,7 +76,7 @@ func setup_layers() -> void:
 	if actors_layer:
 		actors_layer.z_index = 0
 	if effects_layer:
-		effects_layer.z_index = -1
+		effects_layer.z_index = 1
 
 # 获取指定图层
 func get_background_layer() -> Node2D:

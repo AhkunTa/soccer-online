@@ -16,7 +16,7 @@ enum WindDirection {
 
 const RAIN_SETTINGS := {
 	RainSize.SMALL: {
-		"amount": 10,
+		"amount": 20,
 		"scale_min": 0.3,
 		"scale_max": 0.5,
 		"splash_amount_at_collision": 1,
@@ -24,7 +24,7 @@ const RAIN_SETTINGS := {
 		"splash_scale_max": 0.45,
 	},
 	RainSize.MEDIUM: {
-		"amount": 20,
+		"amount": 50,
 		"scale_min": 0.4,
 		"scale_max": 0.6,
 		"splash_amount_at_collision": 2,
@@ -32,7 +32,7 @@ const RAIN_SETTINGS := {
 		"splash_scale_max": 0.65,
 	},
 	RainSize.HEAVY: {
-		"amount": 30,
+		"amount": 80,
 		"scale_min": 0.5,
 		"scale_max": 0.7,
 		"splash_amount_at_collision": 3,
