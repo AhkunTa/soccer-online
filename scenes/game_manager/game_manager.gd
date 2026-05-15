@@ -15,7 +15,7 @@ var current_state: GameState = null
 var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 var game_mode: GameMode = GameMode.LOCAL
-var field_condition: FieldCondition = FieldCondition.compose(FieldCondition.Surface.GRASS, FieldCondition.Weather.RAIN)
+var field_condition: FieldCondition = FieldCondition.compose(FieldCondition.Surface.WET, FieldCondition.Weather.RAIN)
 var field_seed := 0
 # 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
 var online_slot_assignments: Dictionary = {}
@@ -81,9 +81,11 @@ func is_single_player() -> bool:
 ##   { "room_id": int,
 ##     "assignments": [{ "peer_id": int, "team": int, "slot": int, "is_ready": bool }, ...],
 ##     "home_country": String,   # 可选，若无则保持现有 player_setup
-##     "away_country": String }
+##     "away_country": String,
+##     "field_seed": int }
 func apply_online_match_config(config: Dictionary, local_peer_id: int) -> void:
 	game_mode = GameMode.ONLINE
+	field_seed = int(config.get("field_seed", field_seed))
 	# 如果服务端携带了国旗信息则更新比赛
 	if config.has("home_country") and config.has("away_country"):
 		current_match = Match.new(config["home_country"], config["away_country"])

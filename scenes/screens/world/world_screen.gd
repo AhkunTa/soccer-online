@@ -142,10 +142,12 @@ func _apply_particle_rain(condition: FieldCondition) -> void:
 	else:
 		rain_effect.rain_size = RainParticles.RainSize.MEDIUM
 
-	if environment_map != null:
-		rain_effect.set_puddle_rects(environment_map.get_environment_rects(EnvironmentMap.EnvironmentType.PUDDLE))
+	var patch_set := condition.get_patch_set()
+	var rain_patch_type := EnvironmentMap.get_patch_type(patch_set)
+	if environment_map != null and rain_patch_type != EnvironmentMap.EnvironmentType.NONE:
+		rain_effect.set_puddle_rects(environment_map.get_patch_rects([rain_patch_type], patch_set))
 	elif field_patch_map != null:
-		rain_effect.set_puddle_rects(field_patch_map.get_patch_rects([FieldPatchMap.PatchType.PUDDLE]))
+		rain_effect.set_puddle_rects(field_patch_map.get_patch_rects([rain_patch_type]))
 
 	var wind := condition.get_wind_vector()
 	if wind.x < -0.01:
@@ -160,10 +162,13 @@ func _uses_particle_rain(condition: FieldCondition) -> bool:
 	return condition.weather == FieldCondition.Weather.RAIN or condition.weather == FieldCondition.Weather.THUNDER
 
 func _create_field_patch_map(condition: FieldCondition) -> void:
+	var seed_value := GameManager.field_seed
+	if environment_map != null:
+		environment_map.set_noise_seed(seed_value)
 	field_patch_map = FieldPatchMap.new()
 	field_patch_map.name = "FieldPatchMap"
 	background_layer.add_child(field_patch_map)
-	field_patch_map.generate(condition, GameManager.field_seed, environment_map)
+	field_patch_map.generate(condition, seed_value, environment_map)
 
 # 调试功能：显示图层信息
 func print_layer_info() -> void:

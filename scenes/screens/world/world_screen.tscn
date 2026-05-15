@@ -19,10 +19,8 @@
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_i7141"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_wfsse"]
-frequency = 0.02
-fractal_octaves = 3
-fractal_lacunarity = 0.5
-fractal_gain = 0.3
+frequency = 0.025
+fractal_lacunarity = 0.3
 domain_warp_fractal_lacunarity = 2.0
 metadata/_preview_in_3d_space_ = true
 
@@ -78,12 +76,14 @@ texture = ExtResource("5_1ll83")
 
 [node name="Environment" type="TextureRect" parent="Backgrounds" unique_id=677608798]
 unique_name_in_owner = true
-visible = false
 material = SubResource("ShaderMaterial_environment")
 offset_right = 849.0
 offset_bottom = 359.0
 texture = SubResource("NoiseTexture2D_g0bxh")
 script = ExtResource("7_1m0pg")
+noise_scale = 24.0
+sample_blur_cells = 1.0
+cell_size = Vector2(24, 24)
 
 [node name="ActorsContainer" type="Node2D" parent="." unique_id=1335360116 node_paths=PackedStringArray("ball", "goal_home", "goal_away")]
 y_sort_enabled = true
@@ -192,7 +192,6 @@ z_index = 1
 y_sort_enabled = true
 
 [node name="Rain" parent="EffectsContainer" unique_id=874858961 instance=ExtResource("7_v47v4")]
-z_index = 0
 wind_direction = 0
 rain_height = 100.0
 

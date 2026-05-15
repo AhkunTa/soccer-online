@@ -267,19 +267,19 @@ func _try_slip(direction: Vector2, delta: float) -> void:
 		switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(slip_direction))
 
 func _get_player_speed_multiplier() -> float:
-	var patch_multiplier := field_patch_map.get_player_speed_multiplier(position) if field_patch_map != null else 1.0
+	var patch_multiplier := field_patch_map.get_player_speed_multiplier(global_position) if field_patch_map != null else 1.0
 	return field_condition.get_player_speed_multiplier() * patch_multiplier
 
 func _get_acceleration_multiplier() -> float:
-	var patch_multiplier := field_patch_map.get_acceleration_multiplier(position) if field_patch_map != null else 1.0
+	var patch_multiplier := field_patch_map.get_acceleration_multiplier(global_position) if field_patch_map != null else 1.0
 	return field_condition.get_acceleration_multiplier() * patch_multiplier
 
 func _get_stopping_friction_multiplier() -> float:
-	var patch_multiplier := field_patch_map.get_stopping_friction_multiplier(position) if field_patch_map != null else 1.0
+	var patch_multiplier := field_patch_map.get_stopping_friction_multiplier(global_position) if field_patch_map != null else 1.0
 	return field_condition.get_stopping_friction_multiplier() * patch_multiplier
 
 func _get_slip_chance_per_second() -> float:
-	var patch_bonus := field_patch_map.get_slip_chance_bonus(position) if field_patch_map != null else 0.0
+	var patch_bonus := field_patch_map.get_slip_chance_bonus(global_position) if field_patch_map != null else 0.0
 	return field_condition.get_slip_chance_per_second() + patch_bonus
 
 func set_control_texture() -> void:

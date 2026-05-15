@@ -538,6 +538,7 @@ func _server_launch_match(room_id: int) -> void:
 		"assignments": selections,
 		"home_country": home_country,
 		"away_country": away_country,
+		"field_seed": randi(),
 	}
 	for pid: int in room["players"]:
 		if pid == 1:

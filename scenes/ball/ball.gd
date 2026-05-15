@@ -211,7 +211,7 @@ func apply_field_condition(condition: FieldCondition, patch_map: FieldPatchMap =
 	friction_ground = base_friction_ground * field_condition.get_ball_ground_friction_multiplier()
 
 func get_ground_friction_at_current_patch() -> float:
-	var patch_multiplier := field_patch_map.get_ball_ground_friction_multiplier(position) if field_patch_map != null else 1.0
+	var patch_multiplier := field_patch_map.get_ball_ground_friction_multiplier(global_position) if field_patch_map != null else 1.0
 	return friction_ground * patch_multiplier
 
 func is_header_for_scoring_area(scoring_area: Area2D) -> bool:
