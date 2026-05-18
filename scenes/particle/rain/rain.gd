@@ -62,7 +62,7 @@ var is_raining := false
 		down_direction = value
 		_apply_wind_settings()
 
-@export_range(1.0, 850.0, 1.0) var rain_width := 970.0:
+@export_range(1.0, 1200.0, 1.0) var rain_width := 970.0:
 	set(value):
 		rain_width = value
 		_apply_rain_emission_area()
@@ -98,6 +98,7 @@ func set_puddle_rects(rects: Array[Rect2]) -> void:
 
 
 func _ready() -> void:
+	_enable_particle_z_axis()
 	_apply_rain_settings()
 	_apply_wind_settings()
 	_apply_rain_emission_area()
@@ -194,11 +195,22 @@ func _apply_sub_emitter_settings() -> void:
 	if particles == null or rain_material == null:
 		return
 
+	_enable_particle_z_axis()
 	var use_sub_emitters := splash_enabled
 	particles.sub_emitter = NodePath("../SplashParticles") if use_sub_emitters else NodePath("")
 	rain_material.collision_mode = ParticleProcessMaterial.COLLISION_HIDE_ON_CONTACT if use_sub_emitters else ParticleProcessMaterial.COLLISION_DISABLED
 	rain_material.sub_emitter_mode = ParticleProcessMaterial.SUB_EMITTER_AT_COLLISION if use_sub_emitters else ParticleProcessMaterial.SUB_EMITTER_DISABLED
 	_apply_rain_settings()
+
+
+func _enable_particle_z_axis() -> void:
+	var rain_material := _get_rain_process_material()
+	if rain_material != null:
+		rain_material.set_particle_flag(ParticleProcessMaterial.PARTICLE_FLAG_DISABLE_Z, false)
+
+	var splash_material := _get_splash_process_material()
+	if splash_material != null:
+		splash_material.set_particle_flag(ParticleProcessMaterial.PARTICLE_FLAG_DISABLE_Z, false)
 
 
 func _apply_ground_collision() -> void:

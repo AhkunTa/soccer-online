@@ -193,7 +193,7 @@ y_sort_enabled = true
 
 [node name="Rain" parent="EffectsContainer" unique_id=874858961 instance=ExtResource("7_v47v4")]
 wind_direction = 0
-rain_height = 100.0
+rain_height = 360.0
 
 [node name="UI" parent="." unique_id=63367791 instance=ExtResource("12_sgfi7")]
 unique_name_in_owner = true

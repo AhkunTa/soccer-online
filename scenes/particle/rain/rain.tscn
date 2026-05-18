@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bua3fdtji3wtj" path="res://assets/art/particles/rain-line.png" id="2_1egj2"]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_x86lq"]
-particle_flag_disable_z = true
+particle_flag_disable_z = false
 emission_shape = 3
 emission_box_extents = Vector3(485, 180, 1)
 direction = Vector3(0, 10, 0)
@@ -20,7 +20,7 @@ sub_emitter_mode = 3
 sub_emitter_amount_at_collision = 1
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_splash"]
-particle_flag_disable_z = true
+particle_flag_disable_z = false
 emission_shape = 3
 emission_box_extents = Vector3(425, 2, 1)
 direction = Vector3(0, -1, 0)

@@ -143,11 +143,10 @@ func _apply_particle_rain(condition: FieldCondition) -> void:
 		rain_effect.rain_size = RainParticles.RainSize.MEDIUM
 
 	var patch_set := condition.get_patch_set()
-	var rain_patch_type := EnvironmentMap.get_patch_type(patch_set)
-	if environment_map != null and rain_patch_type != EnvironmentMap.EnvironmentType.NONE:
-		rain_effect.set_puddle_rects(environment_map.get_patch_rects([rain_patch_type], patch_set))
+	if environment_map != null:
+		rain_effect.set_puddle_rects(environment_map.get_patch_rects([EnvironmentMap.EnvironmentType.PUDDLE], patch_set))
 	elif field_patch_map != null:
-		rain_effect.set_puddle_rects(field_patch_map.get_patch_rects([rain_patch_type]))
+		rain_effect.set_puddle_rects(field_patch_map.get_patch_rects([FieldPatchMap.PatchType.PUDDLE]))
 
 	var wind := condition.get_wind_vector()
 	if wind.x < -0.01:

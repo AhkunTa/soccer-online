@@ -107,6 +107,8 @@ static func get_patch_type(patch_set: int) -> int:
 	match patch_set:
 		FieldCondition.PatchSet.WET:
 			return EnvironmentType.WET
+		FieldCondition.PatchSet.PUDDLE:
+			return EnvironmentType.PUDDLE
 		FieldCondition.PatchSet.ICE:
 			return EnvironmentType.ICE
 		FieldCondition.PatchSet.MUD:
@@ -123,6 +125,8 @@ static func get_patch_threshold(patch_set: int) -> float:
 	match patch_set:
 		FieldCondition.PatchSet.WET:
 			return -0.08
+		FieldCondition.PatchSet.PUDDLE:
+			return 0.20
 		FieldCondition.PatchSet.ICE:
 			return -0.12
 		FieldCondition.PatchSet.MUD:

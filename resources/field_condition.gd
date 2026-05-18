@@ -17,7 +17,7 @@ enum Weather {
 }
 
 enum WindDirection {NONE, LEFT, RIGHT}
-enum PatchSet {NONE, WET, ICE, MUD, SAND, DUST}
+enum PatchSet {NONE, WET, PUDDLE, ICE, MUD, SAND, DUST}
 enum HazardType {
 	NONE,
 	LIGHTNING, # 雷击点
@@ -167,6 +167,8 @@ func get_patch_set() -> int:
 					return PatchSet.NONE
 		Surface.WET:
 			match weather:
+				Weather.RAIN:
+					return PatchSet.PUDDLE
 				Weather.SNOW:
 					return PatchSet.ICE
 				Weather.THUNDER:
