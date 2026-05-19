@@ -43,7 +43,6 @@ func _ready() -> void:
 	var is_server := OS.has_feature("server")
 	var is_client := OS.has_feature("client")
 	if not is_server and not is_client:
-		print("[DebugQuickMatch] 未检测到 server/client 特性标签，跳过")
 		return
 	print("[DebugQuickMatch] feature server=%s client=%s" % [is_server, is_client])
 	if is_server:
@@ -55,7 +54,6 @@ func _ready() -> void:
 func _setup_server() -> void:
 	# RoomManager._ready() 中 is_dedicated 检测可能没触发，手动 host
 	if RoomManager.state != RoomManager.State.HOSTING:
-		print("[DebugQuickMatch] Server: manually starting host...")
 		var err := RoomManager.start_as_host()
 		if err != OK:
 			push_error("[DebugQuickMatch] Failed to host: %d" % err)

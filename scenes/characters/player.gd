@@ -234,7 +234,7 @@ func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
 	var speed_multiplier := _get_player_speed_multiplier()
 	if direction != Vector2.ZERO:
 		target_velocity = direction * speed * speed_multiplier
-	target_velocity += field_condition.get_wind_vector() * field_condition.get_wind_player_force()
+		target_velocity += _get_wind_velocity_effect()
 	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
 	if direction == Vector2.ZERO:
 		acceleration = BASE_STOP_FRICTION * _get_stopping_friction_multiplier()
@@ -244,10 +244,14 @@ func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
 func apply_field_modifiers_to_velocity(delta: float) -> void:
 	var desired_direction := velocity.normalized() if velocity != Vector2.ZERO else Vector2.ZERO
 	var target_velocity := velocity * _get_player_speed_multiplier()
-	target_velocity += field_condition.get_wind_vector() * field_condition.get_wind_player_force()
+	if velocity != Vector2.ZERO:
+		target_velocity += _get_wind_velocity_effect()
 	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
 	_try_slip(desired_direction, delta)
+
+func _get_wind_velocity_effect() -> Vector2:
+	return field_condition.get_wind_vector() * field_condition.get_wind_player_force()
 
 func _try_slip(direction: Vector2, delta: float) -> void:
 	slip_cooldown_left = maxf(0.0, slip_cooldown_left - delta)

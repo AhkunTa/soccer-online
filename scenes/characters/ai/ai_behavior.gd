@@ -32,7 +32,8 @@ func setup(context_player: Player, context_ball: Ball, context_opponent_detectio
 func process_ai() -> void:
 	if Time.get_ticks_msec() - time_since_last_ai_tick > DURATION_AI_DECISION_TICK_MS:
 		time_since_last_ai_tick = Time.get_ticks_msec()
-		perform_ai_movement()
+		# DEBUG
+		# perform_ai_movement()
 		perform_ai_decisions()
 
 func perform_ai_movement() -> void:

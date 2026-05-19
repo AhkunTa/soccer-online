@@ -61,7 +61,7 @@ shake_noise = SubResource("FastNoiseLite_i7141")
 
 [node name="Grass" type="Sprite2D" parent="Backgrounds" unique_id=209985479]
 modulate = Color(0.517647, 0.803922, 0.164706, 1)
-position = Vector2(426, 178)
+position = Vector2(426, 180)
 texture = ExtResource("3_ul0lk")
 
 [node name="Pattern" type="Sprite2D" parent="Backgrounds" unique_id=1133219467]
@@ -77,8 +77,8 @@ texture = ExtResource("5_1ll83")
 [node name="Environment" type="TextureRect" parent="Backgrounds" unique_id=677608798]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_environment")
-offset_right = 849.0
-offset_bottom = 359.0
+offset_right = 850.0
+offset_bottom = 360.0
 texture = SubResource("NoiseTexture2D_g0bxh")
 script = ExtResource("7_1m0pg")
 noise_scale = 24.0
@@ -193,7 +193,6 @@ y_sort_enabled = true
 
 [node name="Rain" parent="EffectsContainer" unique_id=874858961 instance=ExtResource("7_v47v4")]
 wind_direction = 0
-rain_height = 360.0
 
 [node name="UI" parent="." unique_id=63367791 instance=ExtResource("12_sgfi7")]
 unique_name_in_owner = true
