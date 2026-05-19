@@ -109,6 +109,7 @@ func _apply_field_condition() -> void:
 		field_condition = GameManager.field_condition
 	if field_condition == null:
 		field_condition = FieldCondition.grass()
+	_print_field_condition_debug(field_condition)
 	_apply_field_visuals(field_condition)
 	_create_field_patch_map(field_condition)
 	_apply_particle_rain(field_condition)
@@ -124,6 +125,37 @@ func _apply_field_condition() -> void:
 	weather_hazard_system.z_index = 20
 	effects_layer.add_child(weather_hazard_system)
 	weather_hazard_system.setup(field_condition, game_camera, actors_layer)
+
+func _print_field_condition_debug(condition: FieldCondition) -> void:
+	var surface_name = FieldCondition.Surface.keys()[condition.surface]
+	var weather_name = FieldCondition.Weather.keys()[condition.weather]
+	var wind_direction_name = FieldCondition.WindDirection.keys()[condition.wind_direction]
+	var patch_set_name = FieldCondition.PatchSet.keys()[condition.get_patch_set()]
+	print("[FieldCondition] Surface=%s Weather=%s PatchSet=%s" % [surface_name, weather_name, patch_set_name])
+	print("[FieldCondition] 玩家: player_speed=%.2f acceleration=%.2f stopping_friction=%.2f slip=%.2f" % [
+		condition.player_speed_multiplier,
+		condition.acceleration_multiplier,
+		condition.stopping_friction_multiplier,
+		condition.slip_chance_per_second,
+	])
+	print("[FieldCondition] 足球: ball_ground_friction=%.2f ball_air_friction=%.2f" % [
+		condition.ball_ground_friction_multiplier,
+		condition.ball_air_friction_multiplier,
+	])
+	print("[FieldCondition] 风: direction=%s vector=%s player_force=%.2f ball_force=%.2f" % [
+		wind_direction_name,
+		str(condition.get_wind_vector()),
+		condition.get_wind_player_force(),
+		condition.get_wind_ball_force(),
+	])
+	print("[FieldCondition] 最终效果: player_speed=%.2f acceleration=%.2f stopping_friction=%.2f slip=%.2f ball_ground_friction=%.2f ball_air_friction=%.2f" % [
+		condition.get_player_speed_multiplier(),
+		condition.get_acceleration_multiplier(),
+		condition.get_stopping_friction_multiplier(),
+		condition.get_slip_chance_per_second(),
+		condition.get_ball_ground_friction_multiplier(),
+		condition.get_ball_air_friction_multiplier(),
+	])
 
 func _apply_field_visuals(condition: FieldCondition) -> void:
 	grass.modulate = condition.grass_color

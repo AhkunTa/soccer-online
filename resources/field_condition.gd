@@ -153,6 +153,7 @@ static func from_key(key: String) -> FieldCondition:
 		_:
 			return FieldCondition.compose(Surface.GRASS, Weather.CLEAR)
 
+# 环境生成
 func get_patch_set() -> int:
 	match surface:
 		Surface.GRASS:
