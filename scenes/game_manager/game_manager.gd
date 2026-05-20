@@ -16,7 +16,7 @@ var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 var game_mode: GameMode = GameMode.LOCAL
 # DEBUG
-var field_condition: FieldCondition = FieldCondition.compose(FieldCondition.Surface.SAND, FieldCondition.Weather.RAIN)
+var field_condition: FieldCondition = FieldCondition.compose(FieldCondition.Surface.SNOW, FieldCondition.Weather.SNOW)
 var field_seed := 0
 # 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
 var online_slot_assignments: Dictionary = {}

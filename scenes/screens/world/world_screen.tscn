@@ -36,6 +36,9 @@ shader_parameter/swamp_color = Color(0.12, 0.22, 0.13, 0.42)
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_g0bxh")
 shader_parameter/puddle_threshold = 0.2
 shader_parameter/swamp_threshold = 0.35
+shader_parameter/patch_threshold = 0.2
+shader_parameter/patch_color = Color(0.18, 0.42, 0.64, 0.36)
+shader_parameter/use_single_patch_mask = false
 shader_parameter/blur_radius = 0.006
 shader_parameter/edge_softness = 0.025
 
@@ -81,8 +84,6 @@ offset_right = 850.0
 offset_bottom = 360.0
 texture = SubResource("NoiseTexture2D_g0bxh")
 script = ExtResource("7_1m0pg")
-noise_scale = 24.0
-sample_blur_cells = 1.0
 cell_size = Vector2(24, 24)
 
 [node name="ActorsContainer" type="Node2D" parent="." unique_id=1335360116 node_paths=PackedStringArray("ball", "goal_home", "goal_away")]

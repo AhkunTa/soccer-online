@@ -204,8 +204,10 @@ func _create_field_patch_map(condition: FieldCondition) -> void:
 	var seed_value := GameManager.field_seed
 	if environment_map != null:
 		environment_map.set_noise_seed(seed_value)
+		environment_map.apply_patch_set_visuals(condition.get_patch_set())
 	field_patch_map = FieldPatchMap.new()
 	field_patch_map.name = "FieldPatchMap"
+	field_patch_map.draw_visual_patches = environment_map == null or not environment_map.visible
 	background_layer.add_child(field_patch_map)
 	field_patch_map.generate(condition, seed_value, environment_map)
 

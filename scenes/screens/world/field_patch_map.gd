@@ -4,14 +4,6 @@ extends Node2D
 const FIELD_RECT := Rect2(Vector2(50, 45), Vector2(752, 285))
 const TILE_SIZE := Vector2(16, 12) # 小长方形采样格，比正方形大块更细碎。
 const PATCH_EDGE_JITTER := 3.0 # 只影响视觉边缘，不影响碰撞/物理采样所属格子。
-const PATCH_COLORS := {
-	FieldCondition.PatchSet.WET: Color(0.18, 0.32, 0.36, 0.24),
-	FieldCondition.PatchSet.PUDDLE: Color(0.18, 0.42, 0.64, 0.36),
-	FieldCondition.PatchSet.ICE: Color(0.55, 0.86, 1.0, 0.38),
-	FieldCondition.PatchSet.SAND: Color(0.90, 0.78, 0.45, 0.30),
-	FieldCondition.PatchSet.MUD: Color(0.20, 0.16, 0.10, 0.36),
-	FieldCondition.PatchSet.DUST: Color(0.80, 0.67, 0.38, 0.36)
-}
 
 var field_condition: FieldCondition
 var environment_map: EnvironmentMap
@@ -19,6 +11,7 @@ var terrain_grid: Array[Array] = []
 var generation_seed := 0
 var columns := 0
 var rows := 0
+var draw_visual_patches := true
 
 func generate(condition: FieldCondition, seed_value: int, source_environment_map: EnvironmentMap = null) -> void:
 	print("Generating FieldPatchMap with condition: %s, seed: %d" % [condition, seed_value])
@@ -109,14 +102,14 @@ func _get_modifier_value(world_position: Vector2, key: String) -> float:
 	return FieldCondition.get_patch_modifier_value(patch, key)
 
 func _draw() -> void:
-	if terrain_grid.is_empty():
+	if terrain_grid.is_empty() or not draw_visual_patches:
 		return
 	for y in rows:
 		for x in columns:
 			var patch: int = terrain_grid[y][x]
 			if patch == FieldCondition.PatchSet.NONE:
 				continue
-			var color: Color = PATCH_COLORS.get(patch, Color.TRANSPARENT)
+			var color := EnvironmentMap.get_patch_color(patch)
 			var rect := Rect2(FIELD_RECT.position + Vector2(x, y) * TILE_SIZE, TILE_SIZE)
 			draw_colored_polygon(_build_patch_polygon(rect, x, y), color)
 
