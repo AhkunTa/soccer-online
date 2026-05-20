@@ -1,85 +1,16 @@
 class_name FieldPatchMap
 extends Node2D
 
-enum PatchType {NORMAL, WET, PUDDLE, SNOW, ICE, LOOSE_SAND, SWAMP, MUD, DUST_DRIFT}
-
 const FIELD_RECT := Rect2(Vector2(50, 45), Vector2(752, 285))
 const TILE_SIZE := Vector2(16, 12) # 小长方形采样格，比正方形大块更细碎。
 const PATCH_EDGE_JITTER := 3.0 # 只影响视觉边缘，不影响碰撞/物理采样所属格子。
-const NORMAL_MODIFIER := {
-	"player_speed": 1.0,
-	"acceleration": 1.0,
-	"stopping_friction": 1.0,
-	"slip": 0.0,
-	"ball_ground_friction": 1.0
-}
-const PATCH_MODIFIERS := {
-	PatchType.WET: {
-		"player_speed": 0.94,
-		"acceleration": 0.86,
-		"stopping_friction": 0.65,
-		"slip": 0.08,
-		"ball_ground_friction": 1.18
-	},
-	PatchType.PUDDLE: {
-		"player_speed": 0.78,
-		"acceleration": 0.62,
-		"stopping_friction": 0.38,
-		"slip": 0.22,
-		"ball_ground_friction": 1.65
-	},
-	PatchType.SNOW: {
-		"player_speed": 0.86,
-		"acceleration": 0.72,
-		"stopping_friction": 0.52,
-		"slip": 0.10,
-		"ball_ground_friction": 0.86
-	},
-	PatchType.ICE: {
-		"player_speed": 0.96,
-		"acceleration": 0.48,
-		"stopping_friction": 0.20,
-		"slip": 0.30,
-		"ball_ground_friction": 0.42
-	},
-	PatchType.LOOSE_SAND: {
-		"player_speed": 0.76,
-		"acceleration": 0.70,
-		"stopping_friction": 1.45,
-		"slip": 0.02,
-		"ball_ground_friction": 1.85
-	},
-	PatchType.SWAMP: {
-		"player_speed": 0.58,
-		"acceleration": 0.44,
-		"stopping_friction": 0.26,
-		"slip": 0.18,
-		"ball_ground_friction": 2.35
-	},
-	PatchType.MUD: {
-		"player_speed": 0.72,
-		"acceleration": 0.58,
-		"stopping_friction": 0.38,
-		"slip": 0.14,
-		"ball_ground_friction": 1.90
-	},
-	PatchType.DUST_DRIFT: {
-		"player_speed": 0.68,
-		"acceleration": 0.58,
-		"stopping_friction": 1.70,
-		"slip": 0.05,
-		"ball_ground_friction": 2.05
-	}
-}
 const PATCH_COLORS := {
-	PatchType.WET: Color(0.18, 0.32, 0.36, 0.24),
-	PatchType.PUDDLE: Color(0.18, 0.42, 0.64, 0.36),
-	PatchType.SNOW: Color(0.88, 0.96, 1.0, 0.40),
-	PatchType.ICE: Color(0.55, 0.86, 1.0, 0.38),
-	PatchType.LOOSE_SAND: Color(0.90, 0.78, 0.45, 0.30),
-	PatchType.SWAMP: Color(0.12, 0.22, 0.13, 0.42),
-	PatchType.MUD: Color(0.20, 0.16, 0.10, 0.36),
-	PatchType.DUST_DRIFT: Color(0.80, 0.67, 0.38, 0.36)
+	FieldCondition.PatchSet.WET: Color(0.18, 0.32, 0.36, 0.24),
+	FieldCondition.PatchSet.PUDDLE: Color(0.18, 0.42, 0.64, 0.36),
+	FieldCondition.PatchSet.ICE: Color(0.55, 0.86, 1.0, 0.38),
+	FieldCondition.PatchSet.SAND: Color(0.90, 0.78, 0.45, 0.30),
+	FieldCondition.PatchSet.MUD: Color(0.20, 0.16, 0.10, 0.36),
+	FieldCondition.PatchSet.DUST: Color(0.80, 0.67, 0.38, 0.36)
 }
 
 var field_condition: FieldCondition
@@ -113,7 +44,7 @@ func get_patch_at(global_world_position: Vector2) -> int:
 	# 这样角色层、球层、背景层即使父节点不同，也能查到同一片地块。
 	var map_position := to_local(global_world_position)
 	if terrain_grid.is_empty() or not FIELD_RECT.has_point(map_position):
-		return PatchType.NORMAL
+		return FieldCondition.PatchSet.NONE
 	var local_position := map_position - FIELD_RECT.position
 	var x := clampi(int(local_position.x / TILE_SIZE.x), 0, columns - 1)
 	var y := clampi(int(local_position.y / TILE_SIZE.y), 0, rows - 1)
@@ -156,7 +87,7 @@ func _pick_patch_at(world_position: Vector2, seed_value: int) -> int:
 
 	var sample := _get_environment_sample(world_position, seed_value)
 	if sample < EnvironmentMap.get_patch_threshold(patch_set):
-		return PatchType.NORMAL
+		return FieldCondition.PatchSet.NONE
 	return EnvironmentMap.get_patch_type(patch_set)
 
 func _get_environment_sample(world_position: Vector2, seed_value: int) -> float:
@@ -175,8 +106,7 @@ func _get_environment_sample(world_position: Vector2, seed_value: int) -> float:
 
 func _get_modifier_value(world_position: Vector2, key: String) -> float:
 	var patch := get_patch_at(world_position)
-	var modifier: Dictionary = PATCH_MODIFIERS.get(patch, NORMAL_MODIFIER)
-	return modifier.get(key, NORMAL_MODIFIER[key])
+	return FieldCondition.get_patch_modifier_value(patch, key)
 
 func _draw() -> void:
 	if terrain_grid.is_empty():
@@ -184,7 +114,7 @@ func _draw() -> void:
 	for y in rows:
 		for x in columns:
 			var patch: int = terrain_grid[y][x]
-			if patch == PatchType.NORMAL:
+			if patch == FieldCondition.PatchSet.NONE:
 				continue
 			var color: Color = PATCH_COLORS.get(patch, Color.TRANSPARENT)
 			var rect := Rect2(FIELD_RECT.position + Vector2(x, y) * TILE_SIZE, TILE_SIZE)

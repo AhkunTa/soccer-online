@@ -2,19 +2,6 @@
 class_name EnvironmentMap
 extends TextureRect
 
-enum EnvironmentType {
-	# Keep this order aligned with FieldPatchMap.PatchType.
-	NONE,
-	WET,
-	PUDDLE,
-	SNOW,
-	ICE,
-	LOOSE_SAND,
-	SWAMP,
-	MUD,
-	DUST_DRIFT,
-}
-
 @export var noise_scale := 10.0
 @export_range(-1.0, 1.0, 0.01) var puddle_threshold := 0.20:
 	set(value):
@@ -82,43 +69,43 @@ func get_environment_at(world_position: Vector2) -> int:
 	# Legacy two-threshold classification for old puddle/swamp callers.
 	# Field patch generation should use get_patch_at() with FieldCondition.get_patch_set().
 	if not sample_rect.has_point(world_position):
-		return EnvironmentType.NONE
+		return FieldCondition.PatchSet.NONE
 
 	var value := get_noise_value(world_position)
 	if value >= swamp_threshold:
-		return EnvironmentType.SWAMP
+		return FieldCondition.PatchSet.MUD
 	if value >= puddle_threshold:
-		return EnvironmentType.PUDDLE
-	return EnvironmentType.NONE
+		return FieldCondition.PatchSet.PUDDLE
+	return FieldCondition.PatchSet.NONE
 
 
 func get_patch_at(world_position: Vector2, patch_set: int) -> int:
 	# Converts the shared Environment noise into the single patch type allowed by the current PatchSet.
 	if not sample_rect.has_point(world_position):
-		return EnvironmentType.NONE
+		return FieldCondition.PatchSet.NONE
 
 	var sample := get_noise_value(world_position)
 	if sample < get_patch_threshold(patch_set):
-		return EnvironmentType.NONE
+		return FieldCondition.PatchSet.NONE
 	return get_patch_type(patch_set)
 
 
 static func get_patch_type(patch_set: int) -> int:
 	match patch_set:
 		FieldCondition.PatchSet.WET:
-			return EnvironmentType.WET
+			return FieldCondition.PatchSet.WET
 		FieldCondition.PatchSet.PUDDLE:
-			return EnvironmentType.PUDDLE
+			return FieldCondition.PatchSet.PUDDLE
 		FieldCondition.PatchSet.ICE:
-			return EnvironmentType.ICE
+			return FieldCondition.PatchSet.ICE
 		FieldCondition.PatchSet.MUD:
-			return EnvironmentType.MUD
+			return FieldCondition.PatchSet.MUD
 		FieldCondition.PatchSet.SAND:
-			return EnvironmentType.LOOSE_SAND
+			return FieldCondition.PatchSet.SAND
 		FieldCondition.PatchSet.DUST:
-			return EnvironmentType.DUST_DRIFT
+			return FieldCondition.PatchSet.DUST
 		_:
-			return EnvironmentType.NONE
+			return FieldCondition.PatchSet.NONE
 
 
 static func get_patch_threshold(patch_set: int) -> float:

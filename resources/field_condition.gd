@@ -23,6 +23,59 @@ enum HazardType {
 	LIGHTNING, # 雷击点
 	TORNADO # 龙卷风
 }
+
+const NORMAL_PATCH_MODIFIER := {
+	"player_speed": 1.0,
+	"acceleration": 1.0,
+	"stopping_friction": 1.0,
+	"slip": 0.0,
+	"ball_ground_friction": 1.0
+}
+const PATCH_MODIFIERS := {
+	PatchSet.WET: {
+		"player_speed": 0.90,
+		"acceleration": 0.78,
+		"stopping_friction": 0.68,
+		"slip": 0.08,
+		"ball_ground_friction": 1.25
+	},
+	PatchSet.PUDDLE: {
+		"player_speed": 0.72,
+		"acceleration": 0.52,
+		"stopping_friction": 0.30,
+		"slip": 0.24,
+		"ball_ground_friction": 1.75
+	},
+	PatchSet.ICE: {
+		"player_speed": 0.88,
+		"acceleration": 0.38,
+		"stopping_friction": 0.14,
+		"slip": 0.34,
+		"ball_ground_friction": 0.34
+	},
+	PatchSet.SAND: {
+		"player_speed": 0.70,
+		"acceleration": 0.62,
+		"stopping_friction": 1.55,
+		"slip": 0.02,
+		"ball_ground_friction": 1.75
+	},
+	PatchSet.MUD: {
+		"player_speed": 0.64,
+		"acceleration": 0.48,
+		"stopping_friction": 0.30,
+		"slip": 0.18,
+		"ball_ground_friction": 2.10
+	},
+	PatchSet.DUST: {
+		"player_speed": 0.62,
+		"acceleration": 0.50,
+		"stopping_friction": 1.85,
+		"slip": 0.07,
+		"ball_ground_friction": 2.25
+	}
+}
+
 @export var surface: Surface = Surface.GRASS
 @export var weather: Weather = Weather.CLEAR
 @export var grass_color: Color = Color(0.52, 0.80, 0.16, 1.0)
@@ -153,6 +206,13 @@ static func from_key(key: String) -> FieldCondition:
 		_:
 			return FieldCondition.compose(Surface.GRASS, Weather.CLEAR)
 
+static func get_patch_modifiers(patch: int) -> Dictionary:
+	return PATCH_MODIFIERS.get(patch, NORMAL_PATCH_MODIFIER)
+
+static func get_patch_modifier_value(patch: int, key: String) -> float:
+	var modifier: Dictionary = get_patch_modifiers(patch)
+	return modifier.get(key, NORMAL_PATCH_MODIFIER.get(key, 1.0))
+
 # 环境生成
 func get_patch_set() -> int:
 	match surface:
@@ -163,7 +223,7 @@ func get_patch_set() -> int:
 				Weather.SNOW:
 					return PatchSet.ICE
 				Weather.THUNDER:
-					return PatchSet.MUD
+					return PatchSet.WET
 				_:
 					return PatchSet.NONE
 		Surface.WET:
@@ -173,11 +233,19 @@ func get_patch_set() -> int:
 				Weather.SNOW:
 					return PatchSet.ICE
 				Weather.THUNDER:
-					return PatchSet.MUD
+					return PatchSet.PUDDLE
 				_:
-					return PatchSet.WET
+					return PatchSet.NONE
 		Surface.SNOW:
-			return PatchSet.ICE
+			match weather:
+				Weather.RAIN:
+					return PatchSet.ICE
+				Weather.SNOW:
+					return PatchSet.ICE
+				Weather.THUNDER:
+					return PatchSet.ICE
+				_:
+					return PatchSet.NONE
 		Surface.SAND:
 			match weather:
 				Weather.RAIN, Weather.THUNDER:
@@ -187,7 +255,7 @@ func get_patch_set() -> int:
 				Weather.WIND:
 					return PatchSet.DUST
 				_:
-					return PatchSet.SAND
+					return PatchSet.NONE
 		_:
 			return PatchSet.NONE
 
@@ -197,41 +265,47 @@ func _apply_surface_defaults() -> void:
 			grass_color = Color(0.52, 0.80, 0.16, 1.0)
 			pattern_color = Color(0.28, 0.61, 0.0, 1.0)
 			line_color = Color(0.94, 0.94, 0.94, 1.0)
+			# 移动速度系数
 			player_speed_multiplier = 1.0
+			# 加速度系数（影响起步和转向）
 			acceleration_multiplier = 1.0
+			# 控制球员停下来的摩擦/减速能力 值越小，越刹不住，像湿地或冰面；值越大，越容易停住，像沙地阻力大
 			stopping_friction_multiplier = 1.0
+			# 滑倒概率
 			slip_chance_per_second = 0.0
+			# 足球地面摩擦系数
 			ball_ground_friction_multiplier = 1.0
+			# 足球空中摩擦系数
 			ball_air_friction_multiplier = 1.0
 		Surface.WET:
 			grass_color = Color(0.30, 0.48, 0.25, 1.0)
 			pattern_color = Color(0.18, 0.34, 0.18, 1.0)
 			line_color = Color(0.78, 0.84, 0.86, 1.0)
-			player_speed_multiplier = 0.88
-			acceleration_multiplier = 0.72
-			stopping_friction_multiplier = 0.45
-			slip_chance_per_second = 0.12
-			ball_ground_friction_multiplier = 1.35
-			ball_air_friction_multiplier = 1.05
+			player_speed_multiplier = 0.94
+			acceleration_multiplier = 0.90
+			stopping_friction_multiplier = 0.88
+			slip_chance_per_second = 0.03
+			ball_ground_friction_multiplier = 1.10
+			ball_air_friction_multiplier = 1.02
 		Surface.SNOW:
 			grass_color = Color(0.78, 0.88, 0.92, 1.0)
 			pattern_color = Color(0.62, 0.76, 0.82, 1.0)
 			line_color = Color(0.92, 0.98, 1.0, 1.0)
-			player_speed_multiplier = 0.82
-			acceleration_multiplier = 0.62
-			stopping_friction_multiplier = 0.32
-			slip_chance_per_second = 0.18
-			ball_ground_friction_multiplier = 0.62
-			ball_air_friction_multiplier = 0.95
+			player_speed_multiplier = 0.92
+			acceleration_multiplier = 0.86
+			stopping_friction_multiplier = 0.82
+			slip_chance_per_second = 0.05
+			ball_ground_friction_multiplier = 0.86
+			ball_air_friction_multiplier = 0.98
 		Surface.SAND:
 			grass_color = Color(0.76, 0.65, 0.38, 1.0)
 			pattern_color = Color(0.64, 0.53, 0.30, 1.0)
 			line_color = Color(0.88, 0.80, 0.58, 1.0)
-			player_speed_multiplier = 0.76
-			acceleration_multiplier = 0.68
-			stopping_friction_multiplier = 1.35
-			slip_chance_per_second = 0.04
-			ball_ground_friction_multiplier = 1.75
+			player_speed_multiplier = 0.90
+			acceleration_multiplier = 0.88
+			stopping_friction_multiplier = 1.18
+			slip_chance_per_second = 0.01
+			ball_ground_friction_multiplier = 1.20
 			ball_air_friction_multiplier = 1.0
 
 func _apply_weather_defaults() -> void:

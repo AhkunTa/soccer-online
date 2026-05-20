@@ -156,6 +156,14 @@ func _print_field_condition_debug(condition: FieldCondition) -> void:
 		condition.get_ball_ground_friction_multiplier(),
 		condition.get_ball_air_friction_multiplier(),
 	])
+	var patch_modifier = FieldCondition.get_patch_modifiers(condition.get_patch_set())
+	print("[FieldCondition] 特殊地块倍率: player_speed=%.2f acceleration=%.2f stopping_friction=%.2f slip=%.2f ball_ground_friction=%.2f" % [
+		patch_modifier["player_speed"],
+		patch_modifier["acceleration"],
+		patch_modifier["stopping_friction"],
+		patch_modifier["slip"],
+		patch_modifier["ball_ground_friction"],
+	])
 
 func _apply_field_visuals(condition: FieldCondition) -> void:
 	grass.modulate = condition.grass_color
@@ -176,9 +184,9 @@ func _apply_particle_rain(condition: FieldCondition) -> void:
 
 	var patch_set := condition.get_patch_set()
 	if environment_map != null:
-		rain_effect.set_puddle_rects(environment_map.get_patch_rects([EnvironmentMap.EnvironmentType.PUDDLE], patch_set))
+		rain_effect.set_puddle_rects(environment_map.get_patch_rects([FieldCondition.PatchSet.PUDDLE], patch_set))
 	elif field_patch_map != null:
-		rain_effect.set_puddle_rects(field_patch_map.get_patch_rects([FieldPatchMap.PatchType.PUDDLE]))
+		rain_effect.set_puddle_rects(field_patch_map.get_patch_rects([FieldCondition.PatchSet.PUDDLE]))
 
 	var wind := condition.get_wind_vector()
 	if wind.x < -0.01:

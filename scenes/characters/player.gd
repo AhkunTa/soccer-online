@@ -253,6 +253,7 @@ func apply_field_modifiers_to_velocity(delta: float) -> void:
 func _get_wind_velocity_effect() -> Vector2:
 	return field_condition.get_wind_vector() * field_condition.get_wind_player_force()
 
+# TODO 去掉滑倒 没必要
 func _try_slip(direction: Vector2, delta: float) -> void:
 	slip_cooldown_left = maxf(0.0, slip_cooldown_left - delta)
 	var slip_chance_per_second := _get_slip_chance_per_second()
