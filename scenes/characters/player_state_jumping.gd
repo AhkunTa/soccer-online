@@ -11,12 +11,14 @@ func on_enter_visual() -> void:
 func on_enter_logic() -> void:
 	player.height_velocity = HEIGHT_VELOCITY
 	player.height = HEIGHT_START
+	player.air_time_since_jump = 0.0
 	player.jump_count += 1
 
 ## Jumping 有本地/网络/CPU 三条路径，直接重写 _process
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _is_remote_on_client():
 		return  # 客户端远程：动画已播放，等 SyncManager 切换状态
+	_update_air_time(delta)
 	match player.control_scheme:
 		Player.ControlScheme.CPU:
 			if player.height <= 0:
@@ -30,6 +32,7 @@ func _process(_delta: float) -> void:
 func _handle_local_input() -> void:
 	if KeyUtils.check_combo_triggered(player.control_scheme, [KeyUtils.Action.PASS, KeyUtils.Action.SHOOT]) and player.jump_count < player.MAX_JUMPS:
 		player.height_velocity = DOUBLE_JUMP_VELOCITY
+		player.air_time_since_jump = 0.0
 		player.jump_count += 1
 		return
 	if KeyUtils.check_single_action_triggered(player.control_scheme, KeyUtils.Action.PASS):
@@ -53,6 +56,7 @@ func _handle_network_input() -> void:
 	var idx := player.network_index
 	if KeyUtils.is_network_jump_pressed(idx) and player.jump_count < player.MAX_JUMPS:
 		player.height_velocity = DOUBLE_JUMP_VELOCITY
+		player.air_time_since_jump = 0.0
 		player.jump_count += 1
 		return
 	if KeyUtils.is_network_jump_held(idx):
@@ -76,6 +80,14 @@ func _handle_network_input() -> void:
 
 func _exit_tree() -> void:
 	player.jump_count = 0
+	if player.height <= 0:
+		player.air_time_since_jump = 0.0
 
 func can_pass() -> bool:
 	return false
+
+func _update_air_time(delta: float) -> void:
+	if player.height > 0:
+		player.air_time_since_jump += delta
+	else:
+		player.air_time_since_jump = 0.0

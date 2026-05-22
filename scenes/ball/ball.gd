@@ -33,6 +33,7 @@ enum PowerShotType {
 	# UNDERGROUND, # 地下射门：球会挖地前进
 	TAIJI, # 太极射门：球在飞行过程中会有太极旋转效果
 	GEMINI, # 双子射门：球会分裂成两个球飞向球门
+	PLAIN, # 强制普通射门，不触发绝招
 }
 
 const DISTANCE_HIGH_PASS := 100
@@ -126,9 +127,11 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 	last_shooter_damage_grace_until = Time.get_ticks_msec() + SHOOTER_DAMAGE_GRACE_MS
 	var player_power_shot_type := power_shot_type if power_shot_type != PowerShotType.NULL else (shot_player.power_shot_type if shot_player != null else PowerShotType.NORMAL)
 	print("力量 %s 使用 %s" % [power, player_power_shot_type])
-	if carrier != null and power >= POWER_SHOT_STRENGTH and carrier.is_facing_target_goal() and position.distance_to(carrier.target_goal.position) >= MIN_POWER_SHOT_DISTANCE:
+	if player_power_shot_type != PowerShotType.PLAIN and shot_player != null and power >= POWER_SHOT_STRENGTH and shot_player.is_facing_target_goal() and position.distance_to(shot_player.target_goal.position) >= MIN_POWER_SHOT_DISTANCE:
 		# 根据绝招类型选择不同的状态
 		match player_power_shot_type:
+			PowerShotType.NORMAL:
+				switch_state(Ball.State.POWER_SHOT_NORMAL, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.STRONG:
 				switch_state(Ball.State.POWER_SHOT_STRONG, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.HEIGHT_LIGHT:

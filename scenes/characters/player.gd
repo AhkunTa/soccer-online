@@ -56,6 +56,15 @@ enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMP
 
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD, FIELD}
 enum SkinColor {LIGHT, MEDIUM, DARK}
+# TODO 更多 动作
+# 跳跃技巧：0 无，1 普通二段跳，2 空中飞行但不能踢球，3 带球高跳并空中旋转一圈
+enum JumpSkill {NONE, DOUBLE_JUMP, AIR_FLY, BALL_SPIN_JUMP}
+# 运球技巧：0 无，1 跑动中双击上下方向键折跃过人，2 带球旋转并造成伤害
+enum DribbleSkill {NONE, WARP_UP, SPIN_DAMAGE}
+# 冲刺技巧：0 无，1 跑动中双击前进方向短冲，2 原地留下幻影并向前冲刺
+enum ChargeSkill {NONE, SHORT_DASH, PHANTOM_DASH}
+# 守门技巧：0 无，1 冲刺扑球，2 旋转扑球
+enum GoalieSkill {NONE, DIVING_SAVE, SPIN_SAVE}
 
 var ai_behavior_factory := AIBehaviorFactory.new()
 var current_ai_behavior: AIBehavior = null
@@ -64,9 +73,14 @@ var country := ""
 var fullname := ""
 var role := Player.Role.MIDFIELDER
 var skin_color := Player.SkinColor.MEDIUM
+var jump_skill := Player.JumpSkill.DOUBLE_JUMP
+var dribble_skill := Player.DribbleSkill.WARP_UP
+var charge_skill := Player.ChargeSkill.SHORT_DASH
+var goalie_skill := Player.GoalieSkill.NONE
 var heading := Vector2.RIGHT
 var height := 0.0
 var height_velocity := 0.0
+var air_time_since_jump := 0.0
 var kickoff_position := Vector2.ZERO
 var current_state: PlayerState = null
 var state_factory := PlayerStateFactory.new()
@@ -80,13 +94,12 @@ var healing_rate: float = 0.0
 # 网络同步属性
 var network_index: int = -1
 var owner_peer_id: int = -1
-var current_state_enum: int = -1  # 当前状态枚举值，用于网络同步
+var current_state_enum: int = -1 # 当前状态枚举值，用于网络同步
 var slip_cooldown_left := 0.0
 
 func _ready() -> void:
 	set_ai_behavior()
 	# 应用配置到玩家属性
-	# apply_player_config()
 	set_control_texture()
 	set_shader_properties()
 	permanent_damage_emitter_area.monitoring = role == Role.GOALIE
