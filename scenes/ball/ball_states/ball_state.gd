@@ -58,14 +58,14 @@ func on_enter_logic() -> void:
 func _process(delta: float) -> void:
 	visual_process(delta)
 	if not SyncManager.is_client():
-		physics_process(delta)
+		server_process(delta)
 
 ## 所有端都执行：动画更新、视觉特效
 func visual_process(_delta: float) -> void:
 	pass
 
-## 所有端都执行：物理计算、碰撞检测、状态转换
-func physics_process(_delta: float) -> void:
+## 仅服务端执行：物理计算、碰撞检测、状态转换
+func server_process(_delta: float) -> void:
 	pass
 
 # ══════════════════════════════════════════════════════════════════════════════

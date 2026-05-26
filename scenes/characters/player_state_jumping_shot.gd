@@ -7,7 +7,9 @@ const PARRY_BONUS := 2.0
 const BALL_HEIGHT_MIN := 10.0
 const BALL_HEIGHT_MAX := 50.0
 const POWER_SHOT_AIR_TIME_MIN := 0.18
-const POWER_SHOT_AIR_TIME_MAX := 0.42
+# const POWER_SHOT_AIR_TIME_MAX := 0.5
+# DEBUG
+const POWER_SHOT_AIR_TIME_MAX := 0.8
 
 var shot_air_time := 0.0
 
@@ -44,6 +46,7 @@ func _perform_jump_shot() -> void:
 	ball.shoot(direction * bonus_power, player.height, bonus_power, power_shot_type, player)
 
 func _get_air_power_shot_type() -> Ball.PowerShotType:
+	print("Air time for shot: ", shot_air_time)
 	if shot_air_time >= POWER_SHOT_AIR_TIME_MIN and shot_air_time <= POWER_SHOT_AIR_TIME_MAX:
 		return player.power_shot_type
 	return Ball.PowerShotType.PLAIN

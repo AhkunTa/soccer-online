@@ -14,6 +14,7 @@ enum State {
 	POWER_SHOT_FISH,
 	POWER_SHOT_TAIJI,
 	POWER_SHOT_GEMINI,
+	POWER_SHOT_PANCEL,
 	# TODO 可以在这里添加更多绝招状态...,
 }
 
@@ -27,8 +28,7 @@ enum PowerShotType {
 	CURVE, # 弧线射门：球以弧线轨迹飞向球门
 	INVISIBLE, # 隐形射门：球在飞行过程中变得隐形
 	JUMP, # 跳跃射门：球在飞行过程中会有跳跃效果
-	# TODO
-	# PENCIL, # 画笔射门：球在飞行过程中会留下彩色轨迹
+	PANCEL, # 画笔射门：球在飞行过程中会留下彩色轨迹
 	FISH, # 鱼跃射门：球在飞行过程中会有鱼跃效果
 	# UNDERGROUND, # 地下射门：球会挖地前进
 	TAIJI, # 太极射门：球在飞行过程中会有太极旋转效果
@@ -70,12 +70,14 @@ var field_patch_map: FieldPatchMap = null
 var base_friction_air := 25.0
 var base_friction_ground := 250.0
 
+
 @onready var animation_player: AnimationPlayer = %AnimationPlayer
 @onready var player_detection_area: Area2D = $PlayerDetection
 @onready var ball_sprite: Sprite2D = %BallSprite
 @onready var scoring_ratcast: RayCast2D = %ScoringRayCast
 @onready var shot_particles: GPUParticles2D = %shot_particles
 @onready var player_proximity_area: Area2D = %PlayerProximityArea
+@onready var ball_trail: BallTrail = %BallTrail
 func _ready() -> void:
 	base_friction_air = friction_air
 	base_friction_ground = friction_ground
@@ -144,6 +146,8 @@ func shoot(shot_velocity: Vector2, initial_height: float = -1.0, power: float = 
 				switch_state(Ball.State.POWER_SHOT_INVISIBLE, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.JUMP:
 				switch_state(Ball.State.POWER_SHOT_JUMP, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
+			PowerShotType.PANCEL:
+				switch_state(Ball.State.POWER_SHOT_PANCEL, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.FISH:
 				switch_state(Ball.State.POWER_SHOT_FISH, BallStateData.build().set_shot_normal_data(initial_height, power, player_power_shot_type))
 			PowerShotType.TAIJI:
@@ -185,6 +189,12 @@ func pass_to(destination: Vector2, lock_duration: int = DURATION_PASS_LOCK) -> v
 
 func stop() -> void:
 	velocity = Vector2.ZERO
+
+func start_tail_trail(style: BallTrail.TrailStyle = BallTrail.TrailStyle.RAINBOW) -> void:
+	ball_trail.start(style, ball_sprite)
+
+func stop_tail_trail() -> void:
+	ball_trail.stop()
 
 func can_air_interact() -> bool:
 	return current_state != null and current_state.can_air_interact()

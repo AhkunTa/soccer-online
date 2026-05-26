@@ -16,7 +16,7 @@ func on_enter_logic() -> void:
 		return
 	ball.height = carrier.height + POWER_SHOT_HEIGHT
 	var short_direction := carrier.get_direction_to_opponent_goal()
-	ball.velocity = short_direction * POWER_SHOT_STRENGTH
+	ball.velocity = short_direction * get_power_shot_strength()
 
 func play_animation() -> void:
 	set_ball_roll_animation_from_velocity()
@@ -28,7 +28,7 @@ func visual_process(_delta: float) -> void:
 	if is_height_light_effect():
 		add_highlight_effect()
 
-func physics_process(delta: float) -> void:
+func server_process(delta: float) -> void:
 	var ball_caught := check_player_damage()
 	if not ball_caught:
 		move_and_bounce(delta)
@@ -40,3 +40,6 @@ func _exit_tree() -> void:
 
 func can_air_interact() -> bool:
 	return true
+
+func get_power_shot_strength() -> float:
+	return POWER_SHOT_STRENGTH

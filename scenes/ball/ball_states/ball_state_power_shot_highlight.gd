@@ -34,7 +34,7 @@ func on_enter_logic() -> void:
 func visual_process(_delta: float) -> void:
 	add_highlight_effect()
 
-func physics_process(delta: float) -> void:
+func server_process(delta: float) -> void:
 	_process_gravity_highlight(delta, 0.9, 1.0)
 	var ball_caught := check_player_damage()
 	if not ball_caught:

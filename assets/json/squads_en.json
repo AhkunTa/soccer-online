@@ -69,7 +69,7 @@
         "speed": 79,
         "power": 170,
         "hp": 100,
-        "power_shot_type": 3,
+        "power_shot_type": 9,
         "jump_skill": 1,
         "dribble_skill": 2,
         "charge_skill": 1

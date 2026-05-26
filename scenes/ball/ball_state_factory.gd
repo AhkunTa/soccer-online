@@ -16,6 +16,7 @@ func _init() -> void:
 		Ball.State.POWER_SHOT_FISH: BallStatePowerShotFish,
 		Ball.State.POWER_SHOT_TAIJI: BallStatePowerShotTaiji,
 		Ball.State.POWER_SHOT_GEMINI: BallStatePowerShotGemini,
+		Ball.State.POWER_SHOT_PANCEL: BallStatePowerShotPancel,
 		# 添加更多绝招状态
 
 	}

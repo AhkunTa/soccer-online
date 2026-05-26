@@ -27,11 +27,12 @@ func on_enter_logic() -> void:
 func play_animation() -> void:
 	set_ball_roll_animation_from_velocity()
 
-func physics_process(delta: float) -> void:
+func server_process(delta: float) -> void:
 	var ball_caught := check_player_damage()
-	if not ball_caught:
-		_apply_jump_gravity(delta)
-		move_and_bounce(delta)
+	if ball_caught:
+		return
+	_apply_jump_gravity(delta)
+	move_and_bounce(delta)
 
 func _apply_jump_gravity(delta: float) -> void:
 	if ball.height > 0 or ball.height_velocity > 0:
@@ -44,5 +45,11 @@ func _apply_jump_gravity(delta: float) -> void:
 func can_air_interact() -> bool:
 	return true
 
+func stop_rising() -> void:
+	if ball.height_velocity > 0.0:
+		ball.height_velocity = 0.0
+
 func _exit_tree() -> void:
 	shot_particles.emitting = false
+	stop_rising()
+	set_ball_roll_animation_from_velocity()
