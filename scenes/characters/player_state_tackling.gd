@@ -15,7 +15,7 @@ func server_process(delta: float) -> void:
 	if SyncManager.is_client():
 		return
 	if not is_tackle_complete:
-		player.velocity = player.velocity.move_toward(Vector2.ZERO, delta * GROUND_FRICTION * player.field_condition.get_stopping_friction_multiplier())
+		player.velocity = player.velocity.move_toward(Vector2.ZERO, delta * GROUND_FRICTION * player.get_stopping_friction_multiplier_at_current_patch())
 		if player.velocity == Vector2.ZERO:
 			is_tackle_complete = true
 			time_finish_tackle = Time.get_ticks_msec()

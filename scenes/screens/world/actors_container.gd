@@ -44,11 +44,13 @@ func _ready() -> void:
 		squad_home[i].network_index = i
 		squad_home[i].field_condition = field_condition
 		squad_home[i].field_patch_map = field_patch_map
+		squad_home[i].reset_field_patch_tracking()
 		all_players.append(squad_home[i])
 	for i in squad_away.size():
 		squad_away[i].network_index = squad_home.size() + i
 		squad_away[i].field_condition = field_condition
 		squad_away[i].field_patch_map = field_patch_map
+		squad_away[i].reset_field_patch_tracking()
 		all_players.append(squad_away[i])
 	# 根据模式设置控制方案
 	if GameManager.is_online():
@@ -170,6 +172,7 @@ func apply_field_condition(condition: FieldCondition, patch_map: FieldPatchMap =
 	for player in all_players:
 		player.field_condition = field_condition
 		player.field_patch_map = field_patch_map
+		player.reset_field_patch_tracking()
 
 ## 联机模式：根据 match_config 中的 assignments 分配控制方案
 func setup_online_control_schemes() -> void:

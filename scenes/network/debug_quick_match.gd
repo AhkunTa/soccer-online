@@ -77,7 +77,7 @@ func _server_start_match() -> void:
 		"room_id": 999,
 		"home_country": HOME_COUNTRY,
 		"away_country": AWAY_COUNTRY,
-		"field_seed": randi(),
+		"field_seed": GameManager.randomize_field_seed(),
 		"assignments": [
 			{
 				"peer_id": 1,

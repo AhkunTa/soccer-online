@@ -17,12 +17,18 @@ extends Screen
 @onready var game_over_timer: Timer = %GameOverTimer
 
 @export var field_condition: FieldCondition
+@export var randomize_local_field_seed := true
+#DEBUG 调试选项：在 FieldPatchMap 上显示特殊地块的网格和标签
+@export var debug_draw_special_tile_grid := false
+@export var debug_draw_special_tile_labels := false
 
 var weather_system: WeatherSystem
 var weather_hazard_system: WeatherHazardSystem
 var field_patch_map: FieldPatchMap
 
 func _ready() -> void:
+	if randomize_local_field_seed and not GameManager.is_online():
+		GameManager.randomize_field_seed()
 	setup_layers()
 	_apply_field_condition()
 	game_over_timer.timeout.connect(on_transition.bind())
@@ -164,6 +170,7 @@ func _print_field_condition_debug(condition: FieldCondition) -> void:
 		patch_modifier["slip"],
 		patch_modifier["ball_ground_friction"],
 	])
+	print("[FieldCondition] FieldSeed=%d" % GameManager.field_seed)
 
 func _apply_field_visuals(condition: FieldCondition) -> void:
 	grass.modulate = condition.grass_color
@@ -208,6 +215,8 @@ func _create_field_patch_map(condition: FieldCondition) -> void:
 	field_patch_map = FieldPatchMap.new()
 	field_patch_map.name = "FieldPatchMap"
 	field_patch_map.draw_visual_patches = environment_map == null or not environment_map.visible
+	field_patch_map.draw_debug_tile_grid = debug_draw_special_tile_grid
+	field_patch_map.draw_debug_tile_labels = debug_draw_special_tile_labels
 	background_layer.add_child(field_patch_map)
 	field_patch_map.generate(condition, seed_value, environment_map)
 

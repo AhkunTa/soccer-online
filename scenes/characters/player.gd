@@ -17,6 +17,8 @@ const WALK_ANIM_THRESHOLD := 0.6
 const MAX_JUMPS := 2
 const BASE_GROUND_ACCELERATION := 760.0
 const BASE_STOP_FRICTION := 860.0
+# 只在从低摩擦地块切到高抓地地块时，额外追回一部分惯性。
+const PATCH_TRANSITION_GRIP := 2.5
 const SLIP_MIN_SPEED := 35.0
 const SLIP_COOLDOWN := 0.8
 
@@ -96,6 +98,10 @@ var network_index: int = -1
 var owner_peer_id: int = -1
 var current_state_enum: int = -1 # 当前状态枚举值，用于网络同步
 var slip_cooldown_left := 0.0
+# 缓存上一帧脚下地块参数，用来判断是否刚跨过特殊地块边界。
+var last_ground_patch := FieldCondition.PatchSet.NONE
+var last_stopping_friction_multiplier := 1.0
+var last_acceleration_multiplier := 1.0
 
 func _ready() -> void:
 	set_ai_behavior()
@@ -243,15 +249,35 @@ func get_knocked_flying(hurt_origin: Vector2) -> void:
 
 func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
 	var direction := input_direction.limit_length(1.0)
+	var previous_patch := last_ground_patch
+	var previous_stopping_friction := last_stopping_friction_multiplier
+	var previous_acceleration := last_acceleration_multiplier
+	var current_patch := _get_current_ground_patch()
 	var target_velocity := Vector2.ZERO
 	var speed_multiplier := _get_player_speed_multiplier()
+	var acceleration_multiplier := _get_acceleration_multiplier()
+	var stopping_friction_multiplier := _get_stopping_friction_multiplier()
 	if direction != Vector2.ZERO:
 		target_velocity = direction * speed * speed_multiplier
 		target_velocity += _get_wind_velocity_effect()
-	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
+	var acceleration := BASE_GROUND_ACCELERATION * acceleration_multiplier
 	if direction == Vector2.ZERO:
-		acceleration = BASE_STOP_FRICTION * _get_stopping_friction_multiplier()
+		acceleration = BASE_STOP_FRICTION * stopping_friction_multiplier
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
+	_apply_patch_transition_grip(
+		previous_patch,
+		current_patch,
+		previous_stopping_friction,
+		stopping_friction_multiplier,
+		previous_acceleration,
+		acceleration_multiplier,
+		target_velocity,
+		direction,
+		delta
+	)
+	last_ground_patch = current_patch as FieldCondition.PatchSet
+	last_stopping_friction_multiplier = stopping_friction_multiplier
+	last_acceleration_multiplier = acceleration_multiplier
 	_try_slip(direction, delta)
 
 func apply_field_modifiers_to_velocity(delta: float) -> void:
@@ -265,6 +291,49 @@ func apply_field_modifiers_to_velocity(delta: float) -> void:
 
 func _get_wind_velocity_effect() -> Vector2:
 	return field_condition.get_wind_vector() * field_condition.get_wind_player_force()
+
+func get_stopping_friction_multiplier_at_current_patch() -> float:
+	return _get_stopping_friction_multiplier()
+
+func _get_current_ground_patch() -> FieldCondition.PatchSet:
+	if field_patch_map == null:
+		return FieldCondition.PatchSet.NONE
+	return field_patch_map.get_patch_at(global_position)
+
+func reset_field_patch_tracking() -> void:
+	# 初始化后先记录当前地块，避免第一帧被误判为跨地块。
+	last_ground_patch = _get_current_ground_patch()
+	last_stopping_friction_multiplier = _get_stopping_friction_multiplier()
+	last_acceleration_multiplier = _get_acceleration_multiplier()
+
+func _apply_patch_transition_grip(
+	previous_patch: FieldCondition.PatchSet,
+	current_patch: FieldCondition.PatchSet,
+	previous_stopping_friction: float,
+	current_stopping_friction: float,
+	previous_acceleration: float,
+	current_acceleration: float,
+	target_velocity: Vector2,
+	direction: Vector2,
+	delta: float
+) -> void:
+	if previous_patch == current_patch:
+		return
+	if direction == Vector2.ZERO:
+		# 停止输入时，进入更高抓地地块应更快吃掉从冰/泥地带出的滑行。
+		var friction_gain := current_stopping_friction - previous_stopping_friction
+		if friction_gain <= 0.0:
+			return
+		velocity = velocity.move_toward(Vector2.ZERO, BASE_STOP_FRICTION * friction_gain * PATCH_TRANSITION_GRIP * delta)
+		return
+
+	if velocity.length() <= target_velocity.length():
+		return
+	var acceleration_gain := current_acceleration - previous_acceleration
+	if acceleration_gain <= 0.0:
+		return
+	# 仍在移动时，把低摩擦地块带出的超额速度拉回到新地块目标速度。
+	velocity = velocity.move_toward(target_velocity, BASE_GROUND_ACCELERATION * acceleration_gain * PATCH_TRANSITION_GRIP * delta)
 
 # TODO 去掉滑倒 没必要
 func _try_slip(direction: Vector2, delta: float) -> void:

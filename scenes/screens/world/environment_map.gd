@@ -23,6 +23,7 @@ const PATCH_COLORS := {
 }
 
 var _noise_image: Image = null
+var _noise: FastNoiseLite = null
 
 
 func _ready() -> void:
@@ -39,59 +40,53 @@ func set_noise_seed(seed_value: int) -> void:
 
 	var seeded_noise := noise.duplicate() as FastNoiseLite
 	seeded_noise.seed = seed_value
+	_noise = seeded_noise
 	noise_texture.noise = seeded_noise
 	_noise_image = null
 	_sync_shader_parameters()
 
 
 func get_noise_value(world_position: Vector2) -> float:
-	var image := _get_noise_image()
-	if image == null:
+	var noise := _get_noise()
+	if noise == null:
 		return -1.0
 
 	var uv := Vector2(
 		world_position.x / maxf(size.x, 1.0),
 		world_position.y / maxf(size.y, 1.0)
 	)
-	return _get_filtered_visual_noise(image, uv)
+	return _get_filtered_visual_noise(noise, uv)
 
 
-func _get_filtered_visual_noise(image: Image, uv: Vector2) -> float:
+func _get_filtered_visual_noise(noise: FastNoiseLite, uv: Vector2) -> float:
 	var blur_radius := _get_shader_float("blur_radius", 0.006)
 	if blur_radius <= 0.0:
-		return _sample_noise_image(image, uv)
+		return _sample_noise(noise, uv)
 
-	var center := _sample_noise_image(image, uv) * 4.0
+	var center := _sample_noise(noise, uv) * 4.0
 	var cardinals := (
-		_sample_noise_image(image, uv + Vector2(blur_radius, 0.0))
-		+ _sample_noise_image(image, uv + Vector2(-blur_radius, 0.0))
-		+ _sample_noise_image(image, uv + Vector2(0.0, blur_radius))
-		+ _sample_noise_image(image, uv + Vector2(0.0, -blur_radius))
+		_sample_noise(noise, uv + Vector2(blur_radius, 0.0))
+		+ _sample_noise(noise, uv + Vector2(-blur_radius, 0.0))
+		+ _sample_noise(noise, uv + Vector2(0.0, blur_radius))
+		+ _sample_noise(noise, uv + Vector2(0.0, -blur_radius))
 	)
 	var diagonals := (
-		_sample_noise_image(image, uv + Vector2(blur_radius, blur_radius))
-		+ _sample_noise_image(image, uv + Vector2(-blur_radius, blur_radius))
-		+ _sample_noise_image(image, uv + Vector2(blur_radius, -blur_radius))
-		+ _sample_noise_image(image, uv + Vector2(-blur_radius, -blur_radius))
+		_sample_noise(noise, uv + Vector2(blur_radius, blur_radius))
+		+ _sample_noise(noise, uv + Vector2(-blur_radius, blur_radius))
+		+ _sample_noise(noise, uv + Vector2(blur_radius, -blur_radius))
+		+ _sample_noise(noise, uv + Vector2(-blur_radius, -blur_radius))
 	)
 	return (center + cardinals * 2.0 + diagonals) / 16.0
 
 
-func _sample_noise_image(image: Image, uv: Vector2) -> float:
+func _sample_noise(noise: FastNoiseLite, uv: Vector2) -> float:
+	var texture_size := _get_noise_texture_size()
 	var wrapped_uv := Vector2(fposmod(uv.x, 1.0), fposmod(uv.y, 1.0))
 	var pixel_position := Vector2(
-		wrapped_uv.x * float(image.get_width() - 1),
-		wrapped_uv.y * float(image.get_height() - 1)
+		wrapped_uv.x * float(texture_size.x - 1),
+		wrapped_uv.y * float(texture_size.y - 1)
 	)
-	var x0 := clampi(floori(pixel_position.x), 0, image.get_width() - 1)
-	var y0 := clampi(floori(pixel_position.y), 0, image.get_height() - 1)
-	var x1 := clampi(x0 + 1, 0, image.get_width() - 1)
-	var y1 := clampi(y0 + 1, 0, image.get_height() - 1)
-	var tx := pixel_position.x - float(x0)
-	var ty := pixel_position.y - float(y0)
-	var top := lerpf(image.get_pixel(x0, y0).r, image.get_pixel(x1, y0).r, tx)
-	var bottom := lerpf(image.get_pixel(x0, y1).r, image.get_pixel(x1, y1).r, tx)
-	return lerpf(top, bottom, ty) * 2.0 - 1.0
+	return noise.get_noise_2d(pixel_position.x, pixel_position.y)
 
 
 func get_step_value(world_position: Vector2, threshold: float) -> int:
@@ -110,9 +105,7 @@ func apply_patch_set_visuals(patch_set: int) -> void:
 	_sync_shader_parameters()
 
 
-func get_environment_at(world_position: Vector2) -> int:
-	# Legacy two-threshold classification for old puddle/swamp callers.
-	# Field patch generation should use get_patch_at() with FieldCondition.get_patch_set().
+func get_environment_at(world_position: Vector2) -> FieldCondition.PatchSet:
 	if not sample_rect.has_point(world_position):
 		return FieldCondition.PatchSet.NONE
 
@@ -124,8 +117,7 @@ func get_environment_at(world_position: Vector2) -> int:
 	return FieldCondition.PatchSet.NONE
 
 
-func get_patch_at(world_position: Vector2, patch_set: int) -> int:
-	# Converts the shared Environment noise into the single patch type allowed by the current PatchSet.
+func get_patch_at(world_position: Vector2, patch_set: int) -> FieldCondition.PatchSet:
 	if not sample_rect.has_point(world_position):
 		return FieldCondition.PatchSet.NONE
 
@@ -135,7 +127,7 @@ func get_patch_at(world_position: Vector2, patch_set: int) -> int:
 	return get_patch_type(patch_set)
 
 
-static func get_patch_type(patch_set: int) -> int:
+static func get_patch_type(patch_set: int) -> FieldCondition.PatchSet:
 	match patch_set:
 		FieldCondition.PatchSet.WET:
 			return FieldCondition.PatchSet.WET
@@ -169,10 +161,9 @@ static func get_patch_threshold(patch_set: int) -> float:
 			return -0.20
 		_:
 			return 1.0
-	return 1.0
 
 
-static func get_patch_color(patch_type: int) -> Color:
+static func get_patch_color(patch_type: FieldCondition.PatchSet) -> Color:
 	return PATCH_COLORS.get(patch_type, Color.TRANSPARENT)
 
 
@@ -210,6 +201,23 @@ func _get_noise_image() -> Image:
 	if _noise_image == null:
 		_noise_image = noise_texture.get_image()
 	return _noise_image
+
+
+func _get_noise() -> FastNoiseLite:
+	if _noise != null:
+		return _noise
+	var noise_texture := texture as NoiseTexture2D
+	if noise_texture == null:
+		return null
+	_noise = noise_texture.noise as FastNoiseLite
+	return _noise
+
+
+func _get_noise_texture_size() -> Vector2i:
+	var noise_texture := texture as NoiseTexture2D
+	if noise_texture == null:
+		return Vector2i(maxi(int(size.x), 1), maxi(int(size.y), 1))
+	return Vector2i(maxi(noise_texture.width, 1), maxi(noise_texture.height, 1))
 
 
 func _get_shader_float(parameter_name: StringName, fallback: float) -> float:

@@ -522,7 +522,6 @@ shape = SubResource("RectangleShape2D_ug4v2")
 
 [node name="OpponentDetectionArea" type="Area2D" parent="." unique_id=1414591432]
 unique_name_in_owner = true
-visible = false
 collision_layer = 0
 collision_mask = 2
 
