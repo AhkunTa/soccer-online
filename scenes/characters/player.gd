@@ -13,7 +13,6 @@ const CONTROL_SCENE_MAP: Dictionary = {
 const BALL_CONTROL_HEIGHT_MAX := 10.0
 
 const GRAVITY := 8.0
-const WALK_ANIM_THRESHOLD := 0.6
 const MAX_JUMPS := 2
 const BASE_GROUND_ACCELERATION := 760.0
 const BASE_STOP_FRICTION := 860.0
@@ -53,7 +52,7 @@ var field_patch_map: FieldPatchMap = null
 
 
 enum ControlScheme {CPU, P1, P2, ONLINE_LOCAL, ONLINE_REMOTE}
-enum State {MOVING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING, RESETTING}
+enum State {MOVING, RUNNING, TACKLING, JUMPING, RECOVERING, PREPPING_SHOT, SHOOTING, JUMPING_SHOT, PASSING, HEADER, VOLLEY_KICK, BICYCLE_KICK, CHEST_CONTROL, HURT, DIVING, CELEBRATING, MOURNING, RESETTING}
 
 
 enum Role {GOALIE, DEFENDER, MIDFIELDER, FORWARD, FIELD}
@@ -185,13 +184,12 @@ func set_tackling_animation() -> void:
 	animation_player.play("tackle")
 
 func set_movement_animation() -> void:
-	var vel_length := velocity.length()
-	if vel_length < 1:
+	if velocity.length() < 1:
 		animation_player.play('idle')
-	elif vel_length < speed * WALK_ANIM_THRESHOLD:
-		animation_player.play('walk')
-	else:
+	elif current_state_enum == State.RUNNING:
 		animation_player.play("run")
+	else:
+		animation_player.play('walk')
 	
 
 func set_control_scheme(scheme: ControlScheme) -> void:
@@ -232,7 +230,7 @@ func flip_sprites() -> void:
 
 func set_sprite_visiable() -> void:
 	control_sprite.visible = has_ball() or not control_scheme == ControlScheme.CPU
-	run_particles.emitting = velocity.length() >= speed * _get_player_speed_multiplier() * WALK_ANIM_THRESHOLD
+	run_particles.emitting = current_state_enum == State.RUNNING and velocity.length() >= 1
 
 func has_ball() -> bool:
 	return ball.carrier == self
@@ -247,14 +245,14 @@ func get_hurt(hurt_origin: Vector2) -> void:
 func get_knocked_flying(hurt_origin: Vector2) -> void:
 	switch_state(Player.State.HURT, PlayerStateData.build().set_hurt_direction(hurt_origin))
 
-func apply_ground_movement(input_direction: Vector2, delta: float) -> void:
+func apply_ground_movement(input_direction: Vector2, delta: float, movement_speed_scale: float = 1.0) -> void:
 	var direction := input_direction.limit_length(1.0)
 	var previous_patch := last_ground_patch
 	var previous_stopping_friction := last_stopping_friction_multiplier
 	var previous_acceleration := last_acceleration_multiplier
 	var current_patch := _get_current_ground_patch()
 	var target_velocity := Vector2.ZERO
-	var speed_multiplier := _get_player_speed_multiplier()
+	var speed_multiplier := _get_player_speed_multiplier() * movement_speed_scale
 	var acceleration_multiplier := _get_acceleration_multiplier()
 	var stopping_friction_multiplier := _get_stopping_friction_multiplier()
 	if direction != Vector2.ZERO:

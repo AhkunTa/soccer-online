@@ -370,7 +370,7 @@ func _client_interpolate_remote_entities(_delta: float) -> void:
 		player.height = lerpf(p_prev["hgt"], p_next["hgt"], t)
 		player.current_hp = p_next["hp"]
 		_apply_snapshot_player_state(player, p_next, false)
-		if player.current_state_enum == Player.State.MOVING:
+		if player.current_state_enum == Player.State.MOVING or player.current_state_enum == Player.State.RUNNING:
 			player.set_movement_animation()
 		player.flip_sprites()
 
@@ -413,7 +413,7 @@ func _apply_snapshot_direct(snap: Dictionary) -> void:
 		player.height = p["hgt"]
 		player.current_hp = p["hp"]
 		_apply_snapshot_player_state(player, p, false)
-		if player.current_state_enum == Player.State.MOVING:
+		if player.current_state_enum == Player.State.MOVING or player.current_state_enum == Player.State.RUNNING:
 			player.set_movement_animation()
 		player.flip_sprites()
 
