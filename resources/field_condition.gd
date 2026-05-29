@@ -9,7 +9,7 @@ enum Surface {
 }
 
 enum Weather {
-	CLEAR, # 正常
+	NONE, # 正常
 	RAIN, # 下雨
 	SNOW, # 下雪
 	THUNDER, # 打雷
@@ -17,6 +17,7 @@ enum Weather {
 }
 
 enum WindDirection {NONE, LEFT, RIGHT}
+# 特殊地块
 enum PatchSet {NONE, WET, PUDDLE, ICE, MUD, SAND, DUST}
 enum HazardType {
 	NONE,
@@ -77,7 +78,7 @@ const PATCH_MODIFIERS := {
 }
 
 @export var surface: Surface = Surface.GRASS
-@export var weather: Weather = Weather.CLEAR
+@export var weather: Weather = Weather.NONE
 @export var grass_color: Color = Color(0.52, 0.80, 0.16, 1.0)
 @export var pattern_color: Color = Color(0.28, 0.61, 0.0, 1.0)
 @export var line_color: Color = Color(0.94, 0.94, 0.94, 1.0)
@@ -96,7 +97,7 @@ const PATCH_MODIFIERS := {
 @export var max_tornado_count := 2
 
 static func grass() -> FieldCondition:
-	return FieldCondition.compose(Surface.GRASS, Weather.CLEAR)
+	return FieldCondition.compose(Surface.GRASS, Weather.NONE)
 
 static func rain() -> FieldCondition:
 	return FieldCondition.compose(Surface.WET, Weather.RAIN)
@@ -105,7 +106,7 @@ static func snow() -> FieldCondition:
 	return FieldCondition.compose(Surface.SNOW, Weather.SNOW)
 
 static func sand() -> FieldCondition:
-	return FieldCondition.compose(Surface.SAND, Weather.CLEAR)
+	return FieldCondition.compose(Surface.SAND, Weather.NONE)
 
 static func thunder() -> FieldCondition:
 	return FieldCondition.compose(Surface.GRASS, Weather.THUNDER)
@@ -141,7 +142,7 @@ static func surface_sand() -> FieldCondition:
 
 static func weather_clear() -> FieldCondition:
 	var condition := FieldCondition.new()
-	condition.weather = Weather.CLEAR
+	condition.weather = Weather.NONE
 	condition._apply_weather_defaults()
 	return condition
 
@@ -170,7 +171,7 @@ static func weather_wind(direction: WindDirection = WindDirection.RIGHT) -> Fiel
 	condition._apply_weather_defaults()
 	return condition
 
-static func compose(surface_value: Surface, weather_value: Weather = Weather.CLEAR, wind_direction_value: WindDirection = WindDirection.NONE) -> FieldCondition:
+static func compose(surface_value: Surface, weather_value: Weather = Weather.NONE, wind_direction_value: WindDirection = WindDirection.NONE) -> FieldCondition:
 	var condition := FieldCondition.new()
 	condition.surface = surface_value
 	condition.weather = weather_value
@@ -182,19 +183,19 @@ static func compose(surface_value: Surface, weather_value: Weather = Weather.CLE
 static func from_key(key: String) -> FieldCondition:
 	match key.to_lower():
 		"grass":
-			return FieldCondition.compose(Surface.GRASS, Weather.CLEAR)
+			return FieldCondition.compose(Surface.GRASS, Weather.NONE)
 		"wet":
-			return FieldCondition.compose(Surface.WET, Weather.CLEAR)
+			return FieldCondition.compose(Surface.WET, Weather.NONE)
 		"rain":
 			return FieldCondition.compose(Surface.GRASS, Weather.RAIN)
 		"snow":
-			return FieldCondition.compose(Surface.SNOW, Weather.CLEAR)
+			return FieldCondition.compose(Surface.SNOW, Weather.NONE)
 		"snow_weather":
 			return FieldCondition.compose(Surface.GRASS, Weather.SNOW)
 		"ice":
 			return FieldCondition.compose(Surface.SNOW, Weather.RAIN)
 		"sand", "dirt":
-			return FieldCondition.compose(Surface.SAND, Weather.CLEAR)
+			return FieldCondition.compose(Surface.SAND, Weather.NONE)
 		"thunder", "storm":
 			return FieldCondition.compose(Surface.GRASS, Weather.THUNDER)
 		"wind", "windy":
@@ -204,7 +205,7 @@ static func from_key(key: String) -> FieldCondition:
 		"sand_wind", "sandstorm":
 			return FieldCondition.compose(Surface.SAND, Weather.WIND, WindDirection.RIGHT)
 		_:
-			return FieldCondition.compose(Surface.GRASS, Weather.CLEAR)
+			return FieldCondition.compose(Surface.GRASS, Weather.NONE)
 
 static func get_patch_modifiers(patch: int) -> Dictionary:
 	return PATCH_MODIFIERS.get(patch, NORMAL_PATCH_MODIFIER)

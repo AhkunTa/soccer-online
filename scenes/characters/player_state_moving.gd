@@ -1,7 +1,7 @@
 class_name PlayerStateMoving
 extends PlayerState
 
-const WALK_SPEED_SCALE := 0.5
+const WALK_SPEED_SCALE := 0.6
 const DOUBLE_TAP_WINDOW_MS := 280
 
 var last_tap_action := KeyUtils.Action.LEFT

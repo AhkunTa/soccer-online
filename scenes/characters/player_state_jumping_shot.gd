@@ -9,7 +9,7 @@ const BALL_HEIGHT_MAX := 50.0
 const POWER_SHOT_AIR_TIME_MIN := 0.18
 # const POWER_SHOT_AIR_TIME_MAX := 0.5
 # DEBUG
-const POWER_SHOT_AIR_TIME_MAX := 0.8
+const POWER_SHOT_AIR_TIME_MAX := 0.6
 
 var shot_air_time := 0.0
 

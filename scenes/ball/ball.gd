@@ -64,7 +64,6 @@ var spawn_position := Vector2.ZERO
 @export var friction_air := 25.0
 #摩擦力 地面
 @export var friction_ground := 250.0
-#TODO 不同地面 
 var field_condition: FieldCondition = FieldCondition.grass()
 var field_patch_map: FieldPatchMap = null
 var base_friction_air := 25.0

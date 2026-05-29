@@ -276,16 +276,16 @@ func apply_ground_movement(input_direction: Vector2, delta: float, movement_spee
 	last_ground_patch = current_patch as FieldCondition.PatchSet
 	last_stopping_friction_multiplier = stopping_friction_multiplier
 	last_acceleration_multiplier = acceleration_multiplier
-	_try_slip(direction, delta)
+	# _try_slip(direction, delta)
 
 func apply_field_modifiers_to_velocity(delta: float) -> void:
-	var desired_direction := velocity.normalized() if velocity != Vector2.ZERO else Vector2.ZERO
+	# var desired_direction := velocity.normalized() if velocity != Vector2.ZERO else Vector2.ZERO
 	var target_velocity := velocity * _get_player_speed_multiplier()
 	if velocity != Vector2.ZERO:
 		target_velocity += _get_wind_velocity_effect()
 	var acceleration := BASE_GROUND_ACCELERATION * _get_acceleration_multiplier()
 	velocity = velocity.move_toward(target_velocity, acceleration * delta)
-	_try_slip(desired_direction, delta)
+	# _try_slip(desired_direction, delta)
 
 func _get_wind_velocity_effect() -> Vector2:
 	return field_condition.get_wind_vector() * field_condition.get_wind_player_force()
