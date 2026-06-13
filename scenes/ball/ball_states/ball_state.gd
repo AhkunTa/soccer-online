@@ -5,6 +5,7 @@ signal state_transition_requested(new_state: Ball.State)
 #基础反弹弹力 
 const BOUNCINESS := 0.8
 const GRAVITY := 10.0
+const HEIGHT_INTEGRATION_FPS := 60.0
 
 var ball: Ball = null
 var carrier: Player = null
@@ -93,7 +94,7 @@ func set_ball_roll_animation_from_velocity() -> void:
 func process_gravity(delta: float, height_velocity_decay: float = 0.0, velocity_decay: float = 0.0) -> void:
 	if ball.height > 0 or ball.height_velocity > 0:
 		ball.height_velocity -= GRAVITY * delta
-		ball.height += ball.height_velocity
+		ball.height += ball.height_velocity * delta * HEIGHT_INTEGRATION_FPS
 		if ball.height < 0:
 			ball.height = 0
 			if height_velocity_decay > 0 and ball.height_velocity < -0.1:

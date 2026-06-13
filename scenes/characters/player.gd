@@ -13,6 +13,7 @@ const CONTROL_SCENE_MAP: Dictionary = {
 const BALL_CONTROL_HEIGHT_MAX := 10.0
 
 const GRAVITY := 8.0
+const HEIGHT_INTEGRATION_FPS := 60.0
 const MAX_JUMPS := 2
 const BASE_GROUND_ACCELERATION := 760.0
 const BASE_STOP_FRICTION := 860.0
@@ -200,7 +201,7 @@ func set_control_scheme(scheme: ControlScheme) -> void:
 func process_gravity(delta) -> void:
 	if height > 0:
 		height_velocity -= GRAVITY * delta
-		height += height_velocity
+		height += height_velocity * delta * HEIGHT_INTEGRATION_FPS
 		if height < 0:
 			height = 0
 	player_sprite.position = Vector2.UP * height
