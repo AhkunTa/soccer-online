@@ -16,7 +16,7 @@ var player_setup: Array[String] = ['FRANCE', 'USA']
 var time_since_pause := Time.get_ticks_msec()
 var game_mode: GameMode = GameMode.LOCAL
 # DEBUG
-var field_condition: FieldCondition = FieldCondition.compose(FieldCondition.Surface.GRASS, FieldCondition.Weather.THUNDER)
+var field_condition: FieldCondition = FieldCondition.compose(FieldCondition.Surface.SAND, FieldCondition.Weather.RAIN)
 var field_seed := 0
 # 联机模式中本地玩家的队伍与球员 slot 分配 { "team": int, "slot": int }
 var online_slot_assignments: Dictionary = {}
@@ -96,16 +96,16 @@ func apply_online_match_config(config: Dictionary, local_peer_id: int) -> void:
 	if config.has("home_country") and config.has("away_country"):
 		current_match = Match.new(config["home_country"], config["away_country"])
 
-	# 保存完整 assignments 供 ActorsContainer 使用
-	online_all_assignments = config.get("assignments", [])
+	# 保存独立副本，避免房间数据清理或修改后丢失球员分配
+	online_all_assignments = (config.get("assignments", []) as Array).duplicate(true)
+	online_slot_assignments.clear()
 
 	# 根据本地 peer 的 team 决定 player_setup 控制方案
 	# team=0 (Home) 控制 P1 侧球员, team=1 (Away) 控制 P2 侧球员
-	var assignments: Array = config.get("assignments", [])
-	for entry: Dictionary in assignments:
-		if entry["peer_id"] == local_peer_id:
-			var team: int = entry["team"]
-			var slot: int = entry["slot"]
+	for entry: Dictionary in online_all_assignments:
+		if int(entry.get("peer_id", -1)) == local_peer_id:
+			var team: int = int(entry.get("team", -1))
+			var slot: int = int(entry.get("slot", -1))
 			# online_slot_assignments: [team, slot] 供游戏内控制逻辑读取
 			online_slot_assignments = {"team": team, "slot": slot, "position": entry.get("position", Vector2.ZERO)}
 			break
@@ -129,6 +129,9 @@ func get_winner_country() -> String:
 func increase_score(country_scored_on: String) -> void:
 	current_match.increase_score(country_scored_on)
 	GameEvents.score_changed.emit()
+	# 联机比赛由服务端统一记分，并把结果同步给客户端。
+	if is_online() and multiplayer.is_server():
+		SyncManager.server_sync_score(country_scored_on)
 
 func on_impact_received(_impact_position: Vector2, is_high_impact: bool) -> void:
 	if SyncManager.is_client():
